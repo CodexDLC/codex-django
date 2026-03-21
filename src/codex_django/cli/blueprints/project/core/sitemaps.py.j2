@@ -1,0 +1,20 @@
+from codex_django.core.sitemaps import BaseSitemap
+# Import other specific sitemaps from features here as needed
+
+
+class StaticSitemap(BaseSitemap):
+    """
+    Sitemap for static pages that don't depend on models.
+    """
+    priority = 0.5
+    changefreq = "monthly"
+
+    def items(self):
+        # Add your static route names here
+        return ["home"]
+
+
+# Example of how to structure the sitemaps dict for URLs
+sitemaps = {
+    "static": StaticSitemap,
+}

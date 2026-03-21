@@ -1,0 +1,9 @@
+from django.conf import settings
+from codex_django.core.redis.managers.base import BaseDjangoRedisManager
+
+# Initialize the base manager which wraps the platform's RedisService
+redis_manager = BaseDjangoRedisManager()
+
+# High-level helper for the most common use case
+get_cached_data = redis_manager.get_cached_data
+aget_cached_data = redis_manager.aget_cached_data

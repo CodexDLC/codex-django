@@ -1,0 +1,48 @@
+import logging
+from typing import Any
+
+from django.conf import settings
+
+try:
+    from loguru import logger
+    from codex_core.common.loguru_setup import setup_logging
+
+    LOGURU_AVAILABLE = True
+except ImportError:
+    logger = logging.getLogger(__name__)
+    LOGURU_AVAILABLE = False
+
+
+class DjangoLoggingSettingsAdapter:
+    """Adapts Django settings to codex-core LoggingSettingsProtocol."""
+
+    def __init__(self) -> None:
+        self.log_level_console = getattr(settings, "LOG_LEVEL_CONSOLE", "INFO")
+        self.log_level_file = getattr(settings, "LOG_LEVEL_FILE", "DEBUG")
+        self.log_rotation = getattr(settings, "LOG_ROTATION", "10 MB")
+        self.log_dir = getattr(settings, "LOG_DIR", "logs")
+        self.debug = getattr(settings, "DEBUG", False)
+
+
+def init_logging() -> None:
+    """Initialize logging based on project settings and available libraries."""
+    if not LOGURU_AVAILABLE:
+        # Fallback to standard Django LOGGING already configured in settings
+        logger.info("Loguru or codex-core not found. Using standard Django logging.")
+        return
+
+    # Use codex-core setup
+    service_name = getattr(settings, "PROJECT_NAME", "django-backend")
+    adapter = DjangoLoggingSettingsAdapter()
+
+    setup_logging(
+        settings=adapter,
+        service_name=service_name,
+        intercept_loggers=["django", "django.server", "django.db.backends"],
+        log_levels={
+            "django.db.backends": logging.WARNING,
+            "django.utils.autoreload": logging.WARNING,
+        },
+    )
+
+    logger.info(f"Loguru initialized via codex-core for {service_name}")

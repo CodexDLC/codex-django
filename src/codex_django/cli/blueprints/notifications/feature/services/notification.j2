@@ -1,0 +1,66 @@
+"""
+NotificationService for {{ app_name }}.
+
+Subclass BaseNotificationEngine and add send_* methods for your events.
+
+Example::
+
+    from features.{{ app_name }}.services.notification import notification_service
+
+    notification_service.dispatch(
+        recipient_email="user@example.com",
+        template_name="emails/my_template.html",
+        event_type="my_event",
+        channels=["email"],
+        language="de",
+        subject_key="my_subject_key",
+        # extra context passed to the template:
+        user_name="John",
+    )
+"""
+
+from codex_django.notifications import BaseNotificationEngine, DjangoQueueAdapter
+from core.arq.client import arq_client
+
+from ..selectors.email_content import cache_adapter, i18n_adapter, selector
+
+queue_adapter = DjangoQueueAdapter(arq_client=arq_client)
+
+
+class NotificationEventType:
+    # TODO: Add event type constants for your project.
+    # Example: USER_REGISTERED = "user_registered"
+    pass
+
+
+class NotificationService(BaseNotificationEngine):
+    """
+    Project notification service.
+
+    Add send_* methods here for each notification event.
+    Each method should call self.dispatch() with the appropriate arguments.
+
+    Example::
+
+        def send_user_registered(self, user):
+            self.dispatch(
+                recipient_email=user.email,
+                template_name="emails/welcome.html",
+                event_type=NotificationEventType.USER_REGISTERED,
+                channels=["email"],
+                language="de",
+                subject_key="welcome_subject",
+                user=user,
+            )
+    """
+
+    # TODO: Add send_* methods for your notification events.
+    pass
+
+
+notification_service = NotificationService(
+    queue_adapter=queue_adapter,
+    cache_adapter=cache_adapter,
+    i18n_adapter=i18n_adapter,
+    selector=selector,
+)
