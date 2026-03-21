@@ -1,0 +1,62 @@
+"""
+DjangoQueueAdapter
+==================
+NotificationAdapter implementation that enqueues tasks via DjangoArqClient.
+
+Wraps enqueue() in transaction.on_commit() by default so the ARQ job is
+only dispatched after the DB transaction commits successfully.
+
+Usage::
+
+    adapter = DjangoQueueAdapter(arq_client=DjangoArqClient())
+
+    # From a sync view (WSGI):
+    adapter.enqueue("send_notification_task", payload=data)
+
+    # From an async view (ASGI):
+    await adapter.aenqueue("send_notification_task", payload=data)
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from .arq_client import DjangoArqClient
+
+
+class DjangoQueueAdapter:
+    """
+    Implements the NotificationAdapter Protocol from codex_platform.
+
+    enqueue()  — sync, wraps in transaction.on_commit() (WSGI views)
+    aenqueue() — async, no on_commit wrapper (ASGI views)
+    """
+
+    def __init__(self, arq_client: DjangoArqClient, use_on_commit: bool = True) -> None:
+        self._arq = arq_client
+        self._use_on_commit = use_on_commit
+
+    def enqueue(self, task_name: str, payload: dict[str, Any]) -> str | None:
+        """
+        Sync enqueue. Wraps in transaction.on_commit() when use_on_commit=True
+        (default) so the job is only sent after the transaction commits.
+
+        Returns None when use_on_commit=True (job_id is not known until commit).
+        Returns job_id immediately when use_on_commit=False.
+        """
+        if self._use_on_commit:
+            from django.db import transaction
+
+            transaction.on_commit(lambda: self._arq.enqueue(task_name, payload=payload))
+            return None
+        return self._arq.enqueue(task_name, payload=payload)
+
+    async def aenqueue(self, task_name: str, payload: dict[str, Any]) -> str | None:
+        """
+        Async enqueue — no transaction.on_commit() wrapper.
+
+        Use from async Django views. Caller is responsible for ensuring the
+        DB transaction has committed before calling this if needed.
+        """
+        return await self._arq.aenqueue(task_name, payload=payload)
