@@ -1,6 +1,5 @@
-from typing import Callable
+from collections.abc import Callable
 
-from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.urls import path
 from django.views.generic import TemplateView
@@ -30,11 +29,14 @@ urlpatterns = [
     path("site/settings/<str:tab>/", views.site_settings_tab_view, name="site_settings_tab"),
     path("catalog/", views.catalog_view, name="catalog"),
     path("catalog/<int:category_pk>/", views.catalog_view, name="catalog_category"),
-
     # Client side
     path("profile/", _t("showcase/cabinet/client/profile.html"), name="profile"),
     path("my/", _t("showcase/cabinet/client/my_appointments.html"), name="my_appointments"),
     path("my/settings/", _t("showcase/cabinet/client/settings.html"), name="settings"),
-    path("my/settings/notifications/", _t("showcase/cabinet/client/settings_notifications.html"), name="settings_notifications"),
+    path(
+        "my/settings/notifications/",
+        _t("showcase/cabinet/client/settings_notifications.html"),
+        name="settings_notifications",
+    ),
     path("my/settings/privacy/", _t("showcase/cabinet/client/settings_privacy.html"), name="settings_privacy"),
 ]
