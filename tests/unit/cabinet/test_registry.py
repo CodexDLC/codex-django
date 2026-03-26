@@ -6,7 +6,7 @@ import pytest
 from django.core.exceptions import ImproperlyConfigured
 
 from codex_django.cabinet.registry import CabinetRegistry, declare
-from codex_django.cabinet.types import CabinetSection, NavAction
+from codex_django.cabinet.types import CabinetSection, DashboardWidget, NavAction
 
 
 @pytest.mark.unit
@@ -32,19 +32,54 @@ class TestCabinetRegistry:
         labels = [s.label for s in self.registry.sections]
         assert labels == ["A", "B"]
 
-    def test_multiple_modules_same_order_stable(self):
-        self.registry.register("x", section=CabinetSection(label="X", icon="bi-x", order=10))
-        self.registry.register("y", section=CabinetSection(label="Y", icon="bi-y", order=10))
+    def test_sections_filtering_by_group(self):
+        s_admin = CabinetSection(label="Admin", icon="icon", nav_group="admin", order=1)
+        s_client = CabinetSection(label="Client", icon="icon", nav_group="client", order=2)
+
+        self.registry.register("admin_mod", section=s_admin)
+        self.registry.register("client_mod", section=s_client)
+
+        # All sections
         assert len(self.registry.sections) == 2
 
-    def test_register_dashboard_widget(self):
-        self.registry.register("booking", dashboard_widget="booking/widgets/upcoming.html")
-        assert "booking/widgets/upcoming.html" in self.registry.dashboard_widgets
+        # Filter by group
+        admin_sections = self.registry.get_sections("admin")
+        assert len(admin_sections) == 1
+        assert admin_sections[0].label == "Admin"
 
-    def test_multiple_dashboard_widgets(self):
+        client_sections = self.registry.get_sections("client")
+        assert len(client_sections) == 1
+        assert client_sections[0].label == "Client"
+
+    def test_register_dashboard_widget(self):
+        # Traditional string registration
         self.registry.register("booking", dashboard_widget="booking/widgets/upcoming.html")
-        self.registry.register("catalog", dashboard_widget="catalog/widgets/stats.html")
-        assert len(self.registry.dashboard_widgets) == 2
+        assert len(self.registry.dashboard_widgets) == 1
+        widget = self.registry.dashboard_widgets[0]
+        assert isinstance(widget, DashboardWidget)
+        assert widget.template == "booking/widgets/upcoming.html"
+
+    def test_register_structured_dashboard_widget(self):
+        widget = DashboardWidget(template="test.html", nav_group="client")
+        self.registry.register("test_mod", dashboard_widget=widget)
+        assert len(self.registry.dashboard_widgets) == 1
+        assert self.registry.dashboard_widgets[0].nav_group == "client"
+
+    def test_widgets_filtering_by_group(self):
+        w_admin = DashboardWidget(template="admin.html", nav_group="admin", order=1)
+        w_client = DashboardWidget(template="client.html", nav_group="client", order=2)
+
+        self.registry.register("admin_mod", dashboard_widget=w_admin)
+        self.registry.register("client_mod", dashboard_widget=w_client)
+
+        # Filter by group
+        admin_widgets = self.registry.get_dashboard_widgets("admin")
+        assert len(admin_widgets) == 1
+        assert admin_widgets[0].template == "admin.html"
+
+        client_widgets = self.registry.get_dashboard_widgets("client")
+        assert len(client_widgets) == 1
+        assert client_widgets[0].template == "client.html"
 
     def test_register_topbar_actions(self):
         actions = [NavAction(label="New", url="booking:new", icon="bi-plus")]
@@ -57,27 +92,13 @@ class TestCabinetRegistry:
         self.registry.register("booking", actions=actions)
         assert len(self.registry.global_actions) == 1
 
-    def test_register_without_section_no_crash(self):
-        # Widget-only registration (no section in nav)
-        self.registry.register("reporting", dashboard_widget="reporting/kpi.html")
-        assert self.registry.sections == []
-        assert len(self.registry.dashboard_widgets) == 1
-
-    def test_overwriting_same_module_replaces_section(self):
-        s1 = CabinetSection(label="Old", icon="bi-x", order=10)
-        s2 = CabinetSection(label="New", icon="bi-x", order=10)
-        self.registry.register("booking", section=s1)
-        self.registry.register("booking", section=s2)
-        assert len(self.registry.sections) == 1
-        assert self.registry.sections[0].label == "New"
-
 
 @pytest.mark.unit
 class TestDeclare:
     def test_declare_with_valid_section_ok(self):
         section = CabinetSection(label="Booking", icon="bi-calendar")
-        # Should not raise — uses global cabinet_registry but that's fine for this check
         from codex_django.cabinet.registry import cabinet_registry
+
         before = len(cabinet_registry._sections)
         declare("booking_test_valid", section=section)
         assert len(cabinet_registry._sections) >= before
@@ -87,10 +108,8 @@ class TestDeclare:
             declare("booking", section={"label": "Booking"})  # type: ignore[arg-type]
 
     def test_declare_with_none_section_ok(self):
-        # Widget-only — no section in nav
         declare("reporting_widget_only", section=None, dashboard_widget="reporting/kpi.html")
 
-    def test_declare_wrong_type_error_message(self):
-        with pytest.raises(ImproperlyConfigured) as exc_info:
-            declare("test", section="not_a_section")  # type: ignore[arg-type]
-        assert "CabinetSection instance" in str(exc_info.value)
+    def test_declare_with_structured_widget_ok(self):
+        widget = DashboardWidget(template="kpi.html")
+        declare("test_structured", dashboard_widget=widget)

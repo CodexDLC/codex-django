@@ -26,21 +26,29 @@ def cabinet(request: HttpRequest) -> dict[str, Any]:
             "cabinet_settings": None,
         }
 
-    # OR logic: show section if user has AT LEAST ONE matching permission.
-    # Sorted by (nav_group, order) so {% regroup %} in templates works correctly.
+    # Filter sections by group and permissions
+    # If request has 'cabinet_nav_group' attribute, use it, otherwise default to None (all)
+    nav_group = getattr(request, "cabinet_nav_group", None)
+
     visible_sections = sorted(
         (
             section
-            for section in cabinet_registry.sections
-            if not section.permissions
-            or any(request.user.has_perm(p) for p in section.permissions)
+            for section in cabinet_registry.get_sections(nav_group)
+            if not section.permissions or any(request.user.has_perm(p) for p in section.permissions)
         ),
         key=lambda s: (s.nav_group, s.order),
     )
 
+    # Filter widgets by group and permissions
+    visible_widgets = [
+        widget
+        for widget in cabinet_registry.get_dashboard_widgets(nav_group)
+        if not widget.permissions or any(request.user.has_perm(p) for p in widget.permissions)
+    ]
+
     return {
         "cabinet_nav": visible_sections,
         "cabinet_topbar_actions": cabinet_registry.topbar_actions,
-        "cabinet_dashboard_widgets": cabinet_registry.dashboard_widgets,
+        "cabinet_dashboard_widgets": visible_widgets,
         "cabinet_settings": _settings_manager.get(),
     }

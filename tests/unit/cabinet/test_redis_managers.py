@@ -74,9 +74,7 @@ class TestCabinetSettingsRedisManagerSave:
         instance = MagicMock()
         instance.to_cabinet_dict.return_value = {"cabinet_name": "Cabinet"}
         await mgr.asave_instance(instance)
-        mgr.hash.set_fields.assert_called_once_with(
-            mgr.make_key("settings"), {"cabinet_name": "Cabinet"}
-        )
+        mgr.hash.set_fields.assert_called_once_with(mgr.make_key("settings"), {"cabinet_name": "Cabinet"})
 
     @pytest.mark.asyncio
     async def test_asave_instance_skips_empty_dict(self, mgr):

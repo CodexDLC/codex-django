@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import pytest
 from dataclasses import FrozenInstanceError
+
+import pytest
 
 from codex_django.cabinet.types import CabinetSection, ListItem, NavAction, TableColumn
 

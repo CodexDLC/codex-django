@@ -2,9 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
-_VALID_TABS = frozenset(
-    {"contact", "geo", "social", "marketing", "technical", "email", "legal"}
-)
+_VALID_TABS = frozenset({"contact", "geo", "social", "marketing", "technical", "email", "legal"})
 
 
 @login_required

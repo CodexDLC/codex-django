@@ -27,20 +27,69 @@ Dashboard Selector
     from codex_django.cabinet.selector.dashboard import DashboardSelector
     DashboardSelector.invalidate("booking_kpi")
 """
+
 from __future__ import annotations
 
-from typing import Any, Callable, cast
+from abc import ABC, abstractmethod
+from collections.abc import Callable
+from typing import Any, cast
 
 from ..redis.managers.dashboard import DashboardRedisManager
+from ..types import ListWidgetData, MetricWidgetData, TableWidgetData
 
 _manager = DashboardRedisManager()
+
+
+class DashboardAdapter(ABC):
+    """
+    Base class for dashboard data adapters.
+    Adapters are responsible for fetching and formatting data for specific widgets.
+    """
+
+    @abstractmethod
+    def get_data(self, request: Any) -> dict[str, Any]:
+        """Fetch and return data as a dictionary."""
+        pass
+
+
+class MetricAdapter(DashboardAdapter):
+    """Generic adapter for metric widgets."""
+
+    def __init__(self, provider_fn: Callable[..., MetricWidgetData]):
+        self.provider_fn = provider_fn
+
+    def get_data(self, request: Any) -> dict[str, Any]:
+        data = self.provider_fn(request)
+        return {"metric": data}
+
+
+class TableAdapter(DashboardAdapter):
+    """Generic adapter for table widgets."""
+
+    def __init__(self, provider_fn: Callable[..., TableWidgetData]):
+        self.provider_fn = provider_fn
+
+    def get_data(self, request: Any) -> dict[str, Any]:
+        data = self.provider_fn(request)
+        return {"table": data}
+
+
+class ListAdapter(DashboardAdapter):
+    """Generic adapter for list widgets."""
+
+    def __init__(self, provider_fn: Callable[..., ListWidgetData]):
+        self.provider_fn = provider_fn
+
+    def get_data(self, request: Any) -> dict[str, Any]:
+        data = self.provider_fn(request)
+        return {"list": data}
 
 
 class DashboardSelector:
     """
     Extensible dashboard data aggregator with Redis caching.
 
-    Each provider is a function (request) -> dict[str, Any].
+    Each provider is a flat function (request) -> dict or a DashboardAdapter.
     Registered via @DashboardSelector.extend(cache_key=..., cache_ttl=...).
     """
 
@@ -49,7 +98,7 @@ class DashboardSelector:
     @classmethod
     def extend(
         cls,
-        fn: Callable[..., Any] | None = None,
+        fn_or_adapter: Callable[..., Any] | DashboardAdapter | None = None,
         *,
         cache_key: str = "",
         cache_ttl: int = 120,
@@ -58,28 +107,29 @@ class DashboardSelector:
         Register a dashboard data provider.
 
         Args:
-            cache_key:  Redis key suffix. Defaults to function name.
+            cache_key:  Redis key suffix. Defaults to function/class name.
             cache_ttl:  Seconds to cache. 0 = no cache (real-time).
-
-        As decorator without args:
-            @DashboardSelector.extend
-            def my_stats(request): ...
-
-        As decorator with args:
-            @DashboardSelector.extend(cache_key="my_stats", cache_ttl=300)
-            def my_stats(request): ...
         """
-        def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-            cls._providers.append({
-                "fn": func,
-                "cache_key": cache_key or func.__name__,
-                "cache_ttl": cache_ttl,
-            })
-            return func
 
-        if fn is not None:
-            # Used as @DashboardSelector.extend (no parentheses)
-            return decorator(fn)
+        def decorator(obj: Callable[..., Any] | DashboardAdapter) -> Any:
+            if isinstance(obj, DashboardAdapter):
+                fn = obj.get_data
+                name = obj.__class__.__name__.lower()
+            else:
+                fn = obj
+                name = obj.__name__
+
+            cls._providers.append(
+                {
+                    "fn": fn,
+                    "cache_key": cache_key or name,
+                    "cache_ttl": cache_ttl,
+                }
+            )
+            return obj
+
+        if fn_or_adapter is not None:
+            return decorator(fn_or_adapter)
         return decorator
 
     @classmethod
