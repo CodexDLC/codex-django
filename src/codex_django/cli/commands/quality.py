@@ -77,6 +77,7 @@ def handle_configure_precommit(project_root: str) -> None:
     baseline_path = os.path.join(project_root, ".secrets.baseline")
     if not os.path.exists(baseline_path):
         import json
+
         empty_baseline = {
             "version": "1.5.0",
             "plugins_used": [
@@ -96,10 +97,10 @@ def handle_configure_precommit(project_root: str) -> None:
                 {"name": "SlackDetector"},
                 {"name": "SoftlayerDetector"},
                 {"name": "StripeDetector"},
-                {"name": "TwilioKeyDetector"}
+                {"name": "TwilioKeyDetector"},
             ],
             "results": {},
-            "exclude": {"files": ".*", "lines": None}
+            "exclude": {"files": ".*", "lines": None},
         }
         with open(baseline_path, "w", encoding="utf-8") as f:
             json.dump(empty_baseline, f, indent=2)

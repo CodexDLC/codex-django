@@ -44,19 +44,18 @@ def handle_add_client_cabinet(project_dir: str) -> None:
     console.print()
     console.print("[bold]Next steps:[/bold]")
     console.print("  1. In [cyan]core/settings/modules/codex.py[/cyan] uncomment the 3 client cabinet lines:")
-    console.print("       [green]ACCOUNT_ADAPTER = \"cabinet.adapters.CabinetAccountAdapter\"[/green]")
-    console.print("       [green]CABINET_DEFAULT_URL = \"/cabinet/\"[/green]")
-    console.print("       [green]CABINET_CLIENT_URL  = \"/cabinet/my/\"[/green]")
+    console.print('       [green]ACCOUNT_ADAPTER = "cabinet.adapters.CabinetAccountAdapter"[/green]')
+    console.print('       [green]CABINET_DEFAULT_URL = "/cabinet/"[/green]')
+    console.print('       [green]CABINET_CLIENT_URL  = "/cabinet/my/"[/green]')
     console.print("  2. Add client URL patterns to [cyan]cabinet/urls.py[/cyan]:")
-    console.print("       [dim]path(\"my/\", my_appointments_view, name=\"my_appointments\"),[/dim]")
-    console.print("       [dim]path(\"my/profile/\", profile_view, name=\"profile\"),[/dim]")
-    console.print("       [dim]path(\"my/settings/\", settings_view, name=\"settings\"),[/dim]")
+    console.print('       [dim]path("my/", my_appointments_view, name="my_appointments"),[/dim]')
+    console.print('       [dim]path("my/profile/", profile_view, name="profile"),[/dim]')
+    console.print('       [dim]path("my/settings/", settings_view, name="settings"),[/dim]')
     console.print(
-        "       [dim]path(\"my/settings/notifications/\", "
-        "settings_notifications_view, name=\"settings_notifications\"),[/dim]"
+        '       [dim]path("my/settings/notifications/", '
+        'settings_notifications_view, name="settings_notifications"),[/dim]'
     )
-    console.print("       [dim]path(\"my/settings/privacy/\", settings_privacy_view, name=\"settings_privacy\"),[/dim]")
+    console.print('       [dim]path("my/settings/privacy/", settings_privacy_view, name="settings_privacy"),[/dim]')
     console.print("  3. Add to [cyan]system/models/__init__.py[/cyan]:")
     console.print("       [dim]from .user_profile import UserProfile[/dim]")
     console.print("  4. Run [cyan]python manage.py makemigrations && migrate[/cyan]")
-

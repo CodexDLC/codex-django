@@ -149,3 +149,32 @@ def ask_init_modules() -> list[str]:
 def ask_multilingual() -> bool:
     result = questionary.confirm("Enable multilingual support?", default=False).ask()
     return bool(result)
+
+
+def ask_languages(multilingual: bool) -> list[str]:
+    """Ask for languages to support."""
+    if not multilingual:
+        # For single language, we ask for the base language
+        lang = questionary.select(
+            "Select base language:",
+            choices=[
+                questionary.Choice("English", value="en"),
+                questionary.Choice("Russian", value="ru"),
+                questionary.Choice("German", value="de"),
+                questionary.Choice("Ukrainian", value="uk"),
+            ],
+            default="en",
+        ).ask()
+        return [lang] if lang else ["en"]
+
+    # For multilingual, use checkboxes
+    results = questionary.checkbox(
+        "Select languages to support:",
+        choices=[
+            questionary.Choice("English", value="en", checked=True),
+            questionary.Choice("Russian", value="ru", checked=True),
+            questionary.Choice("German", value="de", checked=True),
+            questionary.Choice("Ukrainian", value="uk", checked=False),
+        ],
+    ).ask()
+    return cast(list[str], results) or ["en"]
