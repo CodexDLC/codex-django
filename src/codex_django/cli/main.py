@@ -85,18 +85,31 @@ def _init_wizard() -> int:
         with_notifications = "notifications" in modules
 
     multilingual = prompts.ask_multilingual()
+    languages = prompts.ask_languages(multilingual) if multilingual else None
 
     from .commands.init import handle_init
 
-    handle_init(
-        name,
-        os.getcwd(),
-        overwrite=overwrite,
-        multilingual=multilingual,
-        with_cabinet=with_cabinet,
-        with_booking=with_booking,
-        with_notifications=with_notifications,
-    )
+    if languages is None:
+        handle_init(
+            name,
+            os.getcwd(),
+            overwrite=overwrite,
+            multilingual=multilingual,
+            with_cabinet=with_cabinet,
+            with_booking=with_booking,
+            with_notifications=with_notifications,
+        )
+    else:
+        handle_init(
+            name,
+            os.getcwd(),
+            overwrite=overwrite,
+            multilingual=multilingual,
+            languages=languages,
+            with_cabinet=with_cabinet,
+            with_booking=with_booking,
+            with_notifications=with_notifications,
+        )
     return 0
 
 

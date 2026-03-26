@@ -43,6 +43,7 @@ def handle_init(
     dev_mode: bool = False,
     overwrite: bool = False,
     multilingual: bool = False,
+    languages: list[str] | None = None,
     with_cabinet: bool = False,
     with_booking: bool = False,
     with_notifications: bool = False,
@@ -84,11 +85,15 @@ def handle_init(
         console.print("[yellow]  Use --overwrite to re-scaffold.[/yellow]")
         return
 
+    if languages is None:
+        languages = ["en", "ru"] if multilingual else ["en"]
+
     engine = CLIEngine()
     context = {
         "project_name": name,
         "secret_key": token_urlsafe(50),
-        "multilingual": multilingual,
+        "multilingual": multilingual or len(languages) > 1,
+        "languages": languages,
         "with_cabinet": with_cabinet,
         "with_booking": with_booking,
         "with_notifications": with_notifications,

@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+from codex_django.core.i18n.discovery import discover_locale_paths
+
 # Root of Django project: src/backend_django
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
@@ -8,25 +10,34 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 # Internationalization
 # ═══════════════════════════════════════════
 
-LANGUAGE_CODE = os.environ.get("LANGUAGE_CODE", "de")
-TIME_ZONE = os.environ.get("TIME_ZONE", "Europe/Berlin")
+LANGUAGE_CODE = os.environ.get("LANGUAGE_CODE", "{{ languages[0] }}")
+TIME_ZONE = os.environ.get("TIME_ZONE", "UTC")
 USE_I18N = {{ multilingual }}
 USE_TZ = True
 
-{%- if multilingual %}
+{%- if multilingual or languages|length > 0 %}
 LANGUAGES = [
-    ("de", "Deutsch"),
+{%- for lang in languages %}
+    {%- if lang == 'en' %}
     ("en", "English"),
+    {%- elif lang == 'ru' %}
+    ("ru", "Russian"),
+    {%- elif lang == 'de' %}
+    ("de", "Deutsch"),
+    {%- elif lang == 'uk' %}
+    ("uk", "Ukrainian"),
+    {%- else %}
+    ("{{ lang }}", "{{ lang }}"),
+    {%- endif %}
+{%- endfor %}
 ]
 
 try:
     import modeltranslation  # noqa
     MODELTRANSLATION_DEFAULT_LANGUAGE = LANGUAGE_CODE.split("-")[0]
-    MODELTRANSLATION_LANGUAGES = ("de", "en")
+    MODELTRANSLATION_LANGUAGES = ({% for lang in languages %}"{{ lang }}"{% if not loop.last %}, {% endif %}{% endfor %})
 except ImportError:
     pass
 
-LOCALE_PATHS = [
-    BASE_DIR / "locale",
-]
+LOCALE_PATHS = discover_locale_paths(BASE_DIR)
 {%- endif %}
