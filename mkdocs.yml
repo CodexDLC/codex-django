@@ -1,0 +1,34 @@
+site_name: codex-django
+site_description: Django utilities, mixins, adapters and CLI scaffolding for Codex projects
+site_author: Codex Team
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+
+plugins:
+  - search
+  - mkdocs-include-markdown-plugin
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            show_source: true
+            show_root_heading: true
+
+nav:
+  - Home: index.md
+  - Changelog: changelog.md
+
+extra:
+  version:
+    provider: mike

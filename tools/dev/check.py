@@ -9,6 +9,8 @@ from codex_core.dev.check_runner import BaseCheckRunner
 class CheckRunner(BaseCheckRunner):
     PROJECT_NAME = "codex-django"
     INTEGRATION_REQUIRES = "Redis (optional, in-memory mock available)"
+    # CVE-2026-4539: pygments — no fix available yet (latest version)
+    AUDIT_FLAGS = "--skip-editable --ignore-vuln CVE-2026-4539"
 
     def run_tests(self, marker: str = "unit") -> bool:
         self.print_step(f"Running {marker.capitalize()} Tests")
