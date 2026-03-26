@@ -8,6 +8,7 @@ Dashboard Redis Manager
 
 Key format: {PROJECT_NAME}:cabinet:dashboard:{provider_key}
 """
+
 from __future__ import annotations
 
 import json
@@ -18,8 +19,8 @@ from asgiref.sync import async_to_sync
 
 from codex_django.core.redis.managers.base import BaseDjangoRedisManager
 
-
 # ─── JSON serialization ────────────────────────────────────────────────────────
+
 
 class _Encoder(json.JSONEncoder):
     """Handles types not supported by stdlib JSON."""
@@ -39,6 +40,7 @@ def _loads(raw: str) -> dict[str, Any]:
 
 
 # ─── Manager ──────────────────────────────────────────────────────────────────
+
 
 class DashboardRedisManager(BaseDjangoRedisManager):
     """

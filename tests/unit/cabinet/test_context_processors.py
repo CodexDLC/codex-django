@@ -82,18 +82,18 @@ class TestCabinetContextProcessorAuthenticated:
 
     def test_section_hidden_when_user_lacks_permission(self):
         registry = CabinetRegistry()
-        registry.register("admin", section=CabinetSection(
-            label="Admin", icon="bi-gear", permissions=("system.change_settings",)
-        ))
+        registry.register(
+            "admin", section=CabinetSection(label="Admin", icon="bi-gear", permissions=("system.change_settings",))
+        )
 
         result = self._call(registry, perms=())
         assert result["cabinet_nav"] == []
 
     def test_section_visible_when_user_has_permission(self):
         registry = CabinetRegistry()
-        registry.register("admin", section=CabinetSection(
-            label="Admin", icon="bi-gear", permissions=("system.change_settings",)
-        ))
+        registry.register(
+            "admin", section=CabinetSection(label="Admin", icon="bi-gear", permissions=("system.change_settings",))
+        )
 
         result = self._call(registry, perms=("system.change_settings",))
         assert len(result["cabinet_nav"]) == 1
@@ -101,9 +101,9 @@ class TestCabinetContextProcessorAuthenticated:
     def test_or_logic_one_of_two_permissions(self):
         """Section visible if user has AT LEAST ONE matching permission."""
         registry = CabinetRegistry()
-        registry.register("section", section=CabinetSection(
-            label="X", icon="bi-x", permissions=("app.view_a", "app.view_b")
-        ))
+        registry.register(
+            "section", section=CabinetSection(label="X", icon="bi-x", permissions=("app.view_a", "app.view_b"))
+        )
 
         result = self._call(registry, perms=("app.view_b",))
         assert len(result["cabinet_nav"]) == 1

@@ -1,5 +1,5 @@
 from .registry import cabinet_registry, declare
-from .types import CabinetSection, NavAction, TableColumn, ListItem
+from .types import CabinetSection, ListItem, NavAction, TableColumn
 
 __all__ = [
     "declare",
