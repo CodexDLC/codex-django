@@ -12,11 +12,13 @@ from typing import Any
 
 from codex_django.booking.adapters import BookingCacheAdapter, DjangoAvailabilityAdapter
 from codex_django.booking.selectors import (
+    BookingPersistenceHook,
     create_booking as _create_booking,
     get_available_slots as _get_available_slots,
     get_calendar_data,
     get_nearest_slots as _get_nearest_slots,
 )
+from codex_services.booking.slot_master.modes import BookingMode
 
 from .models import Appointment, Master, MasterDayOff, MasterWorkingDay, Service
 
@@ -66,6 +68,11 @@ def create_booking(
     master_id: int,
     client: Any,
     extra_fields: dict[str, Any] | None = None,
+    master_selections: dict[str, str] | dict[int, int | None] | None = None,
+    mode: BookingMode = BookingMode.SINGLE_DAY,
+    overlap_allowed: bool = False,
+    parallel_groups: dict[int, str] | None = None,
+    persistence_hook: BookingPersistenceHook | None = None,
 ) -> Any:
     adapter = _make_adapter()
     cache = BookingCacheAdapter()
@@ -79,6 +86,11 @@ def create_booking(
         master_id=master_id,
         client=client,
         extra_fields=extra_fields,
+        master_selections=master_selections,
+        mode=mode,
+        overlap_allowed=overlap_allowed,
+        parallel_groups=parallel_groups,
+        persistence_hook=persistence_hook,
     )
 
 
