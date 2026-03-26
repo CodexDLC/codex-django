@@ -1,0 +1,33 @@
+"""
+Cabinet registration for the project's base cabinet app.
+Auto-discovered by codex_django.cabinet via autodiscover_modules("cabinet").
+
+Add dashboard providers and nav sections for OTHER modules in their own
+features/<module>/cabinet.py files — this file is only for cabinet-level defaults.
+"""
+from codex_django.cabinet.registry import declare
+from codex_django.cabinet.selector.dashboard import DashboardSelector
+from codex_django.cabinet.types import CabinetSection
+
+declare(
+    module="users",
+    section=CabinetSection(
+        label="Пользователи",
+        icon="bi-people",
+        nav_group="admin",
+        url="/cabinet/users/",
+        permissions=(),
+        order=20,
+    ),
+)
+
+from .mock import CabinetMockData  # noqa: E402
+
+
+@DashboardSelector.extend(cache_key="base_stats", cache_ttl=300)
+def base_stats(request):
+    # TODO: replace with real ORM when models are ready
+    # from system.models import SiteSettings
+    # total_clients = Client.objects.count()
+    # return {"dashboard_stats": {"total_clients": total_clients, ...}}
+    return {"dashboard_stats": CabinetMockData.get_dashboard_stats()}

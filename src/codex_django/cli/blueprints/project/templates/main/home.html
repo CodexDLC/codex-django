@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}
+    {{ site_settings.company_name }} | {% trans "Home" %}
+{% endblock title %}
+
+{% block content %}
+    <div class="container">
+        <h1>Welcome to the Project</h1>
+        <p>
+            This is the default home page.
+        </p>
+        <p>
+            <a href="{% url 'codex_showcase:index' %}" class="btn btn-primary">Go to Showcase</a>
+        </p>
+    </div>
+{% endblock content %}

@@ -1,0 +1,110 @@
+"""
+Cabinet Mock Data
+=================
+Временные данные для разработки. Позволяют запустить кабинет без базы данных.
+
+Паттерн замены:
+    1. Используй selector/ для вызовов данных из view — никогда напрямую.
+    2. Когда будешь готов к реальным моделям — замени тело selector-функции.
+    3. Этот файл удаляй постепенно по мере подключения реальных моделей.
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass
+from decimal import Decimal
+from typing import Any, Iterator
+
+
+# ─── Mock Model Objects ────────────────────────────────────────────────────────
+
+@dataclass
+class MockClient:
+    """Имитирует Django model instance клиента."""
+
+    id: int
+    full_name: str
+    phone: str
+    email: str
+    created_at: str
+    is_active: bool = True
+    note: str = ""
+
+    def get_absolute_url(self) -> str:
+        return f"/cabinet/clients/{self.id}/"
+
+    def __str__(self) -> str:
+        return self.full_name
+
+
+# ─── Mock QuerySet ─────────────────────────────────────────────────────────────
+
+class MockQuerySet:
+    """Имитирует Django QuerySet: итерация, count(), __len__, __bool__."""
+
+    def __init__(self, items: list[Any]) -> None:
+        self._items = items
+
+    def __iter__(self) -> Iterator[Any]:
+        return iter(self._items)
+
+    def __len__(self) -> int:
+        return len(self._items)
+
+    def __bool__(self) -> bool:
+        return bool(self._items)
+
+    def count(self) -> int:
+        return len(self._items)
+
+    def __getitem__(self, index: int | slice) -> Any:
+        return self._items[index]
+
+
+# ─── Mock Data Provider ────────────────────────────────────────────────────────
+
+class CabinetMockData:
+    """
+    Единственный источник mock-данных для cabinet views.
+
+    Используется через selector-функции. Заменяется поэтапно на реальный ORM:
+
+        # selector/clients.py — до подключения реальных моделей:
+        return CabinetMockData.get_clients_list()
+
+        # selector/clients.py — после:
+        return Client.objects.filter(is_active=True).order_by("-created_at")
+    """
+
+    # ── Dashboard stats ────────────────────────────────────────────────────────
+
+    @staticmethod
+    def get_dashboard_stats() -> dict[str, Any]:
+        return {
+            "total_clients": 142,
+            "new_clients_week": 12,
+            "revenue_month": Decimal("48500.00"),
+            "revenue_trend": "+14%",
+        }
+
+    # ── Clients ───────────────────────────────────────────────────────────────
+
+    @classmethod
+    def _get_clients_data(cls) -> list[MockClient]:
+        return [
+            MockClient(1, "Анна Соколова",   "+49 151 1234567", "anna@example.com",    "2026-03-20"),
+            MockClient(2, "Михаил Петров",   "+49 152 7654321", "m.petrov@example.com", "2026-03-18"),
+            MockClient(3, "Юлия Браун",      "+49 160 1122334", "j.brown@example.com",  "2026-03-15"),
+            MockClient(4, "Дмитрий Ким",     "+49 176 9988776", "d.kim@example.com",    "2026-03-10", is_active=False),
+            MockClient(5, "Мария Шульц",     "+49 151 5566778", "m.schulz@example.com", "2026-03-05"),
+        ]
+
+    @classmethod
+    def get_clients_list(cls) -> MockQuerySet:
+        return MockQuerySet(cls._get_clients_data())
+
+    @classmethod
+    def get_client(cls, pk: int) -> MockClient | None:
+        for client in cls._get_clients_data():
+            if client.id == pk:
+                return client
+        return None

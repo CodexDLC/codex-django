@@ -1,0 +1,37 @@
+/* ===================================================
+   Home Page Styles
+   =================================================== */
+
+/* Hero */
+.hero {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: #fff;
+    padding: var(--spacing-2xl) 0;
+    text-align: center;
+}
+
+.hero-content { max-width: 720px; margin: 0 auto; }
+
+.hero-title {
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 800;
+    margin-bottom: var(--spacing-lg);
+    line-height: 1.1;
+}
+
+.hero-subtitle {
+    font-size: 20px;
+    opacity: 0.8;
+    margin-bottom: var(--spacing-xl);
+}
+
+.hero-actions { flex-wrap: wrap; }
+
+/* Sections */
+.section-header { margin-bottom: var(--spacing-xl); }
+
+/* CTA */
+.cta-subtitle {
+    margin-bottom: 32px;
+    opacity: 0.8;
+}
