@@ -31,6 +31,9 @@ class SiteSettingsSyncMixin(LifecycleModelMixin, models.Model):
     Low-level mixin for Redis synchronization.
     """
 
+    class Meta:
+        abstract = True
+
     # Redis manager class used for sync
     redis_manager_class = DjangoSiteSettingsManager
 
@@ -55,7 +58,16 @@ class SiteSettingsSyncMixin(LifecycleModelMixin, models.Model):
 
     @hook(AFTER_SAVE)  # type: ignore[untyped-decorator]
     def sync_to_redis(self) -> None:
-        """Hook to automatically update Redis cache upon saving."""
+        """Hook to automatically update Redis cache upon saving.
+
+        In DEBUG mode Redis sync is skipped unless CODEX_REDIS_ENABLED=True.
+        This allows local development without a running Redis instance.
+        """
+        from django.conf import settings
+
+        if settings.DEBUG and not getattr(settings, "CODEX_REDIS_ENABLED", False):
+            return
+
         from codex_django.core.redis.managers.settings import get_site_settings_manager
 
         manager = get_site_settings_manager()

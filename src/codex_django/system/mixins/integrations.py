@@ -64,6 +64,7 @@ Example of adding Google and Stripe fields to the admin panel:
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from encrypted_model_fields.fields import EncryptedCharField
 
 
 class GoogleIntegrationsMixin(models.Model):
@@ -86,7 +87,7 @@ class GoogleIntegrationsMixin(models.Model):
     google_maps_api_key = models.CharField(_("Google Maps API Key"), max_length=255, blank=True)
     google_business_api_key = models.CharField(_("Google Business API Key"), max_length=255, blank=True)
     google_recaptcha_site_key = models.CharField(_("reCAPTCHA Site Key"), max_length=255, blank=True)
-    google_recaptcha_secret_key = models.CharField(_("reCAPTCHA Secret Key"), max_length=255, blank=True)
+    google_recaptcha_secret_key = EncryptedCharField(_("reCAPTCHA Secret Key"), max_length=255, blank=True)
 
     class Meta:
         abstract = True
@@ -110,7 +111,7 @@ class MetaIntegrationsMixin(models.Model):
 
     facebook_pixel_id = models.CharField(_("Facebook Pixel ID"), max_length=255, blank=True)
     facebook_app_id = models.CharField(_("Facebook App ID"), max_length=255, blank=True)
-    facebook_app_secret = models.CharField(_("Facebook App Secret"), max_length=255, blank=True)
+    facebook_app_secret = EncryptedCharField(_("Facebook App Secret"), max_length=255, blank=True)
 
     class Meta:
         abstract = True
@@ -133,8 +134,8 @@ class StripeIntegrationsMixin(models.Model):
     """
 
     stripe_public_key = models.CharField(_("Stripe Public Key"), max_length=255, blank=True)
-    stripe_secret_key = models.CharField(_("Stripe Secret Key"), max_length=255, blank=True)
-    stripe_webhook_secret = models.CharField(_("Stripe Webhook Secret"), max_length=255, blank=True)
+    stripe_secret_key = EncryptedCharField(_("Stripe Secret Key"), max_length=255, blank=True)
+    stripe_webhook_secret = EncryptedCharField(_("Stripe Webhook Secret"), max_length=255, blank=True)
 
     class Meta:
         abstract = True
@@ -156,7 +157,7 @@ class CrmIntegrationsMixin(models.Model):
     """
 
     crm_api_url = models.URLField(_("CRM API URL"), blank=True)
-    crm_api_key = models.CharField(_("CRM API Key"), max_length=255, blank=True)
+    crm_api_key = EncryptedCharField(_("CRM API Key"), max_length=255, blank=True)
 
     class Meta:
         abstract = True
@@ -180,7 +181,7 @@ class TwilioIntegrationsMixin(models.Model):
     """
 
     twilio_account_sid = models.CharField(_("Twilio Account SID"), max_length=255, blank=True)
-    twilio_auth_token = models.CharField(_("Twilio Auth Token"), max_length=255, blank=True)
+    twilio_auth_token = EncryptedCharField(_("Twilio Auth Token"), max_length=255, blank=True)
     twilio_from_number = models.CharField(
         _("Twilio From Number"), max_length=50, blank=True, help_text=_("E.g. +15017122661")
     )
@@ -207,7 +208,7 @@ class SevenIoIntegrationsMixin(models.Model):
         }),
     """
 
-    seven_api_key = models.CharField(_("Seven.io API Key"), max_length=255, blank=True)
+    seven_api_key = EncryptedCharField(_("Seven.io API Key"), max_length=255, blank=True)
     seven_sender_id = models.CharField(
         _("Seven.io Sender ID"), max_length=50, blank=True, help_text=_("SMS sender name or number")
     )

@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
@@ -17,7 +17,7 @@ class BaseUpdateAllContentCommand(BaseCommand):
     """
 
     help = "Run multiple content update commands"
-    commands_to_run: list[str] = []
+    commands_to_run: ClassVar[list[str]] = []
 
     def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument("--force", action="store_true", help="Ignore hash checks and force all updates")

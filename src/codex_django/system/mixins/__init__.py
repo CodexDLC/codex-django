@@ -19,6 +19,8 @@ from .settings import (
     SiteSocialSettingsMixin,
     SiteTechnicalSettingsMixin,
 )
+from .translations import AbstractStaticTranslation
+from .user_profile import AbstractUserProfile
 
 __all__ = [
     # Settings
@@ -33,6 +35,8 @@ __all__ = [
     "SiteLegalSettingsMixin",
     # SEO
     "AbstractStaticPageSeo",
+    # Translations
+    "AbstractStaticTranslation",
     # Integrations
     "GoogleIntegrationsMixin",
     "MetaIntegrationsMixin",
@@ -41,4 +45,6 @@ __all__ = [
     "TwilioIntegrationsMixin",
     "SevenIoIntegrationsMixin",
     "ExtraIntegrationsMixin",
+    # User Profile
+    "AbstractUserProfile",
 ]
