@@ -41,3 +41,7 @@ PROJECT_NAME = "codex-django-test"
 CANONICAL_DOMAIN = ""
 SITEMAP_LOOKUP_NAMESPACES: list[str] = []
 ROOT_URLCONF = "tests.urls"
+
+# Required by encrypted_model_fields (django-encrypted-model-fields)
+# Valid Fernet key (32 url-safe base64-encoded bytes). Safe dummy for tests only.
+FIELD_ENCRYPTION_KEY = "S4o_caEvaU9JoGsRdwW0PzDFkqyb4_kYUr7lrsTSPMs="  # noqa: S105  # pragma: allowlist secret

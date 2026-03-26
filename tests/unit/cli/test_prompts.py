@@ -104,3 +104,27 @@ class TestPromptWrappers:
             assert result == "system"
             _, kwargs = mock_q.text.call_args
             assert kwargs.get("default") == "system"
+
+    def test_ask_multilingual(self):
+        from codex_django.cli import prompts
+
+        with patch("codex_django.cli.prompts.questionary") as mock_q:
+            mock_q.confirm.return_value = self._make_select(True)
+            result = prompts.ask_multilingual()
+            assert result is True
+
+    def test_ask_languages_single(self):
+        from codex_django.cli import prompts
+
+        with patch("codex_django.cli.prompts.questionary") as mock_q:
+            mock_q.select.return_value = self._make_select("en")
+            result = prompts.ask_languages(multilingual=False)
+            assert result == ["en"]
+
+    def test_ask_languages_multi(self):
+        from codex_django.cli import prompts
+
+        with patch("codex_django.cli.prompts.questionary") as mock_q:
+            mock_q.checkbox.return_value = self._make_select(["en", "ru"])
+            result = prompts.ask_languages(multilingual=True)
+            assert result == ["en", "ru"]
