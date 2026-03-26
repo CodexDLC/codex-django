@@ -1,8 +1,9 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from django.conf import settings
 from django.contrib.sitemaps import Sitemap
+
 from codex_django.core.sitemaps import BaseSitemap
 
 
@@ -13,7 +14,6 @@ class MockItem:
 
 @pytest.mark.unit
 class TestBaseSitemap:
-    
     @pytest.fixture
     def sitemap(self):
         return BaseSitemap()
@@ -29,9 +29,9 @@ class TestBaseSitemap:
     def test_get_domain_default(self, sitemap):
         if hasattr(settings, "CANONICAL_DOMAIN"):
             with patch.object(settings, "CANONICAL_DOMAIN", "localhost"):
-                 assert sitemap.get_domain() == "localhost"
+                assert sitemap.get_domain() == "localhost"
         else:
-             assert sitemap.get_domain() == "localhost"
+            assert sitemap.get_domain() == "localhost"
 
     def test_location_with_item_obj(self, sitemap):
         item = MockItem()
@@ -44,7 +44,7 @@ class TestBaseSitemap:
 
     def test_location_with_namespace(self, sitemap):
         from django.urls import NoReverseMatch
-        
+
         def side_effect(name):
             if name == "main:home":
                 return "/main/home/"
@@ -52,7 +52,7 @@ class TestBaseSitemap:
 
         with (
             patch("codex_django.core.sitemaps.reverse", side_effect=side_effect),
-            patch.object(settings, "SITEMAP_LOOKUP_NAMESPACES", ["main"])
+            patch.object(settings, "SITEMAP_LOOKUP_NAMESPACES", ["main"]),
         ):
             assert sitemap.location("home") == "/main/home/"
 
@@ -60,7 +60,7 @@ class TestBaseSitemap:
         # We need to mock super().get_urls()
         # Since BaseSitemap inherits from Sitemap, we patch Sitemap.get_urls
         mock_urls = [{"item": "home", "location": "/home/"}]
-        
+
         with (
             patch.object(Sitemap, "get_urls", return_value=mock_urls),
             patch.object(settings, "LANGUAGES", [("en", "English")]),
@@ -68,6 +68,6 @@ class TestBaseSitemap:
             patch("codex_django.core.sitemaps.translation.override"),
             patch("codex_django.core.sitemaps.reverse", return_value="/home/"),
         ):
-             urls = sitemap.get_urls()
-             assert len(urls) == 1
-             assert urls[0]["item"] == "home"
+            urls = sitemap.get_urls()
+            assert len(urls) == 1
+            assert urls[0]["item"] == "home"

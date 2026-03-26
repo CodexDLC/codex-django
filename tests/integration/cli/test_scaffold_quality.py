@@ -35,9 +35,7 @@ class TestScaffoldQuality:
             text=True,
             cwd=str(project_root),
         )
-        assert result.returncode == 0, (
-            f"ruff found issues in scaffolded project:\n{result.stdout}\n{result.stderr}"
-        )
+        assert result.returncode == 0, f"ruff found issues in scaffolded project:\n{result.stdout}\n{result.stderr}"
 
     def test_scaffolded_project_passes_bandit(self, tmp_path: Path) -> None:
         handle_init("testproject", str(tmp_path))
@@ -57,6 +55,4 @@ class TestScaffoldQuality:
             capture_output=True,
             text=True,
         )
-        assert result.returncode == 0, (
-            f"bandit found issues in scaffolded project:\n{result.stdout}\n{result.stderr}"
-        )
+        assert result.returncode == 0, f"bandit found issues in scaffolded project:\n{result.stdout}\n{result.stderr}"

@@ -51,6 +51,7 @@ db.sqlite3-journal
 .env
 .envrc
 .venv
+.venv-rebuild/
 env/
 venv/
 ENV/
@@ -67,6 +68,7 @@ dmypy.json
 
 # Ruff stuff:
 .ruff_cache/
+.uv-cache/
 
 # PyPI configuration file
 .pypirc

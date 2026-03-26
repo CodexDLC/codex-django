@@ -30,6 +30,7 @@ class TestHandleInit:
                 "project_name": "myproject",
                 "secret_key": ANY,
                 "multilingual": False,
+                "languages": ["en"],
                 "with_cabinet": False,
                 "with_booking": False,
                 "with_notifications": False,
@@ -115,6 +116,20 @@ class TestHandleInit:
 
             handle_init("myproject", str(tmp_path), code_only=True)
             assert mock_engine.scaffold.call_count == 1
+
+    def test_multilingual_languages_context(self, tmp_path: Path):
+        with patch(_ENGINE_PATH) as mock_engine_cls:
+            mock_engine = MagicMock()
+            mock_engine_cls.return_value = mock_engine
+            from codex_django.cli.commands.init import handle_init
+
+            handle_init("myproject", str(tmp_path), multilingual=True, languages=["en", "ru", "de"])
+
+            # Verify context passed to engine
+            _, kwargs = mock_engine.scaffold.call_args
+            context = kwargs["context"]
+            assert context["multilingual"] is True
+            assert context["languages"] == ["en", "ru", "de"]
 
 
 @pytest.mark.unit
