@@ -1,0 +1,94 @@
+{# [LIBRARY] codex_django/cabinet/templates/cabinet/includes/_sidebar_staff.html #}
+{# Sidebar for staff mode. #}
+{% load static i18n %}
+
+{# ─── LOGO ─── #}
+<div class="cab-sidebar__logo">
+  <span class="cab-sidebar__logo-icon bi bi-lightning-charge-fill"></span>
+  <span class="cab-sidebar__logo-name">{{ SITE_NAME|default:'Showcase' }}</span>
+</div>
+
+{# ─── NAV ─── #}
+<nav class="cab-sidebar__nav">
+
+  {# 1. Core management (CRM) #}
+  {% if active_module == 'crm' or not active_module %}
+  <ul class="cab-nav">
+    <li class="cab-nav__section-title">Management</li>
+    <li>
+      <a href="{% url 'codex_showcase:dashboard' %}"
+         class="cab-nav__item {% if active_section == 'dashboard' %}cab-nav__item--active{% endif %}"
+         hx-get="{% url 'codex_showcase:dashboard' %}"
+         hx-target="#cab-content"
+         hx-push-url="true">
+        <i class="bi bi-speedometer2 cab-nav__icon"></i>
+        <span class="cab-nav__label">{% trans "Dashboard" %}</span>
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'codex_showcase:catalog' %}"
+         class="cab-nav__item {% if active_section == 'catalog' %}cab-nav__item--active{% endif %}"
+         hx-get="{% url 'codex_showcase:catalog' %}"
+         hx-target="#cab-content"
+         hx-push-url="true">
+        <i class="bi bi-grid cab-nav__icon"></i>
+        <span class="cab-nav__label">{% trans "Catalog" %}</span>
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'codex_showcase:staff' %}"
+         class="cab-nav__item {% if active_section == 'staff' %}cab-nav__item--active{% endif %}"
+         hx-get="{% url 'codex_showcase:staff' %}"
+         hx-target="#cab-content"
+         hx-push-url="true">
+        <i class="bi bi-people cab-nav__icon"></i>
+        <span class="cab-nav__label">{% trans "Staff" %}</span>
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'codex_showcase:clients' %}"
+         class="cab-nav__item {% if active_section == 'clients' %}cab-nav__item--active{% endif %}"
+         hx-get="{% url 'codex_showcase:clients' %}"
+         hx-target="#cab-content"
+         hx-push-url="true">
+        <i class="bi bi-person-badge cab-nav__icon"></i>
+        <span class="cab-nav__label">{% trans "Clients" %}</span>
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'codex_showcase:conversations' %}"
+         class="cab-nav__item {% if active_section == 'conversations' %}cab-nav__item--active{% endif %}"
+         hx-get="{% url 'codex_showcase:conversations' %}"
+         hx-target="#cab-content"
+         hx-push-url="true">
+        <i class="bi bi-chat-dots cab-nav__icon"></i>
+        <span class="cab-nav__label">{% trans "Conversations" %}</span>
+      </a>
+    </li>
+
+    <li class="cab-nav__section-title mt-3">Settings</li>
+    <li>
+      <a href="{% url 'codex_showcase:site-settings' %}"
+         class="cab-nav__item {% if active_section == 'site_settings' %}cab-nav__item--active{% endif %}"
+         hx-get="{% url 'codex_showcase:site-settings' %}"
+         hx-target="#cab-content"
+         hx-push-url="true">
+        <i class="bi bi-gear cab-nav__icon"></i>
+        <span class="cab-nav__label">{% trans "Site Settings" %}</span>
+      </a>
+    </li>
+
+    {% block sidebar_nav %}{% endblock %}
+  </ul>
+  {% endif %}
+
+</nav>
+
+{# ─── FOOTER ─── #}
+<div class="cab-sidebar__footer">
+  <button class="cab-sidebar__collapse-btn"
+          @click="sidebarCollapsed = !sidebarCollapsed">
+    <i class="bi cab-nav__icon" :class="sidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
+    <span class="cab-nav__label">{% trans "Collapse" %}</span>
+  </button>
+</div>

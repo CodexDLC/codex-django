@@ -1,0 +1,37 @@
+<div class="card border-0 shadow-sm h-100">
+  <div class="card-header bg-white border-0 pt-3 pb-0 d-flex align-items-center justify-content-between">
+    <h6 class="fw-semibold mb-0" style="font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:#64748b;">
+      {% if icon %}<span class="bi {{ icon }} me-2" style="color:var(--cab-primary);"></span>{% endif %}
+      {{ title }}
+    </h6>
+    {% if subtitle %}
+    <span class="text-muted" style="font-size:.75rem;">{{ subtitle }}</span>
+    {% endif %}
+  </div>
+  <div class="card-body d-flex flex-column">
+    {% if kpi_value %}
+    <div class="d-flex align-items-end gap-3 mb-3">
+      <div class="fw-bold" style="font-size:2rem;line-height:1;">{{ kpi_value }}</div>
+      {% if kpi_trend %}
+      <div class="mb-1" style="font-size:.8rem;">
+        {% if kpi_trend|first == "+" %}
+          <span style="color:#16a34a;">↑ {{ kpi_trend }}</span>
+        {% else %}
+          <span style="color:#dc2626;">↓ {{ kpi_trend }}</span>
+        {% endif %}
+        {% if kpi_trend_label %}
+          <span class="text-muted ms-1">{{ kpi_trend_label }}</span>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+    <div style="flex:1;min-height:{{ height|default:'180' }}px;position:relative;">
+      <canvas id="{{ chart_id }}"></canvas>
+    </div>
+  </div>
+</div>
+
+
+
+

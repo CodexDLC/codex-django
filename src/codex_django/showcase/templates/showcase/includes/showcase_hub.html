@@ -1,0 +1,88 @@
+<style>
+    :root {
+        --codex-primary: #6366f1;
+        --codex-dark: #0f172a;
+    }
+    .showcase-header {
+        background: linear-gradient(135deg, var(--codex-dark) 0%, #1e293b 100%);
+        color: white;
+        padding: 4rem 0;
+        margin-bottom: 3rem;
+        border-radius: 12px;
+    }
+    .demo-card {
+        border: none;
+        transition: transform 0.2s;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        background: white;
+    }
+    .demo-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+    .btn-codex {
+        background-color: var(--codex-primary);
+        color: white;
+        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-codex:hover {
+        background-color: #4f46e5;
+        color: white;
+    }
+</style>
+
+<header class="showcase-header text-center shadow-sm">
+    <div class="container">
+        <h1 class="display-4 fw-bold">Codex Showcase</h1>
+        <p class="lead opacity-75">Explore the reference implementation of our cabinet system</p>
+        <div class="badge bg-danger">DEMO STATE</div>
+    </div>
+</header>
+
+<div class="row g-4 justify-content-center">
+    <!-- Staff Cabinet -->
+    <div class="col-md-5">
+        <div class="card demo-card h-100">
+            <div class="card-body p-4 text-center">
+                <div class="display-5 mb-3 text-primary">
+                    <i class="bi bi-shield-lock"></i>
+                </div>
+                <h3 class="card-title h4 fw-bold">Staff Cabinet</h3>
+                <p class="card-text text-muted mb-4">
+                    Full-featured administration panel with stats, user management, and site settings.
+                </p>
+                <a href="{% url 'codex_showcase:dashboard' %}" class="btn btn-codex w-100">
+                    Launch Staff Demo
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Cabinet -->
+    <div class="col-md-5">
+        <div class="card demo-card h-100">
+            <div class="card-body p-4 text-center">
+                <div class="display-5 mb-3 text-success">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <h3 class="card-title h4 fw-bold">Client Cabinet</h3>
+                <p class="card-text text-muted mb-4">
+                    User-friendly portal for customers with profile settings, orders, and notifications.
+                </p>
+                <a href="{% url 'codex_showcase:my_appointments' %}" class="btn btn-outline-primary w-100 border-2">
+                    Launch Client Demo
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-5 pt-5 text-center text-muted border-top">
+    <p>&copy; 2026 Codex Django Library. Created for developers.</p>
+</footer>

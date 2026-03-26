@@ -1,0 +1,30 @@
+{# [LIBRARY] codex_django/cabinet/templates/cabinet/base_auth.html #}
+{# Used for login, register, magic-link — without sidebar and topbar #}
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}{% endblock %} — {{ SITE_NAME|default:'App' }}</title>
+
+  {% include "showcase/cabinet/includes/_head.html" %}
+</head>
+
+<body id="cab-shell" class="cab-shell--auth">
+
+  <div id="cab-auth">
+    {% block cabinet_content %}{% endblock %}
+  </div>
+
+  <script src="{% static 'showcase/cabinet/js/vendor/bootstrap.bundle.min.js' %}"></script>
+
+  {% block extra_js %}{% endblock %}
+
+</body>
+</html>
+
+
+
+

@@ -1,0 +1,13 @@
+<li>
+  <a href="{% if disabled %}#{% else %}{{ url }}{% endif %}"
+     class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2{% if active %} cab-nav__item--active{% endif %}"
+     style="color:var(--cab-sidebar-text);transition:background .15s;{% if disabled %}opacity:.45;cursor:not-allowed;pointer-events:none;{% endif %}">
+    <span class="bi {{ icon }} fs-5 flex-shrink-0"></span>
+    <span class="cab-nav__label ms-3" style="white-space:nowrap;">{{ label }}</span>
+    {% if badge %}<span class="badge rounded-pill ms-auto" style="font-size:.65rem;background:rgba(255,255,255,.2);">{{ badge }}</span>{% endif %}
+  </a>
+</li>
+
+
+
+

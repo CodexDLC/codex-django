@@ -1,0 +1,237 @@
+{% extends "showcase/cabinet/booking/base_booking.html" %}
+
+{% block title %}Booking — Schedule{% endblock %}
+
+{% block extra_css %}
+<style>
+  .cab-overlay { display: flex; align-items: center; justify-content: center; }
+  /* Calendar sizing — slot-h fills viewport, min 44px per slot */
+  :root {
+    --cal-topbar:  56px;
+    --cal-datebar: 57px;
+    --cal-hdr:     52px;
+    --cal-body-h:  calc(100vh - var(--cal-topbar) - var(--cal-datebar) - var(--cal-hdr));
+    --slot-h:      max(44px, calc(var(--cal-body-h) / {{ total_slots }}));
+    --time-col:    40px;
+  }
+  .booking-slot-bg:hover { background: rgba(99,102,241,.05) !important; }
+</style>
+{% endblock %}
+
+{% block cabinet_content %}
+<div x-data="bookingCalendar()" style="margin:-24px;">
+
+  {# ── Date navigation bar ── #}
+  <div class="d-flex align-items-center gap-2 px-4 py-3 border-bottom bg-white" style="height:var(--cal-datebar);">
+    <button class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center" style="width: 34px; height: 34px; padding: 0; flex-shrink: 0;">
+      <span class="bi bi-chevron-left" style="font-size: .8rem;"></span>
+    </button>
+
+    <div class="position-relative">
+      <button class="btn btn-outline-secondary fw-semibold d-flex align-items-center gap-2" @click="showDatePicker = !showDatePicker" style="font-size: .875rem; min-width: 180px; height: 34px;">
+        <span class="bi bi-calendar3 opacity-50" style="font-size: .8rem;"></span>
+        {{ current_date }}
+      </button>
+
+      {# Mini date picker dropdown #}
+      <div x-cloak x-show="showDatePicker" x-transition @click.outside="showDatePicker = false" class="position-absolute bg-white border rounded-3 shadow p-3 mt-1" style="z-index: 1050; width: 270px; left: 0;">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <button class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; padding: 0;"><span class="bi bi-chevron-left" style="font-size: .65rem;"></span></button>
+          <span class="fw-semibold" style="font-size: .82rem;">March 2026</span>
+          <button class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; padding: 0;"><span class="bi bi-chevron-right" style="font-size: .65rem;"></span></button>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; gap: 1px; margin-bottom: 4px;">
+          <span style="font-size: .67rem; color: #94a3b8; padding: 3px 0;">Mo</span><span style="font-size: .67rem; color: #94a3b8; padding: 3px 0;">Tu</span><span style="font-size: .67rem; color: #94a3b8; padding: 3px 0;">We</span><span style="font-size: .67rem; color: #94a3b8; padding: 3px 0;">Th</span><span style="font-size: .67rem; color: #94a3b8; padding: 3px 0;">Fr</span><span style="font-size: .67rem; color: #94a3b8; padding: 3px 0;">Sa</span><span style="font-size: .67rem; color: #94a3b8; padding: 3px 0;">Su</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; gap: 2px;">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">1</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">2</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">3</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">4</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">5</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">6</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">7</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">8</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">9</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">10</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">11</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">12</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">13</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">14</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">15</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">16</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">17</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">18</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">19</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">20</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">21</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">22</button>
+          <button class="btn btn-sm btn-primary" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">23</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">24</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">25</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">26</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">27</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">28</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">29</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">30</button>
+          <button class="btn btn-sm btn-link text-dark" style="padding: 3px; font-size: .78rem; border-radius: 50%; width: 30px; height: 30px; line-height: 1;" @click="showDatePicker=false">31</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center" style="width: 34px; height: 34px; padding: 0; flex-shrink: 0;">
+      <span class="bi bi-chevron-right" style="font-size: .8rem;"></span>
+    </button>
+    <button class="btn btn-sm btn-outline-secondary" style="height: 34px; font-size: .82rem;">Today</button>
+
+    <div class="ms-auto d-flex align-items-center gap-3">
+      <span class="text-muted" style="font-size: .8rem;">{{ staff_list|length }} specialists · {{ slot_height }}px / 30 min</span>
+      <a href="#" class="btn btn-primary btn-sm d-flex align-items-center gap-1" style="height: 34px; font-size: .82rem;">
+        <span class="bi bi-plus-lg"></span> New booking
+      </a>
+    </div>
+  </div>
+
+  {# ── Calendar grid ── #}
+  <div style="overflow-x:auto;">
+    <div style="display:flex; min-width:calc({{ min_col_px }}px * {{ staff_list|length }} + 56px);">
+
+      {# ── Time label column ── #}
+      <div style="width:var(--time-col);flex-shrink:0;position:sticky;left:0;background:#fff;z-index:20;border-right:1px solid #e2e8f0;">
+        <div style="height:var(--cal-hdr);border-bottom:2px solid #e2e8f0;"></div>
+        <div style="position:relative;height:calc(var(--slot-h) * {{ total_slots }});">
+          {% for slot in time_slots %}<div style="position:absolute;left:0;right:0;top:calc(var(--slot-h) * {{ slot.slot_index }});height:var(--slot-h);display:flex;align-items:flex-start;">{% if slot.is_hour %}<span style="font-size:.72rem;font-weight:700;color:#475569;line-height:1;padding-top:3px;padding-left:4px;white-space:nowrap;">{{ slot.label }}</span>{% else %}<span style="font-size:.6rem;color:#c8d0da;line-height:1;margin-left:auto;padding-top:3px;padding-right:3px;white-space:nowrap;">30</span>{% endif %}</div>{% endfor %}
+        </div>
+      </div>
+
+      {# ── Staff columns ── #}
+      {% for staff in staff_list %}
+      <div style="flex:1;min-width:{{ min_col_px }}px;border-left:2px solid #e2e8f0;">
+
+        {# Staff header #}
+        <div class="d-flex align-items-center gap-2 px-3" style="height:var(--cal-hdr);border-bottom:2px solid #e2e8f0;background:#f8fafc;">
+          <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0" style="width:36px;height:36px;font-size:.75rem;background:{{ staff.color }};">{{ staff.initials }}</div>
+          <div>
+            <div class="fw-semibold" style="font-size:.84rem;line-height:1.2;">{{ staff.name }}</div>
+            <div class="text-muted" style="font-size:.7rem;">{{ staff.appointments|length }} appts.</div>
+          </div>
+        </div>
+
+        {# Slots + cards — calc(var(--slot-h) * N) ── #}
+        <div style="position:relative;height:var(--cal-body-h);">
+          {% for slot in time_slots %}<div class="booking-slot-bg" data-staff-name="{{ staff.name }}" data-time="{% if slot.label %}{{ slot.label }}:00{% else %}{{ slot.sub }}{% endif %}" style="position:absolute;left:0;right:0;top:calc(var(--slot-h) * {{ slot.slot_index }});height:var(--slot-h);border-bottom:{% if slot.is_hour %}2px solid #e2e8f0{% else %}1px dashed #f0f0f0{% endif %};cursor:crosshair;transition:background .1s;" @click="openNewBooking($el.dataset.staffName,$el.dataset.time)" @mouseenter="$el.style.background='rgba(99,102,241,.04)'" @mouseleave="$el.style.background=''"></div>{% endfor %}
+          {% for appt in staff.appointments %}<div data-id="{{ appt.id }}" data-client="{{ appt.client }}" data-service="{{ appt.service }}" data-phone="{{ appt.phone }}" data-start="{{ appt.start_label }}" data-end="{{ appt.end_label }}" data-price="{{ appt.price }}" data-status="{{ appt.status }}" data-status-label="{{ appt.status_label }}" data-status-color="{{ appt.status_color }}" data-status-bg="{{ appt.status_bg }}" data-color="{{ appt.booking_color }}" data-initials="{{ appt.initials }}" style="position:absolute;left:4px;right:4px;top:calc(var(--slot-h) * {{ appt.top_slots }});height:calc(var(--slot-h) * {{ appt.dur_slots }});border-radius:6px;border-left:4px {% if appt.status == 'pending' %}dashed{% else %}solid{% endif %} {{ appt.booking_color }};background:{{ appt.booking_color }}{% if appt.status == 'pending' %}12{% else %}1c{% endif %};cursor:pointer;z-index:10;overflow:hidden;transition:box-shadow .15s;" @click.stop="openCard({id:$el.dataset.id,client:$el.dataset.client,service:$el.dataset.service,phone:$el.dataset.phone,start:$el.dataset.start,end:$el.dataset.end,price:$el.dataset.price,status:$el.dataset.status,statusLabel:$el.dataset.statusLabel,statusColor:$el.dataset.statusColor,statusBg:$el.dataset.statusBg,color:$el.dataset.color,initials:$el.dataset.initials})" @mouseenter="$el.style.boxShadow='0 3px 10px rgba(0,0,0,.1)'" @mouseleave="$el.style.boxShadow=''">
+            {% if appt.card_size == 'mini' %}<div style="display:flex;align-items:center;justify-content:space-between;height:100%;padding:0 6px;gap:4px;"><span style="font-size:.7rem;font-weight:600;color:{{ appt.booking_color }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ appt.client }}</span><span style="font-size:.58rem;font-weight:600;padding:1px 4px;border-radius:3px;background:{{ appt.status_bg }};color:{{ appt.status_color }};white-space:nowrap;flex-shrink:0;">{{ appt.status_short }}</span></div>
+            {% elif appt.card_size == 'mid' %}<div style="padding:4px 6px;"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:3px;"><span style="font-size:.72rem;font-weight:600;color:{{ appt.booking_color }};line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ appt.client }}</span><span style="font-size:.58rem;font-weight:600;padding:1px 4px;border-radius:3px;background:{{ appt.status_bg }};color:{{ appt.status_color }};white-space:nowrap;flex-shrink:0;line-height:1.6;">{{ appt.status_short }}</span></div><div style="font-size:.67rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;">{{ appt.service }}</div></div>
+            {% else %}<div style="padding:5px 6px;"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:3px;margin-bottom:2px;"><span style="font-size:.73rem;font-weight:600;color:{{ appt.booking_color }};line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ appt.client }}</span><span style="font-size:.58rem;font-weight:600;padding:1px 4px;border-radius:3px;background:{{ appt.status_bg }};color:{{ appt.status_color }};white-space:nowrap;flex-shrink:0;line-height:1.6;">{{ appt.status_short }}</span></div><div style="font-size:.68rem;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;margin-bottom:3px;">{{ appt.service }}</div><div style="text-align:right;"><span style="font-size:.65rem;color:{{ appt.booking_color }};font-weight:600;">{{ appt.price }}</span></div></div>{% endif %}
+          </div>{% endfor %}
+        </div>
+
+      </div>
+      {% endfor %}
+
+    </div>
+  </div>
+
+  {# ── Card detail modal ── #}
+  <div x-cloak x-show="showCardModal" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="position-fixed cab-overlay" style="inset:0; top:0; left:0; right:0; bottom:0; background:rgba(15,23,42,.4); z-index:1050;" @click.self="closeCard()">
+
+    <div x-show="showCardModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="bg-white rounded-4 shadow-lg" style="width: 380px; max-width: 92vw; overflow: hidden;" @click.stop>
+
+      {# Header: client avatar + name + close #}
+      <div class="d-flex align-items-center gap-3 p-4 pb-3">
+        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0" :style="`width:46px;height:46px;font-size:.9rem;background:${selectedAppt?.color}`" x-text="selectedAppt?.initials"></div>
+        <div class="flex-grow-1 min-w-0">
+          <div class="fw-semibold" style="font-size: .95rem;" x-text="selectedAppt?.client"></div>
+          <div class="text-muted" style="font-size: .78rem;" x-text="selectedAppt?.phone"></div>
+        </div>
+        <button class="btn btn-sm btn-light rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px; padding: 0;" @click="closeCard()">
+          <span class="bi bi-x" style="font-size: 1.1rem;"></span>
+        </button>
+      </div>
+
+      {# Service info block #}
+      <div class="mx-4 mb-3 rounded-3 p-3" :style="`background:${selectedAppt?.statusBg}`">
+        <div class="fw-semibold" style="font-size: .875rem;" x-text="selectedAppt?.service"></div>
+        <div class="d-flex align-items-center gap-3 mt-1">
+          <span class="text-muted" style="font-size: .78rem;"><span class="bi bi-clock me-1"></span><span x-text="selectedAppt?.start"></span> – <span x-text="selectedAppt?.end"></span></span>
+          <span class="fw-semibold" style="font-size: .82rem;" :style="`color:${selectedAppt?.color}`" x-text="selectedAppt?.price"></span>
+        </div>
+        <div class="mt-2">
+          <span class="badge rounded-pill px-2 py-1" :style="`background:${selectedAppt?.statusColor}22;color:${selectedAppt?.statusColor};font-size:.7rem;`" x-text="selectedAppt?.statusLabel"></span>
+        </div>
+      </div>
+
+      {# Action buttons #}
+      <div class="px-4 pb-4 d-grid gap-2">
+        <template x-if="selectedAppt?.status === 'pending'">
+          <div class="d-flex gap-2">
+            <button class="btn btn-success flex-grow-1" style="font-size: .84rem;"><span class="bi bi-check-lg me-1"></span>Confirm</button>
+            <button class="btn btn-outline-danger flex-grow-1" style="font-size: .84rem;"><span class="bi bi-x-lg me-1"></span>Decline</button>
+          </div>
+        </template>
+        <template x-if="selectedAppt?.status === 'confirmed'">
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary flex-grow-1" style="font-size: .84rem;"><span class="bi bi-check2-circle me-1"></span>Complete</button>
+            <button class="btn btn-outline-secondary flex-grow-1" style="font-size: .84rem;"><span class="bi bi-arrow-clockwise me-1"></span>Reschedule</button>
+          </div>
+        </template>
+        <div class="d-flex gap-2">
+          <button class="btn btn-light flex-grow-1 btn-sm" style="font-size: .78rem;"><span class="bi bi-sticky me-1"></span>Note</button>
+          <button class="btn btn-light flex-grow-1 btn-sm" style="font-size: .78rem;"><span class="bi bi-person me-1"></span>Client</button>
+          <button class="btn btn-light flex-grow-1 btn-sm text-danger" style="font-size: .78rem;"><span class="bi bi-trash me-1"></span>Delete</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  {# ── New booking hint modal (placeholder) ── #}
+  <div x-cloak x-show="showNewBooking" x-transition @click.self="showNewBooking=false" class="position-fixed cab-overlay" style="inset:0; top:0; left:0; right:0; bottom:0; background:rgba(15,23,42,.4); z-index:1050;">
+    <div class="bg-white rounded-4 shadow-lg p-4 text-center" style="width: 340px; max-width: 92vw;" @click.stop>
+      <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 52px; height: 52px;">
+        <span class="bi bi-calendar-plus text-primary fs-4"></span>
+      </div>
+      <div class="fw-semibold mb-1" x-text="`New booking: ${newBookingStaff}`"></div>
+      <div class="text-muted mb-3" style="font-size: .84rem;" x-text="`Starts at ${newBookingTime}`"></div>
+      <p class="text-muted mb-4" style="font-size: .82rem;">Here the booking constructor will open with the selected specialist and time.</p>
+      <button class="btn btn-primary w-100" @click="showNewBooking=false">Go to create</button>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function bookingCalendar() {
+  return {
+    showDatePicker: false,
+    showCardModal:  false,
+    showNewBooking: false,
+    selectedAppt:   null,
+    newBookingStaff: '',
+    newBookingTime:  '',
+
+    openCard(data) {
+      this.selectedAppt  = data;
+      this.showCardModal = true;
+    },
+    closeCard() {
+      this.showCardModal = false;
+      this.selectedAppt  = null;
+    },
+    openNewBooking(staffName, timeSlot) {
+      this.newBookingStaff = staffName;
+      this.newBookingTime  = timeSlot;
+      this.showNewBooking  = true;
+    }
+  }
+}
+</script>
+{% endblock %}
+
+
+
+

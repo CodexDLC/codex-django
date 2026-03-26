@@ -1,0 +1,27 @@
+<div class="card border-0 shadow-sm h-100">
+  <div class="card-body">
+    <div class="d-flex align-items-start justify-content-between mb-2">
+      <div class="text-muted" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;">{{ title }}</div>
+      {% if icon %}
+      <span class="bi {{ icon }}" style="color:var(--cab-primary);font-size:1.1rem;"></span>
+      {% endif %}
+    </div>
+    <div class="fw-bold mb-1" style="font-size:1.9rem;line-height:1.1;">{{ value }}</div>
+    {% if trend %}
+    <div class="d-flex align-items-center gap-1 mt-1" style="font-size:.8rem;">
+      {% if trend|first == "+" %}
+        <span style="color:#16a34a;">↑ {{ trend }}</span>
+      {% else %}
+        <span style="color:#dc2626;">↓ {{ trend }}</span>
+      {% endif %}
+      {% if trend_label %}
+        <span class="text-muted">{{ trend_label }}</span>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+
+
+

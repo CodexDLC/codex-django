@@ -1,0 +1,39 @@
+{% extends "showcase/cabinet/base_cabinet.html" %}
+
+{% block title %}Catalog{% endblock %}
+
+{% block sidebar_title %}
+<span class="bi bi-grid fs-5" style="color: var(--cab-primary);"></span>
+<span class="cab-sidebar__title ms-2 fw-semibold text-white" style="font-size: 1rem; white-space: nowrap;">Catalog</span>
+{% endblock %}
+
+{# Categories from DB -> sidebar tabs. New category = new item automatically #}
+{% block sidebar_nav %}
+  {% for cat in categories %}
+  <li>
+    <a href="{% url 'codex_showcase:catalog_category' cat.pk %}"
+       class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2 {% if cat.pk == active_category.pk %}cab-nav__item--active{% endif %}"
+       hx-get="{% url 'codex_showcase:catalog_category' cat.pk %}" hx-target="#cab-content" hx-push-url="true"
+       style="color: var(--cab-sidebar-text); transition: background 0.15s;">
+      <span class="bi bi-tag fs-5 flex-shrink-0"></span>
+      <span class="cab-nav__label ms-3" style="white-space: nowrap;">{{ cat.name }}</span>
+    </a>
+  </li>
+  {% endfor %}
+{% endblock %}
+
+{% block cabinet_content %}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <h6 class="fw-semibold mb-0">{{ active_category.name }}</h6>
+  <button class="btn btn-sm btn-primary">+ Add</button>
+</div>
+
+{# Products/Services of active category via universal list widget #}
+{% include "showcase/cabinet/widgets/list.html" with title=active_category.name items=items icon="bi-tag" %}
+
+{% endblock %}
+
+
+
+

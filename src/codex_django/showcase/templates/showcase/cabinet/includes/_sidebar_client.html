@@ -1,0 +1,59 @@
+{# [LIBRARY] codex_django/cabinet/templates/cabinet/includes/_sidebar_client.html #}
+{# Sidebar for client mode — User Portal only. #}
+{% load static i18n %}
+
+{# ─── LOGO ─── #}
+<div class="cab-sidebar__logo">
+  <span class="cab-sidebar__logo-icon bi bi-grid-3x3-gap-fill"></span>
+  <span class="cab-sidebar__logo-name">{{ SITE_NAME|default:'App' }}</span>
+</div>
+
+{# ─── NAV ─── #}
+<nav class="cab-sidebar__nav">
+  <ul class="cab-nav">
+    <li class="cab-nav__section-title">My Account</li>
+    <li>
+      <a href="{% url 'codex_showcase:profile' %}"
+         class="cab-nav__item {% if active_section == 'profile' %}cab-nav__item--active{% endif %}"
+         hx-get="{% url 'codex_showcase:profile' %}"
+         hx-target="#cab-content"
+         hx-push-url="true">
+        <i class="bi bi-person cab-nav__icon"></i>
+        <span class="cab-nav__label">{% trans "Profile" %}</span>
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'codex_showcase:my_appointments' %}"
+         class="cab-nav__item {% if active_section == 'my_appointments' %}cab-nav__item--active{% endif %}"
+         hx-get="{% url 'codex_showcase:my_appointments' %}"
+         hx-target="#cab-content"
+         hx-push-url="true">
+        <i class="bi bi-calendar-check cab-nav__icon"></i>
+        <span class="cab-nav__label">{% trans "My appointments" %}</span>
+      </a>
+    </li>
+
+    <li class="cab-nav__section-title mt-3">Support</li>
+    <li>
+      <a href="{% url 'codex_showcase:conversations' %}"
+         class="cab-nav__item {% if active_section == 'conversations' %}cab-nav__item--active{% endif %}"
+         hx-get="{% url 'codex_showcase:conversations' %}"
+         hx-target="#cab-content"
+         hx-push-url="true">
+        <i class="bi bi-chat-dots cab-nav__icon"></i>
+        <span class="cab-nav__label">{% trans "Messages" %}</span>
+      </a>
+    </li>
+
+    {% block sidebar_nav %}{% endblock %}
+  </ul>
+</nav>
+
+{# ─── FOOTER ─── #}
+<div class="cab-sidebar__footer">
+  <button class="cab-sidebar__collapse-btn"
+          @click="sidebarCollapsed = !sidebarCollapsed">
+    <i class="bi cab-nav__icon" :class="sidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
+    <span class="cab-nav__label">{% trans "Collapse" %}</span>
+  </button>
+</div>
