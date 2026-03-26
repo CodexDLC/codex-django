@@ -133,7 +133,7 @@ class TestScaffoldRealBlueprints:
     def test_scaffold_notifications_feature(self, tmp_path: Path):
         engine = CLIEngine()
         engine.scaffold(
-            "notifications/feature",
+            "features/notifications/feature",
             str(tmp_path / "system"),
             {"app_name": "system"},
         )

@@ -21,7 +21,7 @@ class TestHandleInitIntegration:
     def test_creates_project_structure(self, tmp_path: Path):
         handle_init("myproject", str(tmp_path))
 
-        project = tmp_path / "src" / "myproject"
+        project = tmp_path / "myproject" / "src" / "myproject"
         assert project.is_dir()
         assert (project / "manage.py").exists()
         assert (project / "core").is_dir()
@@ -31,7 +31,7 @@ class TestHandleInitIntegration:
     def test_creates_core_settings(self, tmp_path: Path):
         handle_init("myproject", str(tmp_path))
 
-        settings_dir = tmp_path / "src" / "myproject" / "core" / "settings"
+        settings_dir = tmp_path / "myproject" / "src" / "myproject" / "core" / "settings"
         assert (settings_dir / "base.py").exists()
         assert (settings_dir / "dev.py").exists()
         assert (settings_dir / "prod.py").exists()
@@ -39,25 +39,27 @@ class TestHandleInitIntegration:
     def test_renders_project_name_in_system_apps(self, tmp_path: Path):
         handle_init("blog_platform", str(tmp_path))
 
-        system_apps = tmp_path / "src" / "blog_platform" / "system" / "apps.py"
+        system_apps = tmp_path / "blog_platform" / "src" / "blog_platform" / "system" / "apps.py"
         assert system_apps.exists()
         content = system_apps.read_text()
         assert "blog_platform" in content
 
     def test_skips_existing_project(self, tmp_path: Path):
-        target = tmp_path / "src" / "myproject"
+        target = tmp_path / "myproject" / "src" / "myproject"
         target.mkdir(parents=True)
+        (target / "manage.py").write_text("dummy")
+
         sentinel = target / "sentinel.txt"
         sentinel.write_text("original")
 
         handle_init("myproject", str(tmp_path))
 
         assert sentinel.read_text() == "original"
-        assert not (target / "manage.py").exists()
+        assert (target / "manage.py").read_text() == "dummy"
 
     def test_idempotent_second_call_skipped(self, tmp_path: Path):
         handle_init("myproject", str(tmp_path))
-        manage_py = tmp_path / "src" / "myproject" / "manage.py"
+        manage_py = tmp_path / "myproject" / "src" / "myproject" / "manage.py"
         original_content = manage_py.read_text()
 
         handle_init("myproject", str(tmp_path))
