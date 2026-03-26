@@ -67,18 +67,10 @@ class BookingSettingsMixin(models.Model):
     )
 
     # Default working hours (fallback when master has no individual schedule)
-    work_start_weekdays = models.TimeField(
-        _("Weekday Start"), null=True, blank=True
-    )
-    work_end_weekdays = models.TimeField(
-        _("Weekday End"), null=True, blank=True
-    )
-    work_start_saturday = models.TimeField(
-        _("Saturday Start"), null=True, blank=True
-    )
-    work_end_saturday = models.TimeField(
-        _("Saturday End"), null=True, blank=True
-    )
+    work_start_weekdays = models.TimeField(_("Weekday Start"), null=True, blank=True)
+    work_end_weekdays = models.TimeField(_("Weekday End"), null=True, blank=True)
+    work_start_saturday = models.TimeField(_("Saturday Start"), null=True, blank=True)
+    work_end_saturday = models.TimeField(_("Saturday End"), null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -109,9 +101,7 @@ class BookingSettingsSyncMixin(LifecycleModelMixin, models.Model):
     def sync_booking_settings_to_redis(self) -> None:
         from django.conf import settings as django_settings
 
-        if django_settings.DEBUG and not getattr(
-            django_settings, "CODEX_REDIS_ENABLED", False
-        ):
+        if django_settings.DEBUG and not getattr(django_settings, "CODEX_REDIS_ENABLED", False):
             return
 
         try:
@@ -128,9 +118,7 @@ class BookingSettingsSyncMixin(LifecycleModelMixin, models.Model):
 
                     async_to_sync(manager.string.set)(key, str(data))
         except Exception:
-            log.warning(
-                "Failed to sync booking settings to Redis", exc_info=True
-            )
+            log.warning("Failed to sync booking settings to Redis", exc_info=True)
 
 
 class AbstractBookingSettings(

@@ -16,12 +16,15 @@ def discover_locale_paths(base_dir: Path, include_features: bool = True) -> list
     # 1. Check centralized locale directory (for modular domains)
     central_locale = base_dir / "locale"
     if central_locale.exists():
-        for item in central_locale.iterdir():
-            if item.is_dir() and (item / "LC_MESSAGES").exists():
-                paths.append(str(item))
-            elif item.name == "common" and (item / "LC_MESSAGES").exists():
-                # Explicitly add common if it exists and has messages
-                paths.append(str(item))
+        # A modular domain is a subdirectory that contains <lang>/LC_MESSAGES
+        # e.g., locale/cabinet/en/LC_MESSAGES/django.po
+        for domain_dir in central_locale.iterdir():
+            if domain_dir.is_dir():
+                # Check if it has any language subdirectories
+                for lang_dir in domain_dir.iterdir():
+                    if lang_dir.is_dir() and (lang_dir / "LC_MESSAGES").exists():
+                        paths.append(str(domain_dir))
+                        break
 
     # 2. Backward compatibility / alternative structure:
     # Check top-level directories and features for their own locale/ folders

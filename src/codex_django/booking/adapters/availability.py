@@ -18,11 +18,6 @@ from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 from codex_services.booking._shared.calculator import SlotCalculator
-from codex_services.booking._shared.interfaces import (
-    AvailabilityProvider,
-    BusySlotsProvider,
-    ScheduleProvider,
-)
 from codex_services.booking.slot_master.dto import (
     BookingEngineRequest,
     EngineResult,
@@ -86,9 +81,7 @@ class DjangoAvailabilityAdapter:
                 getattr(appointment_model, "STATUS_CONFIRMED", "confirmed"),
             ]
             if hasattr(appointment_model, "STATUS_RESCHEDULE_PROPOSED"):
-                self.appointment_status_filter.append(
-                    appointment_model.STATUS_RESCHEDULE_PROPOSED
-                )
+                self.appointment_status_filter.append(appointment_model.STATUS_RESCHEDULE_PROPOSED)
 
         self._booking_settings: Any = None
         self._site_settings: Any = None
@@ -101,32 +94,39 @@ class DjangoAvailabilityAdapter:
         self,
         service_ids: list[int],
         target_date: date,
-        mode: BookingMode = BookingMode.SINGLE_DAY,
         locked_master_id: int | None = None,
-        master_selections: dict[str, str] | None = None,
+        master_selections: dict[str, str] | dict[int, int | None] | None = None,
+        mode: BookingMode = BookingMode.SINGLE_DAY,
+        overlap_allowed: bool = False,
+        parallel_groups: dict[int, str] | None = None,
     ) -> BookingEngineRequest:
         """Build a ``BookingEngineRequest`` from DB service/master data."""
-        services = self.service_model.objects.filter(
-            id__in=service_ids
-        ).select_related("category")
+        services = self.service_model.objects.filter(id__in=service_ids).select_related("category")
         service_map = {s.id: s for s in services}
+        normalized_master_selections = self._normalize_master_selections(service_ids, master_selections)
 
         weekday = target_date.weekday()
         service_requests: list[ServiceRequest] = []
 
-        for idx, svc_id in enumerate(service_ids):
+        for svc_id in service_ids:
             service = service_map.get(svc_id)
             if not service:
                 continue
 
             possible_ids = self._resolve_master_ids(
-                service, weekday, locked_master_id, master_selections, idx
+                service=service,
+                weekday=weekday,
+                locked_master_id=locked_master_id,
+                master_selections=normalized_master_selections,
+                service_id=svc_id,
             )
             if not possible_ids:
                 continue
 
             gap = getattr(service, "min_gap_after_minutes", 0) or 0
-            parallel_group = getattr(service, "parallel_group", None) or None
+            parallel_group = (parallel_groups or {}).get(svc_id)
+            if parallel_group is None:
+                parallel_group = getattr(service, "parallel_group", None) or None
 
             service_requests.append(
                 ServiceRequest(
@@ -142,6 +142,7 @@ class DjangoAvailabilityAdapter:
             service_requests=service_requests,
             booking_date=target_date,
             mode=mode,
+            overlap_allowed=overlap_allowed,
         )
 
     # ------------------------------------------------------------------
@@ -164,15 +165,13 @@ class DjangoAvailabilityAdapter:
 
         # Days off — exclude these masters entirely
         day_off_ids = set(
-            self.day_off_model.objects.filter(
-                master_id__in=master_ids, date=target_date
-            ).values_list("master_id", flat=True)
+            self.day_off_model.objects.filter(master_id__in=master_ids, date=target_date).values_list(
+                "master_id", flat=True
+            )
         )
 
         # Busy intervals (from appointments)
-        busy_by_master = self._get_busy_intervals(
-            master_ids, target_date, exclude_appointment_ids
-        )
+        busy_by_master = self._get_busy_intervals(master_ids, target_date, exclude_appointment_ids)
 
         masters = self.master_model.objects.filter(pk__in=master_ids)
         for master in masters:
@@ -208,9 +207,7 @@ class DjangoAvailabilityAdapter:
     # Schedule (implements ScheduleProvider pattern)
     # ------------------------------------------------------------------
 
-    def get_working_hours(
-        self, master: Any, target_date: date
-    ) -> tuple[datetime, datetime] | None:
+    def get_working_hours(self, master: Any, target_date: date) -> tuple[datetime, datetime] | None:
         """Return UTC working hours for a master on a specific date.
 
         Reads from ``working_day_model`` first; falls back to
@@ -220,12 +217,7 @@ class DjangoAvailabilityAdapter:
         tz = self._get_tz(master)
 
         # 1. Per-day schedule from relational model
-        working_day = (
-            self.working_day_model.objects.filter(
-                master_id=master.pk, weekday=weekday
-            )
-            .first()
-        )
+        working_day = self.working_day_model.objects.filter(master_id=master.pk, weekday=weekday).first()
 
         if working_day:
             start_t = working_day.start_time
@@ -252,19 +244,12 @@ class DjangoAvailabilityAdapter:
         work_end_dt = datetime.combine(target_date, end_t, tzinfo=tz)
         return (work_start_dt.astimezone(UTC), work_end_dt.astimezone(UTC))
 
-    def get_break_interval(
-        self, master: Any, target_date: date
-    ) -> tuple[datetime, datetime] | None:
+    def get_break_interval(self, master: Any, target_date: date) -> tuple[datetime, datetime] | None:
         """Return UTC break interval for a master on a date."""
         weekday = target_date.weekday()
 
         # Per-day schedule first
-        working_day = (
-            self.working_day_model.objects.filter(
-                master_id=master.pk, weekday=weekday
-            )
-            .first()
-        )
+        working_day = self.working_day_model.objects.filter(master_id=master.pk, weekday=weekday).first()
 
         if working_day:
             break_start = working_day.break_start
@@ -294,11 +279,7 @@ class DjangoAvailabilityAdapter:
         if not master_ids:
             return
         sorted_ids = sorted(master_ids)
-        list(
-            self.master_model.objects.select_for_update(of=("self",))
-            .filter(pk__in=sorted_ids)
-            .only("pk")
-        )
+        list(self.master_model.objects.select_for_update(of=("self",)).filter(pk__in=sorted_ids).only("pk"))
 
     # ------------------------------------------------------------------
     # Busy intervals (implements BusySlotsProvider pattern)
@@ -311,9 +292,7 @@ class DjangoAvailabilityAdapter:
         exclude_appointment_ids: list[int] | None = None,
     ) -> dict[int, list[tuple[datetime, datetime]]]:
         """Fetch busy intervals from cache or DB."""
-        busy_by_master: dict[int, list[tuple[datetime, datetime]]] = {
-            mid: [] for mid in master_ids
-        }
+        busy_by_master: dict[int, list[tuple[datetime, datetime]]] = {mid: [] for mid in master_ids}
 
         appt_filter = {
             "master_id__in": master_ids,
@@ -322,15 +301,11 @@ class DjangoAvailabilityAdapter:
         }
         appointments_qs = self.appointment_model.objects.filter(**appt_filter)
         if exclude_appointment_ids:
-            appointments_qs = appointments_qs.exclude(
-                id__in=exclude_appointment_ids
-            )
+            appointments_qs = appointments_qs.exclude(id__in=exclude_appointment_ids)
         appointments = appointments_qs.order_by("datetime_start")
 
         for app in appointments:
-            s = app.datetime_start.astimezone(UTC).replace(
-                second=0, microsecond=0
-            )
+            s = app.datetime_start.astimezone(UTC).replace(second=0, microsecond=0)
             e = s + timedelta(minutes=app.duration_minutes)
             busy_by_master[app.master_id].append((s, e))
 
@@ -350,16 +325,16 @@ class DjangoAvailabilityAdapter:
         service: Any,
         weekday: int,
         locked_master_id: int | None,
-        master_selections: dict[str, str] | None,
-        idx: int,
+        master_selections: dict[int, int | None] | None,
+        service_id: int,
     ) -> list[str]:
         """Determine which master IDs can perform a service."""
         if locked_master_id:
             return [str(locked_master_id)]
 
-        if master_selections and str(idx) in master_selections:
-            m_id = master_selections[str(idx)]
-            if m_id != "any":
+        if master_selections and service_id in master_selections:
+            m_id = master_selections[service_id]
+            if m_id is not None:
                 return [str(m_id)]
 
         # All active masters for this service's category working on this weekday
@@ -377,6 +352,46 @@ class DjangoAvailabilityAdapter:
         )
 
         return [str(m.pk) for m in masters if m.pk in masters_with_schedule]
+
+    def _normalize_master_selections(
+        self,
+        service_ids: list[int],
+        master_selections: dict[str, str] | dict[int, int | None] | None,
+    ) -> dict[int, int | None]:
+        """Normalize legacy and new master selection formats.
+
+        Supported input formats:
+        - Legacy positional: {"0": "10", "1": "12"}
+        - Service keyed: {5: 10, 7: None} or {"5": "10", "7": "12"}
+        """
+        if not master_selections:
+            return {}
+
+        # Legacy positional format: keys are indices inside service_ids.
+        is_legacy_positional = all(
+            isinstance(key, str) and key.isdigit() and int(key) < len(service_ids) for key in master_selections
+        )
+        if is_legacy_positional:
+            normalized_legacy: dict[int, int | None] = {}
+            for key, raw_val in master_selections.items():
+                idx = int(key)
+                if raw_val in (None, "any", ""):
+                    continue
+                if not isinstance(raw_val, str | int):
+                    continue
+                normalized_legacy[service_ids[idx]] = int(raw_val)
+            return normalized_legacy
+
+        normalized: dict[int, int | None] = {}
+        for raw_key, raw_val in master_selections.items():
+            service_id = int(raw_key)
+            if raw_val in (None, "any", ""):
+                normalized[service_id] = None
+            else:
+                if not isinstance(raw_val, str | int):
+                    continue
+                normalized[service_id] = int(raw_val)
+        return normalized
 
     def _get_buffer_minutes(self, master: Any, settings: Any) -> int:
         individual = getattr(master, "buffer_between_minutes", None)
