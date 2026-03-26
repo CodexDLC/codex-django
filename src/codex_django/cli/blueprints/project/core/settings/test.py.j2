@@ -1,15 +1,15 @@
 """
-Test settings - используется только для pytest.
+Test settings — used only for pytest.
 
-Наследуется от base settings, но использует SQLite in-memory для скорости.
+Inherits from base settings but uses SQLite in-memory for speed.
 """
 
 from .base import *  # noqa: F403
 
-# Включаем режим отладки для тестов, чтобы получать более подробные страницы с ошибками
+# Enable debug mode in tests for detailed error pages
 DEBUG = True
 
-# SQLite in-memory database для быстрых тестов
+# SQLite in-memory database for fast tests
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -17,7 +17,7 @@ DATABASES = {
     }
 }
 
-# In-memory cache для тестов (без Redis)
+# In-memory cache for tests (no Redis)
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
@@ -25,16 +25,16 @@ CACHES = {
     }
 }
 
-# Отключаем пароль Redis для тестов
+# Disable Redis password for tests
 REDIS_PASSWORD = None
 
-# Email backend для тестов
+# Email backend for tests
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 
-# Отключаем миграции для скорости (опционально)
+# Disable migrations for speed (optional)
 # MIGRATION_MODULES = {app: None for app in INSTALLED_APPS}
 
-# Быстрый хэшер паролей для тестов
+# Fast password hasher for tests
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.MD5PasswordHasher",
 ]

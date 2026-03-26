@@ -1,12 +1,19 @@
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Union
 
 from django.conf import settings
 
-try:
-    from loguru import logger
-    from codex_core.common.loguru_setup import setup_logging
+if TYPE_CHECKING:
+    from loguru import Logger
 
+# Declare logger with a Union type to satisfy mypy
+logger: Union[logging.Logger, "Logger"]
+
+try:
+    from codex_core.common.loguru_setup import setup_logging
+    from loguru import logger as loguru_logger
+
+    logger = loguru_logger
     LOGURU_AVAILABLE = True
 except ImportError:
     logger = logging.getLogger(__name__)
@@ -28,7 +35,8 @@ def init_logging() -> None:
     """Initialize logging based on project settings and available libraries."""
     if not LOGURU_AVAILABLE:
         # Fallback to standard Django LOGGING already configured in settings
-        logger.info("Loguru or codex-core not found. Using standard Django logging.")
+        if isinstance(logger, logging.Logger):
+            logger.info("Loguru or codex-core not found. Using standard Django logging.")
         return
 
     # Use codex-core setup
@@ -45,4 +53,5 @@ def init_logging() -> None:
         },
     )
 
-    logger.info(f"Loguru initialized via codex-core for {service_name}")
+    if not isinstance(logger, logging.Logger):
+        logger.info(f"Loguru initialized via codex-core for {service_name}")

@@ -13,6 +13,12 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    # Auth
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    # Admin
     "unfold",
     "unfold.contrib.filters",
     "unfold.contrib.forms",
@@ -21,15 +27,38 @@ THIRD_PARTY_APPS = [
     "unfold.contrib.guardian",
     "unfold.contrib.simple_history",
     "django_prometheus",
-    "modeltranslation",
     "ninja",
 ]
 
-LOCAL_APPS = [
-    "core",
-    "features.main",
-    "features.system",
-    "features.cabinet",
+{%- if multilingual %}
+THIRD_PARTY_APPS.insert(0, "modeltranslation")
+{%- endif %}
+
+# ═══════════════════════════════════════════
+# Codex Library Apps
+# ═══════════════════════════════════════════
+CODEX_APPS = [
+    "codex_django.cabinet",
+    "codex_django.showcase",
 ]
 
-INSTALLED_APPS = THIRD_PARTY_APPS + DJANGO_APPS + LOCAL_APPS
+# ═══════════════════════════════════════════
+# Codex Library Settings
+# ═══════════════════════════════════════════
+CODEX_SITE_SETTINGS_MODEL = "system.SiteSettings"
+{%- if multilingual %}
+CODEX_STATIC_TRANSLATION_MODEL = "system.StaticTranslation"
+{%- endif %}
+CODEX_STATIC_PAGE_SEO_MODEL = "system.StaticPageSeo"
+
+LOCAL_APPS = [
+    "core",
+    "system",
+    "cabinet",
+    "features.main",
+{%- if with_booking %}
+    "booking",
+{%- endif %}
+]
+
+INSTALLED_APPS = CODEX_APPS + THIRD_PARTY_APPS + DJANGO_APPS + LOCAL_APPS

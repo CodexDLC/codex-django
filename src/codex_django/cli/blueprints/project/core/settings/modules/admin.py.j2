@@ -1,11 +1,9 @@
 import os
 from pathlib import Path
 
-from django.conf import settings
-
 # Root of Django project: src/backend_django
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
-PROJECT_NAME = getattr(settings, "PROJECT_NAME", BASE_DIR.name)
+PROJECT_NAME = os.environ.get("PROJECT_NAME", BASE_DIR.name)
 
 UNFOLD = {
     "SITE_TITLE": os.environ.get("ADMIN_SITE_TITLE", f"{PROJECT_NAME.replace('_', ' ').title()} Admin"),

@@ -1,13 +1,13 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
+
 from ..models.seo import StaticPageSeo
 
 
 @admin.register(StaticPageSeo)
 class StaticPageSeoAdmin(admin.ModelAdmin):
-    """
-    Админка для SEO статических страниц.
-    """
+    """Admin for static page SEO entries."""
+
     list_display = ("page_key", "seo_title", "updated_at")
     list_filter = ("page_key",)
     search_fields = ("seo_title", "seo_description")

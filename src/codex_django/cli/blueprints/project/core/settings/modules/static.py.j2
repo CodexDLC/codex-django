@@ -12,7 +12,7 @@ PROJECT_NAME = os.environ.get("PROJECT_NAME", "project_landing")
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
-# В Docker мы собираем статику в подпапку с именем проекта
+# In Docker, static files are collected into a subdirectory named after the project
 if os.environ.get("IS_DOCKER", "False").lower() in ("true", "1", "t"):
     STATIC_ROOT = Path("/app/staticfiles") / PROJECT_NAME
     MEDIA_ROOT = Path("/app/media") / PROJECT_NAME

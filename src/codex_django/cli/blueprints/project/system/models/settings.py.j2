@@ -1,14 +1,14 @@
-from django.utils.translation import gettext_lazy as _
 from codex_django.system.mixins.settings import (
     AbstractSiteSettings,
     SiteContactSettingsMixin,
-    SiteGeoSettingsMixin,
-    SiteSocialSettingsMixin,
-    SiteMarketingSettingsMixin,
-    SiteTechnicalSettingsMixin,
     SiteEmailSettingsMixin,
-    SiteLegalSettingsMixin
+    SiteGeoSettingsMixin,
+    SiteLegalSettingsMixin,
+    SiteMarketingSettingsMixin,
+    SiteSocialSettingsMixin,
+    SiteTechnicalSettingsMixin,
 )
+from django.utils.translation import gettext_lazy as _
 
 
 class SiteSettings(
@@ -22,8 +22,8 @@ class SiteSettings(
     SiteLegalSettingsMixin
 ):
     """
-    Глобальные настройки сайта.
-    Синхронизируются с Redis автоматически.
+    Global site settings.
+    Automatically synchronized with Redis.
     """
 
     class Meta:

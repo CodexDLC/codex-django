@@ -1,37 +1,52 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
-from .models.settings import SiteSettings
+
+from ..models.settings import SiteSettings
 
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
     """
-    Админка для настроек сайта.
-    Рекомендуется использовать Singleton-паттерн (одна запись в БД).
+    Admin for site settings.
+    Only one record is expected (Singleton pattern).
     """
+
     list_display = ("__str__", "app_mode_enabled", "maintenance_mode")
 
     fieldsets = (
         (_("Основные контакты"), {
-            "fields": ("phone", "email", "address_street", "address_locality", "address_postal_code", "contact_person", "working_hours")
+            "fields": (
+                "phone", "email", "address_street", "address_locality",
+                "address_postal_code", "contact_person", "working_hours",
+            )
         }),
         (_("Гео-данные"), {
             "fields": ("google_maps_link", "latitude", "longitude"),
             "classes": ("collapse",)
         }),
         (_("Социальные сети"), {
-            "fields": ("instagram_url", "facebook_url", "telegram_url", "whatsapp_url", "youtube_url", "linkedin_url", "tiktok_url", "twitter_url", "pinterest_url"),
+            "fields": (
+                "instagram_url", "facebook_url", "telegram_url", "whatsapp_url",
+                "youtube_url", "linkedin_url", "tiktok_url", "twitter_url",
+                "pinterest_url",
+            ),
             "classes": ("collapse",)
         }),
         (_("Маркетинг и аналитика"), {
-            "fields": ("google_analytics_id", "google_tag_manager_id", "facebook_pixel_id", "tiktok_pixel_id"),
+            "fields": (
+                "google_analytics_id", "google_tag_manager_id",
+                "facebook_pixel_id", "tiktok_pixel_id",
+            ),
             "classes": ("collapse",)
         }),
         (_("Технические настройки"), {
             "fields": ("app_mode_enabled", "maintenance_mode", "head_scripts", "body_scripts")
         }),
         (_("Почта (SMTP)"), {
-            "fields": ("smtp_host", "smtp_port", "smtp_user", "smtp_password", "smtp_from_email", "smtp_use_tls", "smtp_use_ssl", "sendgrid_api_key"),
+            "fields": (
+                "smtp_host", "smtp_port", "smtp_user", "smtp_password",
+                "smtp_from_email", "smtp_use_tls", "smtp_use_ssl", "sendgrid_api_key",
+            ),
             "classes": ("collapse",)
         }),
         (_("Юридическая информация"), {
@@ -41,7 +56,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
     )
 
     def has_add_permission(self, request):
-        # Ограничиваем создание, если запись уже существует (Singleton)
+        # Restrict creation when a record already exists (Singleton)
         if self.model.objects.exists():
             return False
         return super().has_add_permission(request)

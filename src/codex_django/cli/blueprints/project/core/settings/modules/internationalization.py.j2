@@ -10,17 +10,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
 LANGUAGE_CODE = os.environ.get("LANGUAGE_CODE", "de")
 TIME_ZONE = os.environ.get("TIME_ZONE", "Europe/Berlin")
-USE_I18N = True
+USE_I18N = {{ multilingual }}
 USE_TZ = True
 
+{%- if multilingual %}
 LANGUAGES = [
     ("de", "Deutsch"),
     ("en", "English"),
 ]
 
-MODELTRANSLATION_DEFAULT_LANGUAGE = LANGUAGE_CODE.split("-")[0]
-MODELTRANSLATION_LANGUAGES = ("de", "en")
+try:
+    import modeltranslation  # noqa
+    MODELTRANSLATION_DEFAULT_LANGUAGE = LANGUAGE_CODE.split("-")[0]
+    MODELTRANSLATION_LANGUAGES = ("de", "en")
+except ImportError:
+    pass
 
 LOCALE_PATHS = [
     BASE_DIR / "locale",
 ]
+{%- endif %}

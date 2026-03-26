@@ -7,13 +7,23 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    # Ensure the project directory is on sys.path when running from repo root.
-    # e.g. python src/myproject/manage.py runserver
+    # Ensure both src/ and src/<project>/ are on sys.path.
+    # src/         → needed for DJANGO_SETTINGS_MODULE = "<project>.core.settings.*"
+    # src/<project>/ → needed for LOCAL_APPS = ["core", "system", "cabinet", ...]
     project_dir = os.path.dirname(os.path.abspath(__file__))
-    if project_dir not in sys.path:
-        sys.path.insert(0, project_dir)
+    src_dir = os.path.dirname(project_dir)
+    for path in [src_dir, project_dir]:
+        if path not in sys.path:
+            sys.path.insert(0, path)
 
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings.dev")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "{{ project_name }}.core.settings.dev")
+    # Intercept 'menu' command or empty arguments for interactive experience
+    if len(sys.argv) == 1 or (len(sys.argv) > 1 and sys.argv[1] == "menu"):
+        try:
+            from codex_django.cli.main import main as cli_main
+            sys.exit(cli_main([], forced_project=os.path.basename(project_dir)))
+        except ImportError:
+            pass
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

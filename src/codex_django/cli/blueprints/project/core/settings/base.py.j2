@@ -39,6 +39,13 @@ else:
 PROJECT_NAME = os.environ.get("PROJECT_NAME", BASE_DIR.name)
 
 # ═══════════════════════════════════════════
+# Core Django Settings (MUST be defined early)
+# ═══════════════════════════════════════════
+ROOT_URLCONF = "{{ project_name }}.core.urls"
+WSGI_APPLICATION = "{{ project_name }}.core.wsgi.application"
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ═══════════════════════════════════════════
 # Import Modules
 # ═══════════════════════════════════════════
 
@@ -53,10 +60,8 @@ from .modules.templates import *  # noqa
 from .modules.logging import *  # noqa
 from .modules.admin import *  # noqa
 from .modules.sitemap import *  # noqa
+from .modules.codex import *  # noqa
 
 # ═══════════════════════════════════════════
 # General Settings
 # ═══════════════════════════════════════════
-
-ROOT_URLCONF = "core.urls"
-WSGI_APPLICATION = "core.wsgi.application"

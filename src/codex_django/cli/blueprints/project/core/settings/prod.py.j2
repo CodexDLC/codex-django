@@ -1,12 +1,12 @@
 """
-lily_website — Production Settings.
+{{ project_name }} — Production Settings.
 
 Inherits from base.py. Postgres, DEBUG=False by default, security hardened.
 """
 
 import os
 
-from .base import *  # noqa: F401,F403
+from .base import *  # noqa: F403
 
 # ═══════════════════════════════════════════
 # Security
@@ -31,15 +31,15 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     LANGUAGE_COOKIE_SECURE = True
 
-# Explicitly trust production domains for CSRF (ignore DRY for stability)
+# TODO: Update with your production domain(s)
 CSRF_TRUSTED_ORIGINS = [
-    "https://lily-salon.de",
-    "https://www.lily-salon.de",
+    "https://example.com",
+    "https://www.example.com",
 ]
 
-# Ensure cookies are bound to the correct domain
-CSRF_COOKIE_DOMAIN = ".lily-salon.de"
-SESSION_COOKIE_DOMAIN = ".lily-salon.de"
+# TODO: Update with your production domain
+CSRF_COOKIE_DOMAIN = ".example.com"
+SESSION_COOKIE_DOMAIN = ".example.com"
 
 # ═══════════════════════════════════════════
 # Static files
@@ -47,7 +47,7 @@ SESSION_COOKIE_DOMAIN = ".lily-salon.de"
 
 STATIC_ROOT = BASE_DIR / "staticfiles"  # noqa: F405
 
-# Adds content hash to filenames (e.g. tma_app.abc123de.css)
+# Adds content hash to filenames (e.g. app.abc123de.css)
 # so nginx can cache forever and browsers always get fresh files on deploy
 STORAGES = {
     "staticfiles": {

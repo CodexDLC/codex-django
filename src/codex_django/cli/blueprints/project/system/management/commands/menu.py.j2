@@ -7,7 +7,7 @@ Usage:
 
 from __future__ import annotations
 
-import subprocess
+import subprocess  # nosec B404
 import sys
 
 import questionary
@@ -19,7 +19,7 @@ console = Console()
 
 def _run_blocking(command: str) -> None:
     """Run a blocking Django command (e.g. runserver) via subprocess."""
-    subprocess.run([sys.executable, "manage.py", command], check=False)
+    subprocess.run([sys.executable, "manage.py", command], check=False)  # noqa: S603  # nosec B603
 
 
 SECTIONS: dict[str, dict[str, object]] = {
@@ -27,7 +27,9 @@ SECTIONS: dict[str, dict[str, object]] = {
         "makemigrations": lambda: call_command("makemigrations"),
         "migrate":        lambda: call_command("migrate"),
         "showmigrations": lambda: call_command("showmigrations"),
-        "sqlmigrate":     lambda: console.print("[yellow]Usage:[/yellow] python manage.py sqlmigrate <app> <migration>"),
+        "sqlmigrate":     lambda: console.print(
+            "Usage: python manage.py sqlmigrate <app> <migration>", style="yellow"
+        ),
     },
     "🌍 Translations (i18n)": {
         "makemessages (de, en)": lambda: call_command("makemessages", locale=["de", "en"]),
@@ -38,7 +40,7 @@ SECTIONS: dict[str, dict[str, object]] = {
         "update_all_content":   lambda: call_command("update_all_content"),
     },
     "🚀 Launch & Deploy": {
-        "runserver (dev)":  lambda: _run_blocking("runserver"),
+        "runserver+ (dev)": lambda: _run_blocking("runserver_plus"),
         "collectstatic":    lambda: call_command("collectstatic", interactive=False),
         "check":            lambda: call_command("check"),
         "shell":            lambda: _run_blocking("shell"),
@@ -53,7 +55,7 @@ class Command(BaseCommand):
         while True:
             category = questionary.select(
                 "Management Menu — select a category:",
-                choices=list(SECTIONS.keys()) + ["❌ Exit"],
+                choices=[*list(SECTIONS.keys()), "❌ Exit"],
             ).ask()
 
             if not category or category == "❌ Exit":
@@ -62,7 +64,7 @@ class Command(BaseCommand):
             ops = SECTIONS[category]
             op = questionary.select(
                 f"{category} — select action:",
-                choices=list(ops.keys()) + ["← Back"],
+                choices=[*list(ops.keys()), "← Back"],
             ).ask()
 
             if not op or op == "← Back":
