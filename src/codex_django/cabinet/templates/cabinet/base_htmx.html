@@ -1,0 +1,14 @@
+{# [LIBRARY] codex_django/cabinet/templates/cabinet/base_htmx.html #}
+{#
+   Partial template для HTMX-ответов.
+   View-ы наследуют от этого шаблона — не от base_cabinet.html.
+   HTMX заменяет #cab-content, OOB обновляет #cab-title.
+#}
+{% load static i18n %}
+
+{# OOB: обновляет заголовок в топбаре без перезагрузки страницы #}
+<h1 id="cab-title" hx-swap-oob="true">{% block page_title %}{% endblock %}</h1>
+
+{% block cabinet_content %}{% endblock %}
+
+{% block extra_js %}{% endblock %}

@@ -1,0 +1,34 @@
+<div x-cloak x-show="{{ modal_var|default:'showExport' }}" x-transition class="position-fixed cab-overlay" style="inset:0;background:rgba(15,23,42,.4);z-index:1060;" @click.self="{{ modal_var|default:'showExport' }}=false">
+  <div x-show="{{ modal_var|default:'showExport' }}" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="bg-white rounded-4 shadow-lg" style="width:340px;max-width:92vw;overflow:hidden;" @click.stop>
+    <div class="p-4 pb-3 border-bottom d-flex align-items-center justify-content-between">
+      <div>
+        <div class="fw-semibold" style="font-size:.95rem;">Экспорт данных</div>
+        <div class="text-muted" style="font-size:.75rem;">Выберите способ</div>
+      </div>
+      <button class="btn btn-sm btn-light rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:30px;height:30px;padding:0;" @click="{{ modal_var|default:'showExport' }}=false">
+        <span class="bi bi-x"></span>
+      </button>
+    </div>
+    <div class="p-2">
+      <button class="btn btn-light w-100 text-start d-flex align-items-center gap-3 px-3 py-2 mb-1 rounded-3">
+        <span class="bi bi-download" style="font-size:1.1rem;color:#6366f1;width:24px;text-align:center;"></span>
+        <div><div style="font-size:.85rem;font-weight:500;">Скачать файл</div><div class="text-muted" style="font-size:.72rem;">Excel (.xlsx) на ваш компьютер</div></div>
+      </button>
+      <button class="btn btn-light w-100 text-start d-flex align-items-center gap-3 px-3 py-2 mb-1 rounded-3">
+        <span class="bi bi-envelope" style="font-size:1.1rem;color:#0ea5e9;width:24px;text-align:center;"></span>
+        <div><div style="font-size:.85rem;font-weight:500;">Отправить на email</div><div class="text-muted" style="font-size:.72rem;">Получить файл на почту</div></div>
+      </button>
+      <button class="btn btn-light w-100 text-start d-flex align-items-center gap-3 px-3 py-2 mb-1 rounded-3">
+        <span class="bi bi-whatsapp" style="font-size:1.1rem;color:#25d366;width:24px;text-align:center;"></span>
+        <div><div style="font-size:.85rem;font-weight:500;">Отправить в WhatsApp</div><div class="text-muted" style="font-size:.72rem;">Ссылка на скачивание</div></div>
+      </button>
+      <button class="btn btn-light w-100 text-start d-flex align-items-center gap-3 px-3 py-2 rounded-3">
+        <span class="bi bi-link-45deg" style="font-size:1.1rem;color:#64748b;width:24px;text-align:center;"></span>
+        <div><div style="font-size:.85rem;font-weight:500;">Скопировать ссылку</div><div class="text-muted" style="font-size:.72rem;">Временная ссылка на файл (24 ч)</div></div>
+      </button>
+    </div>
+    <div class="px-4 py-3 border-top" style="background:#f8fafc;">
+      <div class="text-muted" style="font-size:.72rem;"><span class="bi bi-shield-check me-1 text-success"></span>Файл формируется на стороне сервера и доступен только вам</div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,26 @@
+{# [LIBRARY] codex_django/cabinet/templates/cabinet/includes/_sidebar_staff.html #}
+{# Sidebar для staff/owner режима. Суб-навигация заполняется через {% block sidebar_nav %} в каждой странице. #}
+{% load static i18n %}
+
+{# ─── LOGO ─── #}
+<div class="cab-sidebar__logo">
+  <span class="cab-sidebar__logo-icon bi bi-grid-3x3-gap-fill"></span>
+  <span class="cab-sidebar__logo-name">{{ SITE_NAME|default:'App' }}</span>
+</div>
+
+{# ─── NAV ─── #}
+<nav class="cab-sidebar__nav">
+  <ul class="cab-nav">
+    {% block sidebar_nav %}{% endblock %}
+  </ul>
+</nav>
+
+{# ─── FOOTER ─── #}
+<div class="cab-sidebar__footer">
+  <button class="cab-sidebar__collapse-btn"
+          @click="sidebarCollapsed = !sidebarCollapsed"
+          :title="sidebarCollapsed ? '{% trans 'Expand' %}' : '{% trans 'Collapse' %}'">
+    <i class="bi cab-nav__icon" :class="sidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
+    <span class="cab-nav__label">{% trans "Collapse" %}</span>
+  </button>
+</div>

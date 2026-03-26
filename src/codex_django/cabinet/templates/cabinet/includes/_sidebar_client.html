@@ -1,0 +1,35 @@
+{# [LIBRARY] codex_django/cabinet/templates/cabinet/includes/_sidebar_client.html #}
+{# Default sidebar for client layout. Include or override in project. #}
+{% load static i18n %}
+
+{# ─── LOGO ─── #}
+<div class="cab-sidebar__logo">
+  <span class="cab-sidebar__logo-icon bi bi-grid-3x3-gap-fill"></span>
+  <span class="cab-sidebar__logo-name">{{ SITE_NAME|default:'App' }}</span>
+</div>
+
+{# ─── NAV ─── #}
+<nav class="cab-sidebar__nav">
+  <ul class="cab-nav">
+    {% block sidebar_nav %}
+    {# Override this block in project templates to add nav items.
+       Example:
+       <li>
+         <a href="{% url 'cabinet:profile' %}" class="cab-nav__item">
+           <i class="bi bi-person cab-nav__icon"></i>
+           <span class="cab-nav__label">Profile</span>
+         </a>
+       </li>
+    #}
+    {% endblock %}
+  </ul>
+</nav>
+
+{# ─── FOOTER ─── #}
+<div class="cab-sidebar__footer">
+  <button class="cab-sidebar__collapse-btn"
+          @click="sidebarCollapsed = !sidebarCollapsed">
+    <i class="bi cab-nav__icon" :class="sidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
+    <span class="cab-nav__label">{% trans "Collapse" %}</span>
+  </button>
+</div>
