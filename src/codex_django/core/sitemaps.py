@@ -6,7 +6,7 @@ from django.urls import NoReverseMatch, reverse
 from django.utils import translation
 
 
-class BaseSitemap(Sitemap[Any]):
+class BaseSitemap(Sitemap):  # type: ignore[type-arg]
     """
     Base class for Codex Django sitemaps.
     - i18n support enabled by default.
