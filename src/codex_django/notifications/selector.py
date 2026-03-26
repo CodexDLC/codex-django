@@ -41,7 +41,7 @@ class BaseEmailContentSelector:
     """
 
     cache_timeout: int = 3600
-    cache_key_prefix: str = "notification_content"
+    cache_key_prefix: str = ""
 
     def __init__(
         self,
@@ -83,7 +83,7 @@ class BaseEmailContentSelector:
     # ------------------------------------------------------------------
 
     def _cache_key(self, key: str, language: str) -> str:
-        return f"{self.cache_key_prefix}:{language}:{key}"
+        return f"{key}:{language}"
 
     def _fetch_from_db(self, key: str, language: str) -> str | None:
         try:
