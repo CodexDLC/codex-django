@@ -1,0 +1,15 @@
+from codex_django.notifications import BaseEmailContentMixin
+from django.db import models
+
+
+class EmailContent(BaseEmailContentMixin):
+    """
+    Stores notification content blocks for {{ app_name }}.
+
+    Each row is a reusable text fragment (subject, body snippet, etc.)
+    identified by a unique ``key`` and retrieved by the notification selector.
+    """
+
+    class Meta(BaseEmailContentMixin.Meta):
+        verbose_name = "Email Content"
+        verbose_name_plural = "Email Contents"

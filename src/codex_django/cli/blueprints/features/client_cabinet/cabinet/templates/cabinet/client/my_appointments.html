@@ -1,0 +1,58 @@
+{% extends "cabinet/base_client.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "My Appointments" %}{% endblock %}
+{% block page_title %}{% trans "My Appointments" %}{% endblock %}
+
+{% block sidebar_nav %}
+<li>
+  <a href="{% url 'cabinet:my_appointments' %}"
+     class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2
+            {% if active_section == 'my' %}cab-nav__item--active{% endif %}"
+     hx-get="{% url 'cabinet:my_appointments' %}"
+     hx-target="#cab-content"
+     hx-push-url="true"
+     style="color: var(--cab-sidebar-text); transition: background 0.15s;">
+    <span class="bi bi-calendar-check fs-5 flex-shrink-0"></span>
+    <span class="cab-nav__label ms-3" style="white-space: nowrap;">{% trans "My Appointments" %}</span>
+  </a>
+</li>
+<li>
+  <a href="{% url 'cabinet:profile' %}"
+     class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2
+            {% if active_section == 'profile' %}cab-nav__item--active{% endif %}"
+     hx-get="{% url 'cabinet:profile' %}"
+     hx-target="#cab-content"
+     hx-push-url="true"
+     style="color: var(--cab-sidebar-text); transition: background 0.15s;">
+    <span class="bi bi-person fs-5 flex-shrink-0"></span>
+    <span class="cab-nav__label ms-3" style="white-space: nowrap;">{% trans "Profile" %}</span>
+  </a>
+</li>
+{% endblock %}
+
+{% block sidebar_settings_link %}
+<a href="{% url 'cabinet:settings' %}"
+   class="cab-nav__item d-flex align-items-center px-3 py-2 mx-2 rounded"
+   style="color: var(--cab-sidebar-text); transition: background 0.15s;">
+  <span class="bi bi-gear fs-5 flex-shrink-0"></span>
+  <span class="cab-nav__label ms-3" style="white-space: nowrap; font-size: 0.875rem;">{% trans "Settings" %}</span>
+</a>
+{% endblock %}
+
+{% block cabinet_content %}
+
+{# ─── Empty state (default) ─── #}
+{% block appointments_content %}
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white border-0 pt-3 pb-0 d-flex align-items-center justify-content-between">
+    <h6 class="fw-semibold mb-0">{% trans "Upcoming" %}</h6>
+  </div>
+  <div class="card-body text-center py-5">
+    <span class="bi bi-calendar-x fs-1 text-muted d-block mb-2"></span>
+    <p class="text-muted mb-0">{% trans "No upcoming appointments" %}</p>
+  </div>
+</div>
+{% endblock %}
+
+{% endblock %}

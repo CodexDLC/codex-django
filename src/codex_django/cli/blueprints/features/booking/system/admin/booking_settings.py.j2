@@ -1,0 +1,31 @@
+from django.contrib import admin
+
+from system.models import BookingSettings
+
+
+@admin.register(BookingSettings)
+class BookingSettingsAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (
+            "Time Grid",
+            {
+                "fields": [
+                    "step_minutes",
+                    "default_buffer_between_minutes",
+                    "min_advance_minutes",
+                    "max_advance_days",
+                ]
+            },
+        ),
+        (
+            "Default Working Hours",
+            {
+                "fields": [
+                    "work_start_weekdays",
+                    "work_end_weekdays",
+                    "work_start_saturday",
+                    "work_end_saturday",
+                ]
+            },
+        ),
+    ]

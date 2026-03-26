@@ -1,0 +1,70 @@
+"""
+Cabinet booking views — client-facing "My Bookings" page.
+"""
+
+from __future__ import annotations
+
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.views.decorators.http import require_GET, require_POST
+
+from booking.models import Appointment
+
+
+@login_required
+@require_GET
+def my_bookings_view(request):
+    """List the current user's appointments with status filter and pagination."""
+    status_filter = request.GET.get("status", "")
+    qs = Appointment.objects.filter(client=request.user).select_related("master", "service")
+
+    if status_filter and status_filter in dict(Appointment.STATUS_CHOICES if hasattr(Appointment, "STATUS_CHOICES") else []):
+        qs = qs.filter(status=status_filter)
+
+    paginator = Paginator(qs, 10)
+    page = paginator.get_page(request.GET.get("page", 1))
+
+    # Count stats
+    user_appointments = Appointment.objects.filter(client=request.user)
+    stats = {
+        "upcoming": user_appointments.filter(status__in=["pending", "confirmed"]).count(),
+        "completed": user_appointments.filter(status="completed").count(),
+        "cancelled": user_appointments.filter(status="cancelled").count(),
+    }
+
+    return render(request, "cabinet/booking/my_bookings.html", {
+        "page_obj": page,
+        "status_filter": status_filter,
+        "stats": stats,
+        "active_section": "my_bookings",
+    })
+
+
+@login_required
+@require_POST
+def cancel_booking_view(request, pk):
+    """Cancel an appointment via HTMX."""
+    try:
+        appointment = Appointment.objects.get(pk=pk, client=request.user)
+    except Appointment.DoesNotExist:
+        return HttpResponse("Not found", status=404)
+
+    if appointment.status in ("pending", "confirmed"):
+        appointment.status = "cancelled"
+        appointment.save(update_fields=["status"])
+
+    return render(request, "cabinet/booking/my_bookings.html", {
+        "page_obj": Paginator(
+            Appointment.objects.filter(client=request.user).select_related("master", "service"),
+            10,
+        ).get_page(1),
+        "status_filter": "",
+        "stats": {
+            "upcoming": Appointment.objects.filter(client=request.user, status__in=["pending", "confirmed"]).count(),
+            "completed": Appointment.objects.filter(client=request.user, status="completed").count(),
+            "cancelled": Appointment.objects.filter(client=request.user, status="cancelled").count(),
+        },
+        "active_section": "my_bookings",
+    })

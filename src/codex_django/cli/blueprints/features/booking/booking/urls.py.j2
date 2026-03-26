@@ -1,0 +1,12 @@
+from django.urls import path
+
+from .views import booking_page_view, confirm_booking_view, get_calendar_view, get_slots_view
+
+app_name = "booking"
+
+urlpatterns = [
+    path("", booking_page_view, name="booking_page"),
+    path("calendar/", get_calendar_view, name="calendar"),
+    path("slots/", get_slots_view, name="slots"),
+    path("confirm/", confirm_booking_view, name="confirm"),
+]

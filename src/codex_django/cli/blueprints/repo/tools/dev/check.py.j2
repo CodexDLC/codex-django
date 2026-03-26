@@ -1,0 +1,23 @@
+import sys
+from pathlib import Path
+
+try:
+    from codex_core.dev.check_runner import BaseCheckRunner
+except ImportError:
+    print(
+        "Error: codex-core is required for the checker. "
+        "Run 'pip install codex-core' or add it to your dev dependencies."
+    )
+    sys.exit(1)
+
+class CheckRunner(BaseCheckRunner):
+    PROJECT_NAME = "{{ project_name }}"
+    INTEGRATION_REQUIRES = "PostgreSQL, Redis"
+
+    def extra_checks(self) -> bool:
+        """Add Hadolint or other specific checks here."""
+        self.print_step("Running Docker Lint (Hadolint)")
+        success, _ = self.run_command("hadolint deploy/{{ project_name }}/django.Dockerfile")
+        return success
+if __name__ == "__main__":
+    CheckRunner(Path(__file__).parent.parent.parent).main()

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Book an Appointment" %}{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --booking-primary: #2563eb;
+    --booking-primary-hover: #1d4ed8;
+    --booking-bg: #ffffff;
+    --booking-bg-secondary: #f8fafc;
+    --booking-text: #1e293b;
+    --booking-text-muted: #64748b;
+    --booking-border: #e2e8f0;
+    --booking-radius: 8px;
+    --booking-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .booking {
+    max-width: 720px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    color: var(--booking-text);
+    font-family: inherit;
+  }
+
+  .booking__title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── Steps indicator ── */
+  .booking__steps {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .booking__step {
+    flex: 1;
+    text-align: center;
+    padding: 0.5rem 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--booking-text-muted);
+    border-bottom: 3px solid var(--booking-border);
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .booking__step--active {
+    color: var(--booking-primary);
+    border-color: var(--booking-primary);
+  }
+
+  .booking__step--done {
+    color: var(--booking-primary);
+    border-color: var(--booking-primary);
+    opacity: 0.6;
+  }
+
+  /* ── Body container ── */
+  .booking__body {
+    background: var(--booking-bg);
+    border: 1px solid var(--booking-border);
+    border-radius: var(--booking-radius);
+    box-shadow: var(--booking-shadow);
+    padding: 1.5rem;
+  }
+</style>
+
+<div class="booking" x-data="bookingWizard()">
+
+  <h1 class="booking__title">{% trans "Book an Appointment" %}</h1>
+
+  <div class="booking__steps">
+    <div class="booking__step"
+         :class="{ 'booking__step--active': step === 1, 'booking__step--done': step > 1 }">
+      {% trans "Service" %}
+    </div>
+    <div class="booking__step"
+         :class="{ 'booking__step--active': step === 2, 'booking__step--done': step > 2 }">
+      {% trans "Date" %}
+    </div>
+    <div class="booking__step"
+         :class="{ 'booking__step--active': step === 3, 'booking__step--done': step > 3 }">
+      {% trans "Time" %}
+    </div>
+    <div class="booking__step"
+         :class="{ 'booking__step--active': step === 4 }">
+      {% trans "Confirm" %}
+    </div>
+  </div>
+
+  <div class="booking__body" id="booking-body">
+    {% include "booking/partials/step_service.html" %}
+  </div>
+
+</div>
+
+<script>
+function bookingWizard() {
+  return {
+    step: 1,
+    serviceId: null,
+    serviceName: '',
+    date: null,
+    time: null,
+    masterId: null,
+
+    selectService(id, name) {
+      this.serviceId = id;
+      this.serviceName = name;
+      this.step = 2;
+    },
+
+    selectDate(dateStr) {
+      this.date = dateStr;
+      this.step = 3;
+    },
+
+    selectTime(timeStr, masterId) {
+      this.time = timeStr;
+      this.masterId = masterId;
+      this.step = 4;
+    },
+
+    goToStep(n) {
+      if (n < this.step) {
+        this.step = n;
+      }
+    }
+  }
+}
+</script>
+{% endblock %}

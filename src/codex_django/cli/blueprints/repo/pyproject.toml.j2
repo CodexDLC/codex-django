@@ -1,0 +1,46 @@
+[project]
+name = "{{ project_name }}"
+version = "0.1.0"
+description = "My new project scaffolded with codex-django"
+dependencies = [
+    "django>=5.0",
+    "python-dotenv",
+    "dj-database-url",
+    "psycopg2-binary",
+    "loguru",
+    "redis>=5.0",
+    "codex-django",
+    "codex-core",
+    "django-allauth[socialaccount]",
+    "gunicorn>=21.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-django",
+    "mypy",
+    "django-stubs",
+    "ruff",
+    "bandit",
+]
+
+[project.scripts]
+manage = "{{ project_name }}.manage:main"
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "S", "RUF"]
+ignore = ["S101"]
+
+[tool.bandit]
+exclude_dirs = ["tests", "venv", ".venv"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/{{ project_name }}"]

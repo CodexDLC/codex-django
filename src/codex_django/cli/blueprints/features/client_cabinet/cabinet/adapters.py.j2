@@ -1,0 +1,21 @@
+from django.conf import settings
+
+from allauth.account.adapter import DefaultAccountAdapter
+
+
+class CabinetAccountAdapter(DefaultAccountAdapter):
+    """
+    Redirect users after login based on their role.
+
+    Settings:
+        CABINET_DEFAULT_URL — where staff/superuser go (default: "/cabinet/")
+        CABINET_CLIENT_URL  — where regular users go (default: None → same as default)
+    """
+
+    def get_login_redirect_url(self, request):
+        default_url = getattr(settings, "CABINET_DEFAULT_URL", "/cabinet/")
+        client_url = getattr(settings, "CABINET_CLIENT_URL", None)
+
+        if client_url and not (request.user.is_staff or request.user.is_superuser):
+            return client_url
+        return default_url

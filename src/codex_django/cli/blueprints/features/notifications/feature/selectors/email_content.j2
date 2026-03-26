@@ -1,0 +1,23 @@
+"""
+EmailContent selector singleton for {{ app_name }}.
+
+Wires together the three adapters and the EmailContent model.
+Import ``selector`` where you need to look up notification content.
+"""
+
+from codex_django.notifications import (
+    BaseEmailContentSelector,
+    DjangoCacheAdapter,
+    DjangoI18nAdapter,
+)
+
+from ..models.email_content import EmailContent
+
+cache_adapter = DjangoCacheAdapter()
+i18n_adapter = DjangoI18nAdapter()
+
+selector = BaseEmailContentSelector(
+    model=EmailContent,
+    cache_adapter=cache_adapter,
+    i18n_adapter=i18n_adapter,
+)

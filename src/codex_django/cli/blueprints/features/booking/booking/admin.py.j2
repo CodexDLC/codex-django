@@ -1,0 +1,52 @@
+from django.contrib import admin
+from django.utils.translation import gettext_lazy as _
+
+from .models import (
+    Appointment,
+    Master,
+    MasterDayOff,
+    MasterWorkingDay,
+    Service,
+    ServiceCategory,
+)
+
+
+class MasterWorkingDayInline(admin.TabularInline):
+    model = MasterWorkingDay
+    extra = 0
+
+
+class MasterDayOffInline(admin.TabularInline):
+    model = MasterDayOff
+    extra = 0
+
+
+@admin.register(ServiceCategory)
+class ServiceCategoryAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+
+
+@admin.register(Master)
+class MasterAdmin(admin.ModelAdmin):
+    list_display = ("name", "user", "status")
+    list_filter = ("status", "categories")
+    search_fields = ("name", "user__email")
+    inlines = [MasterWorkingDayInline, MasterDayOffInline]
+
+
+@admin.register(Service)
+class ServiceAdmin(admin.ModelAdmin):
+    list_display = ("name", "category", "duration")
+    list_filter = ("category",)
+    search_fields = ("name",)
+    filter_horizontal = ("masters",)
+
+
+@admin.register(Appointment)
+class AppointmentAdmin(admin.ModelAdmin):
+    list_display = ("client", "master", "service", "datetime_start", "status")
+    list_filter = ("status", "master")
+    search_fields = ("client__email", "master__name")
+    date_hierarchy = "datetime_start"
+    readonly_fields = ("datetime_start", "duration_minutes")

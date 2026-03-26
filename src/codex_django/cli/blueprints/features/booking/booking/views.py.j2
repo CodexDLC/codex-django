@@ -1,0 +1,113 @@
+"""
+Booking views — public booking wizard with HTMX + Alpine.js.
+"""
+
+from __future__ import annotations
+
+from datetime import date, datetime
+
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render
+from django.views.decorators.http import require_GET, require_POST
+
+from .models import Service, ServiceCategory
+from .selectors import create_booking, get_available_slots, get_calendar_data
+
+
+@require_GET
+def booking_page_view(request):
+    """Main booking page — renders the wizard shell with step 1 (services)."""
+    categories = ServiceCategory.objects.prefetch_related("services").all()
+    return render(request, "booking/booking_page.html", {
+        "categories": categories,
+    })
+
+
+@require_GET
+def get_calendar_view(request):
+    """HTMX endpoint — returns the calendar partial for a given month."""
+    service_id = request.GET.get("service_id")
+    year = int(request.GET.get("year", date.today().year))
+    month = int(request.GET.get("month", date.today().month))
+    selected = request.GET.get("selected_date")
+
+    selected_date = None
+    if selected:
+        selected_date = datetime.strptime(selected, "%Y-%m-%d").date()
+
+    calendar_data = get_calendar_data(
+        year=year,
+        month=month,
+        today=date.today(),
+        selected_date=selected_date,
+    )
+
+    return render(request, "booking/partials/step_date.html", {
+        "calendar_data": calendar_data,
+        "year": year,
+        "month": month,
+        "service_id": service_id,
+        "selected_date": selected_date,
+    })
+
+
+@require_GET
+def get_slots_view(request):
+    """HTMX endpoint — returns available time slots for a date + service."""
+    service_id = request.GET.get("service_id")
+    target = request.GET.get("date")
+
+    if not service_id or not target:
+        return HttpResponse("Missing parameters", status=400)
+
+    target_date = datetime.strptime(target, "%Y-%m-%d").date()
+    service_ids = [int(service_id)]
+
+    result = get_available_slots(service_ids=service_ids, target_date=target_date)
+    slots = result.get_unique_start_times() if result.solutions else []
+
+    return render(request, "booking/partials/step_time.html", {
+        "slots": slots,
+        "service_id": service_id,
+        "target_date": target,
+    })
+
+
+@require_POST
+def confirm_booking_view(request):
+    """Final step — creates the booking."""
+    service_id = request.POST.get("service_id")
+    target = request.POST.get("date")
+    selected_time = request.POST.get("time")
+    master_id = request.POST.get("master_id")
+
+    if not all([service_id, target, selected_time, master_id]):
+        return HttpResponse("Missing parameters", status=400)
+
+    if not request.user.is_authenticated:
+        return HttpResponse("Authentication required", status=401)
+
+    target_date = datetime.strptime(target, "%Y-%m-%d").date()
+
+    try:
+        appointment = create_booking(
+            service_ids=[int(service_id)],
+            target_date=target_date,
+            selected_time=selected_time,
+            master_id=int(master_id),
+            client=request.user,
+            extra_fields={"service_id": int(service_id)},
+        )
+    except Exception as e:
+        return render(request, "booking/partials/step_confirm.html", {
+            "error": str(e),
+            "service_id": service_id,
+            "date": target,
+            "time": selected_time,
+            "master_id": master_id,
+        })
+
+    return render(request, "booking/partials/step_confirm.html", {
+        "appointment": appointment,
+        "success": True,
+    })

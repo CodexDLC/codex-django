@@ -1,0 +1,143 @@
+{% load i18n %}
+
+<style>
+  .step-confirm__heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .step-confirm__summary {
+    background: var(--booking-bg-secondary);
+    border: 1px solid var(--booking-border);
+    border-radius: var(--booking-radius);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .step-confirm__row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4rem 0;
+    font-size: 0.9rem;
+  }
+
+  .step-confirm__label {
+    color: var(--booking-text-muted);
+  }
+
+  .step-confirm__value {
+    font-weight: 500;
+  }
+
+  .step-confirm__btn {
+    display: inline-block;
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--booking-primary);
+    border: none;
+    border-radius: var(--booking-radius);
+    cursor: pointer;
+    transition: background 0.15s;
+    text-align: center;
+  }
+
+  .step-confirm__btn:hover {
+    background: var(--booking-primary-hover);
+  }
+
+  .step-confirm__btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .step-confirm__success {
+    text-align: center;
+    padding: 2rem 0;
+  }
+
+  .step-confirm__success-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .step-confirm__error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    border-radius: var(--booking-radius);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .step-confirm__back {
+    display: inline-block;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--booking-text-muted);
+    cursor: pointer;
+    text-decoration: underline;
+  }
+</style>
+
+<div>
+  {% if success %}
+  {# ── Booking confirmed ── #}
+  <div class="step-confirm__success">
+    <div class="step-confirm__success-icon">&#10003;</div>
+    <div class="step-confirm__heading">{% trans "Booking Confirmed!" %}</div>
+    <p style="color: var(--booking-text-muted); font-size: 0.9rem;">
+      {% trans "Your appointment has been booked successfully." %}
+    </p>
+    <a href="{% url 'booking:booking_page' %}" class="step-confirm__back">
+      {% trans "Book another appointment" %}
+    </a>
+  </div>
+
+  {% else %}
+  {# ── Confirmation form ── #}
+  <div class="step-confirm__heading">{% trans "Confirm Your Booking" %}</div>
+
+  {% if error %}
+  <div class="step-confirm__error">{{ error }}</div>
+  {% endif %}
+
+  <div class="step-confirm__summary">
+    <div class="step-confirm__row">
+      <span class="step-confirm__label">{% trans "Service" %}</span>
+      <span class="step-confirm__value" x-text="serviceName"></span>
+    </div>
+    <div class="step-confirm__row">
+      <span class="step-confirm__label">{% trans "Date" %}</span>
+      <span class="step-confirm__value" x-text="date"></span>
+    </div>
+    <div class="step-confirm__row">
+      <span class="step-confirm__label">{% trans "Time" %}</span>
+      <span class="step-confirm__value" x-text="time"></span>
+    </div>
+  </div>
+
+  <form hx-post="{% url 'booking:confirm' %}"
+        hx-target="#booking-body"
+        hx-swap="innerHTML">
+    {% csrf_token %}
+    <input type="hidden" name="service_id" :value="serviceId">
+    <input type="hidden" name="date" :value="date">
+    <input type="hidden" name="time" :value="time">
+    <input type="hidden" name="master_id" :value="masterId">
+    <button type="submit" class="step-confirm__btn">
+      {% trans "Confirm Booking" %}
+    </button>
+  </form>
+
+  <span class="step-confirm__back" @click="goToStep(3)"
+        hx-get="{% url 'booking:slots' %}?service_id={{ service_id }}&date={{ date }}"
+        hx-target="#booking-body" hx-swap="innerHTML">
+    &larr; {% trans "Back to time selection" %}
+  </span>
+  {% endif %}
+</div>

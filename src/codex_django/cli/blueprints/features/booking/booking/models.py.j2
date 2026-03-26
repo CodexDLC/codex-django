@@ -1,0 +1,142 @@
+from django.conf import settings
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+from codex_django.booking.mixins import (
+    AbstractBookableAppointment,
+    AbstractBookableMaster,
+    AbstractBookableService,
+    AbstractWorkingDay,
+    MasterDayOffMixin,
+)
+
+
+class ServiceCategory(models.Model):
+    name = models.CharField(_("name"), max_length=255)
+
+    class Meta:
+        verbose_name = _("Service Category")
+        verbose_name_plural = _("Service Categories")
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class Master(AbstractBookableMaster):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="master_profile",
+        verbose_name=_("user"),
+    )
+    name = models.CharField(_("name"), max_length=255)
+    categories = models.ManyToManyField(
+        ServiceCategory,
+        blank=True,
+        related_name="masters",
+        verbose_name=_("categories"),
+    )
+
+    STATUS_ACTIVE = "active"
+    STATUS_INACTIVE = "inactive"
+    STATUS_CHOICES = [
+        (STATUS_ACTIVE, _("Active")),
+        (STATUS_INACTIVE, _("Inactive")),
+    ]
+    status = models.CharField(
+        _("status"),
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_ACTIVE,
+        db_index=True,
+    )
+
+    class Meta:
+        verbose_name = _("Master")
+        verbose_name_plural = _("Masters")
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class Service(AbstractBookableService):
+    name = models.CharField(_("name"), max_length=255)
+    category = models.ForeignKey(
+        ServiceCategory,
+        on_delete=models.CASCADE,
+        related_name="services",
+        verbose_name=_("category"),
+    )
+    masters = models.ManyToManyField(
+        Master,
+        blank=True,
+        related_name="services",
+        verbose_name=_("masters"),
+    )
+
+    class Meta:
+        verbose_name = _("Service")
+        verbose_name_plural = _("Services")
+        ordering = ["category", "name"]
+
+    def __str__(self):
+        return self.name
+
+
+class Appointment(AbstractBookableAppointment):
+    master = models.ForeignKey(
+        Master,
+        on_delete=models.CASCADE,
+        related_name="appointments",
+        verbose_name=_("master"),
+    )
+    service = models.ForeignKey(
+        Service,
+        on_delete=models.CASCADE,
+        related_name="appointments",
+        verbose_name=_("service"),
+    )
+    client = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="appointments",
+        verbose_name=_("client"),
+    )
+
+    class Meta:
+        verbose_name = _("Appointment")
+        verbose_name_plural = _("Appointments")
+        ordering = ["-datetime_start"]
+
+    def __str__(self):
+        return f"{self.client} → {self.master} ({self.datetime_start})"
+
+
+class MasterWorkingDay(AbstractWorkingDay):
+    master = models.ForeignKey(
+        Master,
+        on_delete=models.CASCADE,
+        related_name="working_days",
+        verbose_name=_("master"),
+    )
+
+    class Meta:
+        verbose_name = _("Working Day")
+        verbose_name_plural = _("Working Days")
+        unique_together = [("master", "weekday")]
+
+
+class MasterDayOff(MasterDayOffMixin):
+    master = models.ForeignKey(
+        Master,
+        on_delete=models.CASCADE,
+        related_name="days_off",
+        verbose_name=_("master"),
+    )
+
+    class Meta:
+        verbose_name = _("Day Off")
+        verbose_name_plural = _("Days Off")
+        unique_together = [("master", "date")]

@@ -1,0 +1,49 @@
+"""
+Client-facing views for the personal area (/cabinet/my/).
+
+All views require login. Override or extend as needed.
+"""
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+
+
+@login_required
+def profile_view(request):
+    """User profile page."""
+    return render(request, "cabinet/client/profile.html", {
+        "active_section": "profile",
+    })
+
+
+@login_required
+def my_appointments_view(request):
+    """My appointments / bookings list."""
+    return render(request, "cabinet/client/my_appointments.html", {
+        "active_section": "my",
+    })
+
+
+@login_required
+def settings_view(request):
+    """Account security settings."""
+    return render(request, "cabinet/client/settings.html", {
+        "active_section": "settings",
+    })
+
+
+@login_required
+def settings_notifications_view(request):
+    """Notification preferences."""
+    return render(request, "cabinet/client/settings_notifications.html", {
+        "active_section": "settings",
+        "notifications": [],  # populate from your notification model
+    })
+
+
+@login_required
+def settings_privacy_view(request):
+    """Privacy settings."""
+    return render(request, "cabinet/client/settings_privacy.html", {
+        "active_section": "settings",
+    })

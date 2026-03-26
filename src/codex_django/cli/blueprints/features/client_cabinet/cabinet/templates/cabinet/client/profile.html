@@ -1,0 +1,107 @@
+{% extends "cabinet/base_client.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "My Profile" %}{% endblock %}
+{% block page_title %}{% trans "My Profile" %}{% endblock %}
+
+{% block sidebar_nav %}
+<li>
+  <a href="{% url 'cabinet:my_appointments' %}"
+     class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2
+            {% if active_section == 'my' %}cab-nav__item--active{% endif %}"
+     hx-get="{% url 'cabinet:my_appointments' %}"
+     hx-target="#cab-content"
+     hx-push-url="true"
+     style="color: var(--cab-sidebar-text); transition: background 0.15s;">
+    <span class="bi bi-calendar-check fs-5 flex-shrink-0"></span>
+    <span class="cab-nav__label ms-3" style="white-space: nowrap;">{% trans "My Appointments" %}</span>
+  </a>
+</li>
+<li>
+  <a href="{% url 'cabinet:profile' %}"
+     class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2
+            {% if active_section == 'profile' %}cab-nav__item--active{% endif %}"
+     hx-get="{% url 'cabinet:profile' %}"
+     hx-target="#cab-content"
+     hx-push-url="true"
+     style="color: var(--cab-sidebar-text); transition: background 0.15s;">
+    <span class="bi bi-person fs-5 flex-shrink-0"></span>
+    <span class="cab-nav__label ms-3" style="white-space: nowrap;">{% trans "Profile" %}</span>
+  </a>
+</li>
+{% endblock %}
+
+{% block sidebar_settings_link %}
+<a href="{% url 'cabinet:settings' %}"
+   class="cab-nav__item d-flex align-items-center px-3 py-2 mx-2 rounded"
+   style="color: var(--cab-sidebar-text); transition: background 0.15s;">
+  <span class="bi bi-gear fs-5 flex-shrink-0"></span>
+  <span class="cab-nav__label ms-3" style="white-space: nowrap; font-size: 0.875rem;">{% trans "Settings" %}</span>
+</a>
+{% endblock %}
+
+{% block cabinet_content %}
+
+<div class="row g-4">
+
+  {# ─── Left col: avatar + quick info ─── #}
+  <div class="col-md-4">
+
+    <div class="card border-0 shadow-sm text-center p-4 mb-3">
+      <div class="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+           style="width:80px;height:80px;background:var(--cab-primary);font-size:1.75rem;">
+        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+      </div>
+      <h6 class="fw-semibold mb-0">{{ request.user.get_full_name|default:request.user.username }}</h6>
+      <hr>
+      <div class="d-flex justify-content-around text-center">
+        {% block profile_stats %}
+        <div>
+          <div class="fw-bold">—</div>
+          <div class="text-muted" style="font-size:.75rem;">{% trans "Visits" %}</div>
+        </div>
+        {% endblock %}
+      </div>
+    </div>
+
+  </div>
+
+  {# ─── Right col: personal data form ─── #}
+  <div class="col-md-8">
+
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white border-0 pt-3 pb-0">
+        <h6 class="fw-semibold mb-0">{% trans "Personal Data" %}</h6>
+      </div>
+      <div class="card-body">
+        {% block profile_form %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label text-muted" style="font-size:.8rem;">{% trans "First name" %}</label>
+            <input type="text" class="form-control" value="{{ request.user.first_name }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted" style="font-size:.8rem;">{% trans "Last name" %}</label>
+            <input type="text" class="form-control" value="{{ request.user.last_name }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted" style="font-size:.8rem;">{% trans "Phone" %}</label>
+            <input type="tel" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted" style="font-size:.8rem;">{% trans "Email" %}</label>
+            <input type="email" class="form-control" value="{{ request.user.email }}" readonly>
+          </div>
+          <div class="col-12 text-end">
+            <button class="btn btn-primary">{% trans "Save" %}</button>
+          </div>
+        </div>
+        {% endblock %}
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

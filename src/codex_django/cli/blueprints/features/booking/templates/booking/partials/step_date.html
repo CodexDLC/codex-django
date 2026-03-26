@@ -1,0 +1,184 @@
+{% load i18n %}
+
+<style>
+  .step-date__heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .step-date__nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .step-date__nav-btn {
+    background: none;
+    border: 1px solid var(--booking-border);
+    border-radius: var(--booking-radius);
+    padding: 0.4rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--booking-text);
+    transition: border-color 0.15s;
+  }
+
+  .step-date__nav-btn:hover {
+    border-color: var(--booking-primary);
+  }
+
+  .step-date__month-label {
+    font-weight: 600;
+  }
+
+  .step-date__table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+  }
+
+  .step-date__table th {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--booking-text-muted);
+    padding: 0.5rem 0;
+    text-transform: uppercase;
+  }
+
+  .step-date__table td {
+    padding: 0.25rem;
+  }
+
+  .step-date__day {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .step-date__day:hover {
+    background: var(--booking-bg-secondary);
+  }
+
+  .step-date__day--today {
+    font-weight: 700;
+    border: 2px solid var(--booking-primary);
+  }
+
+  .step-date__day--selected {
+    background: var(--booking-primary) !important;
+    color: #fff !important;
+  }
+
+  .step-date__day--disabled {
+    color: var(--booking-border);
+    pointer-events: none;
+  }
+
+  .step-date__day--other-month {
+    color: var(--booking-border);
+  }
+
+  .step-date__back {
+    display: inline-block;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--booking-text-muted);
+    cursor: pointer;
+    text-decoration: underline;
+  }
+</style>
+
+<div>
+  <div class="step-date__heading">{% trans "Choose a Date" %}</div>
+
+  <div class="step-date__nav">
+    {% with prev_month=month|add:"-1" prev_year=year %}
+    {% if prev_month == 0 %}
+    <button class="step-date__nav-btn"
+            hx-get="{% url 'booking:calendar' %}?service_id={{ service_id }}&year={{ year|add:'-1' }}&month=12"
+            hx-target="#booking-body" hx-swap="innerHTML">
+      &larr;
+    </button>
+    {% else %}
+    <button class="step-date__nav-btn"
+            hx-get="{% url 'booking:calendar' %}?service_id={{ service_id }}&year={{ year }}&month={{ prev_month }}"
+            hx-target="#booking-body" hx-swap="innerHTML">
+      &larr;
+    </button>
+    {% endif %}
+    {% endwith %}
+
+    <span class="step-date__month-label">{{ year }}-{{ month|stringformat:"02d" }}</span>
+
+    {% with next_month=month|add:"1" %}
+    {% if next_month == 13 %}
+    <button class="step-date__nav-btn"
+            hx-get="{% url 'booking:calendar' %}?service_id={{ service_id }}&year={{ year|add:'1' }}&month=1"
+            hx-target="#booking-body" hx-swap="innerHTML">
+      &rarr;
+    </button>
+    {% else %}
+    <button class="step-date__nav-btn"
+            hx-get="{% url 'booking:calendar' %}?service_id={{ service_id }}&year={{ year }}&month={{ next_month }}"
+            hx-target="#booking-body" hx-swap="innerHTML">
+      &rarr;
+    </button>
+    {% endif %}
+    {% endwith %}
+  </div>
+
+  <table class="step-date__table">
+    <thead>
+      <tr>
+        <th>{% trans "Mo" %}</th>
+        <th>{% trans "Tu" %}</th>
+        <th>{% trans "We" %}</th>
+        <th>{% trans "Th" %}</th>
+        <th>{% trans "Fr" %}</th>
+        <th>{% trans "Sa" %}</th>
+        <th>{% trans "Su" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for week in calendar_data %}
+      <tr>
+        {% for day in week.days %}
+        <td>
+          {% if day.day %}
+          <button class="step-date__day
+                         {% if day.is_today %}step-date__day--today{% endif %}
+                         {% if day.is_selected %}step-date__day--selected{% endif %}
+                         {% if day.is_past or not day.is_current_month %}step-date__day--disabled{% endif %}
+                         {% if not day.is_current_month %}step-date__day--other-month{% endif %}"
+                  {% if not day.is_past and day.is_current_month %}
+                  @click="selectDate('{{ day.date }}')"
+                  hx-get="{% url 'booking:slots' %}?service_id={{ service_id }}&date={{ day.date }}"
+                  hx-target="#booking-body"
+                  hx-swap="innerHTML"
+                  {% endif %}>
+            {{ day.day }}
+          </button>
+          {% endif %}
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <span class="step-date__back" @click="goToStep(1)"
+        hx-get="{% url 'booking:booking_page' %}"
+        hx-target="#booking-body" hx-swap="innerHTML">
+    &larr; {% trans "Back to services" %}
+  </span>
+</div>

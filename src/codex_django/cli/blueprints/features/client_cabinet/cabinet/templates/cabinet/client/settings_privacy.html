@@ -1,0 +1,135 @@
+{% extends "cabinet/base_client.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Privacy" %}{% endblock %}
+{% block page_title %}{% trans "Account" %}{% endblock %}
+
+{% block sidebar_nav %}
+  <li>
+    <a href="{% url 'cabinet:settings' %}"
+       class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2"
+       hx-get="{% url 'cabinet:settings' %}" hx-target="#cab-content" hx-push-url="true"
+       style="color: var(--cab-sidebar-text); transition: background 0.15s;">
+      <span class="bi bi-shield-lock fs-5 flex-shrink-0"></span>
+      <span class="cab-nav__label ms-3" style="white-space: nowrap;">{% trans "Security" %}</span>
+    </a>
+  </li>
+  <li>
+    <a href="{% url 'cabinet:settings_notifications' %}"
+       class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2"
+       hx-get="{% url 'cabinet:settings_notifications' %}" hx-target="#cab-content" hx-push-url="true"
+       style="color: var(--cab-sidebar-text); transition: background 0.15s;">
+      <span class="bi bi-bell fs-5 flex-shrink-0"></span>
+      <span class="cab-nav__label ms-3" style="white-space: nowrap;">{% trans "Notifications" %}</span>
+    </a>
+  </li>
+  <li>
+    <a href="{% url 'cabinet:settings_privacy' %}"
+       class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2 cab-nav__item--active"
+       hx-get="{% url 'cabinet:settings_privacy' %}" hx-target="#cab-content" hx-push-url="true"
+       style="color: var(--cab-sidebar-text); transition: background 0.15s;">
+      <span class="bi bi-eye-slash fs-5 flex-shrink-0"></span>
+      <span class="cab-nav__label ms-3" style="white-space: nowrap;">{% trans "Privacy" %}</span>
+    </a>
+  </li>
+{% endblock %}
+
+{% block sidebar_settings_link %}
+<a href="{% url 'cabinet:my_appointments' %}"
+   class="cab-nav__item d-flex align-items-center px-3 py-2 mx-2 rounded"
+   style="color: var(--cab-sidebar-text); transition: background 0.15s;">
+  <span class="bi bi-arrow-left fs-5 flex-shrink-0"></span>
+  <span class="cab-nav__label ms-3" style="white-space: nowrap; font-size: 0.875rem;">{% trans "Back" %}</span>
+</a>
+{% endblock %}
+
+{% block cabinet_content %}
+<div class="row g-4">
+  <div class="col-md-7">
+
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white border-0 pt-3 pb-0">
+        <h6 class="fw-semibold mb-0">{% trans "Profile Visibility" %}</h6>
+      </div>
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+          <div>
+            <div style="font-size:.9rem;">{% trans "Show profile photo" %}</div>
+            <div class="text-muted" style="font-size:.8rem;">{% trans "Other users will see your avatar" %}</div>
+          </div>
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" checked style="width:2.5rem;height:1.25rem;">
+          </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+          <div>
+            <div style="font-size:.9rem;">{% trans "Show birth date" %}</div>
+            <div class="text-muted" style="font-size:.8rem;">{% trans "Month and day only, no year" %}</div>
+          </div>
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" style="width:2.5rem;height:1.25rem;">
+          </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-between py-2">
+          <div>
+            <div style="font-size:.9rem;">{% trans "Show visit history" %}</div>
+            <div class="text-muted" style="font-size:.8rem;">{% trans "Staff can see previous bookings" %}</div>
+          </div>
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" checked style="width:2.5rem;height:1.25rem;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white border-0 pt-3 pb-0">
+        <h6 class="fw-semibold mb-0">{% trans "Data & Personalization" %}</h6>
+      </div>
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+          <div>
+            <div style="font-size:.9rem;">{% trans "Personal recommendations" %}</div>
+            <div class="text-muted" style="font-size:.8rem;">{% trans "Use history for service suggestions" %}</div>
+          </div>
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" checked style="width:2.5rem;height:1.25rem;">
+          </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-between py-2">
+          <div>
+            <div style="font-size:.9rem;">{% trans "Usage analytics" %}</div>
+            <div class="text-muted" style="font-size:.8rem;">{% trans "Helps improve the service" %}</div>
+          </div>
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" checked style="width:2.5rem;height:1.25rem;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 pt-3 pb-0">
+        <h6 class="fw-semibold mb-0">{% trans "Your Data" %}</h6>
+      </div>
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+          <div>
+            <div style="font-size:.9rem;">{% trans "Download my data" %}</div>
+            <div class="text-muted" style="font-size:.8rem;">{% trans "Export all account information" %}</div>
+          </div>
+          <button class="btn btn-sm btn-outline-secondary">{% trans "Request" %}</button>
+        </div>
+        <div class="d-flex align-items-center justify-content-between py-2">
+          <div>
+            <div style="font-size:.9rem;">{% trans "Clear browsing history" %}</div>
+            <div class="text-muted" style="font-size:.8rem;">{% trans "Remove recently viewed services" %}</div>
+          </div>
+          <button class="btn btn-sm btn-outline-secondary">{% trans "Clear" %}</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

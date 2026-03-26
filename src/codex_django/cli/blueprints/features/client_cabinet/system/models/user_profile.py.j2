@@ -1,0 +1,22 @@
+from django.db import models
+
+from codex_django.system.mixins import AbstractUserProfile
+
+
+class UserProfile(AbstractUserProfile):
+    """
+    Project-level user profile.
+
+    Extend this model with project-specific fields as needed.
+    """
+
+    # Add custom fields below, e.g.:
+    # preferred_language = models.CharField(max_length=10, blank=True)
+
+    class Meta:
+        verbose_name = "Профиль пользователя"
+        verbose_name_plural = "Профили пользователей"
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return self.get_full_name() or f"Profile #{self.pk}"

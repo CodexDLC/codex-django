@@ -1,0 +1,89 @@
+{% load i18n %}
+
+<style>
+  .step-time__heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .step-time__subheading {
+    font-size: 0.85rem;
+    color: var(--booking-text-muted);
+    margin-bottom: 1rem;
+  }
+
+  .step-time__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .step-time__slot {
+    padding: 0.6rem 0;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: 1px solid var(--booking-border);
+    border-radius: var(--booking-radius);
+    background: var(--booking-bg);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+  }
+
+  .step-time__slot:hover {
+    border-color: var(--booking-primary);
+  }
+
+  .step-time__slot--selected {
+    background: var(--booking-primary) !important;
+    color: #fff !important;
+    border-color: var(--booking-primary) !important;
+  }
+
+  .step-time__empty {
+    color: var(--booking-text-muted);
+    text-align: center;
+    padding: 2rem 0;
+  }
+
+  .step-time__back {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--booking-text-muted);
+    cursor: pointer;
+    text-decoration: underline;
+  }
+</style>
+
+<div x-data="{ selectedTime: null }">
+  <div class="step-time__heading">{% trans "Choose a Time" %}</div>
+  <div class="step-time__subheading">{{ target_date }}</div>
+
+  {% if slots %}
+  <div class="step-time__grid">
+    {% for slot in slots %}
+    <button class="step-time__slot"
+            :class="{ 'step-time__slot--selected': selectedTime === '{{ slot }}' }"
+            @click="selectedTime = '{{ slot }}'; $dispatch('select-time', { time: '{{ slot }}' })"
+            hx-get="{% url 'booking:confirm' %}?service_id={{ service_id }}&date={{ target_date }}&time={{ slot }}"
+            hx-target="#booking-body"
+            hx-swap="innerHTML">
+      {{ slot }}
+    </button>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="step-time__empty">
+    {% trans "No available slots for this date." %}
+  </div>
+  {% endif %}
+
+  <span class="step-time__back" @click="goToStep(2)"
+        hx-get="{% url 'booking:calendar' %}?service_id={{ service_id }}&selected_date={{ target_date }}"
+        hx-target="#booking-body" hx-swap="innerHTML">
+    &larr; {% trans "Back to calendar" %}
+  </span>
+</div>

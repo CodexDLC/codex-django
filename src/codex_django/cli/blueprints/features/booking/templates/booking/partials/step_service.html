@@ -1,0 +1,78 @@
+{% load i18n %}
+
+<style>
+  .step-service__heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .step-service__category {
+    margin-bottom: 1.5rem;
+  }
+
+  .step-service__category-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--booking-text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .step-service__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .step-service__card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--booking-border);
+    border-radius: var(--booking-radius);
+    background: var(--booking-bg);
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .step-service__card:hover {
+    border-color: var(--booking-primary);
+    box-shadow: 0 0 0 1px var(--booking-primary);
+  }
+
+  .step-service__name {
+    font-weight: 500;
+  }
+
+  .step-service__meta {
+    font-size: 0.8rem;
+    color: var(--booking-text-muted);
+  }
+</style>
+
+<div>
+  <div class="step-service__heading">{% trans "Choose a Service" %}</div>
+
+  {% for category in categories %}
+  <div class="step-service__category">
+    <div class="step-service__category-name">{{ category.name }}</div>
+    <div class="step-service__list">
+      {% for service in category.services.all %}
+      <div class="step-service__card"
+           @click="selectService({{ service.pk }}, '{{ service.name|escapejs }}')"
+           hx-get="{% url 'booking:calendar' %}?service_id={{ service.pk }}"
+           hx-target="#booking-body"
+           hx-swap="innerHTML">
+        <span class="step-service__name">{{ service.name }}</span>
+        <span class="step-service__meta">{{ service.duration }} {% trans "min" %}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% empty %}
+  <p style="color: var(--booking-text-muted);">{% trans "No services available." %}</p>
+  {% endfor %}
+</div>

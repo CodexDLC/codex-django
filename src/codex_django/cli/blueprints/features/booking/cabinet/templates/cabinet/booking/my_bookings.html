@@ -1,0 +1,249 @@
+{% extends "cabinet/base_client.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "My Bookings" %}{% endblock %}
+{% block page_title %}{% trans "My Bookings" %}{% endblock %}
+
+{% block sidebar_nav %}
+<li>
+  <a href="{% url 'cabinet:my_appointments' %}"
+     class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2
+            {% if active_section == 'my' %}cab-nav__item--active{% endif %}"
+     hx-get="{% url 'cabinet:my_appointments' %}"
+     hx-target="#cab-content"
+     hx-push-url="true"
+     style="color: var(--cab-sidebar-text); transition: background 0.15s;">
+    <span class="bi bi-calendar-check fs-5 flex-shrink-0"></span>
+    <span class="cab-nav__label ms-3" style="white-space: nowrap;">{% trans "My Appointments" %}</span>
+  </a>
+</li>
+<li>
+  <a href="{% url 'cabinet:my_bookings' %}"
+     class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2
+            {% if active_section == 'my_bookings' %}cab-nav__item--active{% endif %}"
+     hx-get="{% url 'cabinet:my_bookings' %}"
+     hx-target="#cab-content"
+     hx-push-url="true"
+     style="color: var(--cab-sidebar-text); transition: background 0.15s;">
+    <span class="bi bi-journal-bookmark fs-5 flex-shrink-0"></span>
+    <span class="cab-nav__label ms-3" style="white-space: nowrap;">{% trans "My Bookings" %}</span>
+  </a>
+</li>
+<li>
+  <a href="{% url 'cabinet:profile' %}"
+     class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2
+            {% if active_section == 'profile' %}cab-nav__item--active{% endif %}"
+     hx-get="{% url 'cabinet:profile' %}"
+     hx-target="#cab-content"
+     hx-push-url="true"
+     style="color: var(--cab-sidebar-text); transition: background 0.15s;">
+    <span class="bi bi-person fs-5 flex-shrink-0"></span>
+    <span class="cab-nav__label ms-3" style="white-space: nowrap;">{% trans "Profile" %}</span>
+  </a>
+</li>
+{% endblock %}
+
+{% block sidebar_settings_link %}
+<a href="{% url 'cabinet:settings' %}"
+   class="cab-nav__item d-flex align-items-center px-3 py-2 mx-2 rounded"
+   style="color: var(--cab-sidebar-text); transition: background 0.15s;">
+  <span class="bi bi-gear fs-5 flex-shrink-0"></span>
+  <span class="cab-nav__label ms-3" style="white-space: nowrap; font-size: 0.875rem;">{% trans "Settings" %}</span>
+</a>
+{% endblock %}
+
+{% block cabinet_content %}
+
+{# ─── Stats row ─── #}
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="rounded-circle d-flex align-items-center justify-content-center"
+             style="width:48px;height:48px;background:#ede9fe;flex-shrink:0;">
+          <span class="bi bi-calendar-check fs-5" style="color:#7c3aed;"></span>
+        </div>
+        <div>
+          <div class="text-muted" style="font-size:.75rem;">{% trans "Upcoming" %}</div>
+          <div class="fw-bold fs-4">{{ stats.upcoming }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="rounded-circle d-flex align-items-center justify-content-center"
+             style="width:48px;height:48px;background:#dcfce7;flex-shrink:0;">
+          <span class="bi bi-check-circle fs-5" style="color:#16a34a;"></span>
+        </div>
+        <div>
+          <div class="text-muted" style="font-size:.75rem;">{% trans "Completed" %}</div>
+          <div class="fw-bold fs-4">{{ stats.completed }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="rounded-circle d-flex align-items-center justify-content-center"
+             style="width:48px;height:48px;background:#fee2e2;flex-shrink:0;">
+          <span class="bi bi-x-circle fs-5" style="color:#dc2626;"></span>
+        </div>
+        <div>
+          <div class="text-muted" style="font-size:.75rem;">{% trans "Cancelled" %}</div>
+          <div class="fw-bold fs-4">{{ stats.cancelled }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ─── Status filter tabs ─── #}
+<div class="d-flex gap-2 mb-4 flex-wrap">
+  <a href="{% url 'cabinet:my_bookings' %}"
+     class="btn btn-sm {% if not status_filter %}btn-dark{% else %}btn-outline-secondary{% endif %}"
+     style="font-size:.8rem;border-radius:20px;">
+    {% trans "All" %}
+  </a>
+  <a href="{% url 'cabinet:my_bookings' %}?status=pending"
+     class="btn btn-sm {% if status_filter == 'pending' %}btn-dark{% else %}btn-outline-secondary{% endif %}"
+     style="font-size:.8rem;border-radius:20px;">
+    {% trans "Pending" %}
+  </a>
+  <a href="{% url 'cabinet:my_bookings' %}?status=confirmed"
+     class="btn btn-sm {% if status_filter == 'confirmed' %}btn-dark{% else %}btn-outline-secondary{% endif %}"
+     style="font-size:.8rem;border-radius:20px;">
+    {% trans "Confirmed" %}
+  </a>
+  <a href="{% url 'cabinet:my_bookings' %}?status=completed"
+     class="btn btn-sm {% if status_filter == 'completed' %}btn-dark{% else %}btn-outline-secondary{% endif %}"
+     style="font-size:.8rem;border-radius:20px;">
+    {% trans "Completed" %}
+  </a>
+  <a href="{% url 'cabinet:my_bookings' %}?status=cancelled"
+     class="btn btn-sm {% if status_filter == 'cancelled' %}btn-dark{% else %}btn-outline-secondary{% endif %}"
+     style="font-size:.8rem;border-radius:20px;">
+    {% trans "Cancelled" %}
+  </a>
+</div>
+
+{# ─── Bookings table ─── #}
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white border-0 pt-3 pb-0 d-flex align-items-center justify-content-between">
+    <h6 class="fw-semibold mb-0">{% trans "My Bookings" %}</h6>
+    <a href="{% url 'booking:booking_page' %}" class="btn btn-sm btn-primary">
+      + {% trans "Book Now" %}
+    </a>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th class="ps-4" style="font-size:.75rem;font-weight:600;color:#64748b;">{% trans "DATE AND TIME" %}</th>
+          <th style="font-size:.75rem;font-weight:600;color:#64748b;">{% trans "SERVICE" %}</th>
+          <th style="font-size:.75rem;font-weight:600;color:#64748b;">{% trans "SPECIALIST" %}</th>
+          <th style="font-size:.75rem;font-weight:600;color:#64748b;">{% trans "STATUS" %}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for appt in page_obj %}
+        <tr>
+          <td class="ps-4">
+            <div class="fw-semibold">{{ appt.datetime_start|date:"j F Y" }}</div>
+            <div class="text-muted" style="font-size:.8rem;">{{ appt.datetime_start|time:"H:i" }}</div>
+          </td>
+          <td>{{ appt.service.name }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+                    style="width:28px;height:28px;background:var(--cab-primary);font-size:.7rem;">
+                {{ appt.master.name|make_list|first }}
+              </span>
+              {{ appt.master.name }}
+            </div>
+          </td>
+          <td>
+            {% if appt.status == 'confirmed' %}
+            <span class="badge" style="background:#dcfce7;color:#16a34a;">{% trans "Confirmed" %}</span>
+            {% elif appt.status == 'pending' %}
+            <span class="badge" style="background:#fef9c3;color:#ca8a04;">{% trans "Pending" %}</span>
+            {% elif appt.status == 'completed' %}
+            <span class="badge" style="background:#dcfce7;color:#16a34a;">{% trans "Completed" %}</span>
+            {% elif appt.status == 'cancelled' %}
+            <span class="badge" style="background:#fee2e2;color:#dc2626;">{% trans "Cancelled" %}</span>
+            {% elif appt.status == 'no_show' %}
+            <span class="badge" style="background:#f1f5f9;color:#64748b;">{% trans "No Show" %}</span>
+            {% else %}
+            <span class="badge" style="background:#f1f5f9;color:#64748b;">{{ appt.get_status_display }}</span>
+            {% endif %}
+          </td>
+          <td class="text-end pe-3">
+            {% if appt.status == 'pending' or appt.status == 'confirmed' %}
+            <button class="btn btn-sm btn-outline-danger"
+                    hx-post="{% url 'cabinet:cancel_booking' appt.pk %}"
+                    hx-target="#cab-content"
+                    hx-confirm="{% trans 'Cancel this booking?' %}">
+              {% trans "Cancel" %}
+            </button>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center py-5">
+            <span class="bi bi-calendar-x fs-1 text-muted d-block mb-2"></span>
+            <p class="text-muted mb-0">{% trans "No bookings found" %}</p>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+  <div class="card-footer bg-white border-0 d-flex align-items-center justify-content-between py-3 px-4">
+    <span class="text-muted" style="font-size:.8rem;">
+      {% blocktrans with start=page_obj.start_index end=page_obj.end_index total=page_obj.paginator.count %}
+        Showing {{ start }}–{{ end }} of {{ total }}
+      {% endblocktrans %}
+    </span>
+    <nav>
+      <ul class="pagination pagination-sm mb-0">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">«</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <a class="page-link" href="#">«</a>
+        </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+          <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}"
+             {% if page_obj.number == num %}style="background:var(--cab-primary);border-color:var(--cab-primary);"{% endif %}>
+            {{ num }}
+          </a>
+        </li>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">»</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <a class="page-link" href="#">»</a>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
