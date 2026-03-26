@@ -35,12 +35,12 @@ def handle_add_notifications(app_name: str, base_dir: str, arq_dir: str | None =
 
     # --- Feature files ---
     feature_target = os.path.join(base_dir, "features", app_name)
-    engine.scaffold("notifications/feature", target_dir=feature_target, context=context)
+    engine.scaffold("features/notifications/feature", target_dir=feature_target, context=context)
     console.print(f"[green]✓[/green] Notification feature scaffolded → [bold]features/{app_name}/[/bold]")
 
     # --- ARQ client ---
     arq_target = os.path.join(base_dir, arq_dir) if arq_dir else os.path.join(base_dir, "core", "arq")
-    engine.scaffold("notifications/arq", target_dir=arq_target, context=context)
+    engine.scaffold("features/notifications/arq", target_dir=arq_target, context=context)
     arq_rel = arq_dir or "core/arq"
     console.print(f"[green]✓[/green] ARQ client scaffolded → [bold]{arq_rel}/[/bold]")
 

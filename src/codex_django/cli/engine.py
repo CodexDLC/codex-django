@@ -3,7 +3,7 @@ import os
 import shutil
 from typing import Any
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2 import Environment, FileSystemLoader, TemplateNotFound, select_autoescape
 
 
 class CLIEngine:
@@ -27,7 +27,10 @@ class CLIEngine:
         """
         Render a Jinja2 template with the given context.
         """
-        template = self.env.get_template(template_name)
+        try:
+            template = self.env.get_template(template_name)
+        except TemplateNotFound as exc:
+            raise ValueError(f"Template not found: {template_name}") from exc
         return template.render(**context)
 
     def scaffold(self, blueprint_name: str, target_dir: str, context: dict[str, Any], overwrite: bool = False) -> None:
