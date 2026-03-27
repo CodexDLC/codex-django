@@ -11,6 +11,7 @@ pytestmark = pytest.mark.unit
 @pytest.fixture
 def adapter(adapter_models):
     from codex_django.booking.adapters.availability import DjangoAvailabilityAdapter
+
     cache = MagicMock()
     cache.get_busy.return_value = None
     with patch("codex_django.booking.adapters.availability.SlotCalculator"):
@@ -31,12 +32,14 @@ def adapter(adapter_models):
 # __init__ / construction
 # ---------------------------------------------------------------------------
 
+
 class TestDjangoAvailabilityAdapterInit:
     def test_step_minutes_stored(self, adapter):
         assert adapter.step_minutes == 30
 
     def test_status_filter_default_includes_pending_and_confirmed(self, adapter_models):
         from codex_django.booking.adapters.availability import DjangoAvailabilityAdapter
+
         adapter_models["appointment"].STATUS_PENDING = "pending"
         adapter_models["appointment"].STATUS_CONFIRMED = "confirmed"
         with patch("codex_django.booking.adapters.availability.SlotCalculator"):
@@ -55,6 +58,7 @@ class TestDjangoAvailabilityAdapterInit:
 
     def test_status_filter_includes_reschedule_if_present(self, adapter_models):
         from codex_django.booking.adapters.availability import DjangoAvailabilityAdapter
+
         adapter_models["appointment"].STATUS_RESCHEDULE_PROPOSED = "reschedule_proposed"
         with patch("codex_django.booking.adapters.availability.SlotCalculator"):
             a = DjangoAvailabilityAdapter(
@@ -71,6 +75,7 @@ class TestDjangoAvailabilityAdapterInit:
 
     def test_custom_status_filter_respected(self, adapter_models):
         from codex_django.booking.adapters.availability import DjangoAvailabilityAdapter
+
         with patch("codex_django.booking.adapters.availability.SlotCalculator"):
             a = DjangoAvailabilityAdapter(
                 master_model=adapter_models["master"],
@@ -86,6 +91,7 @@ class TestDjangoAvailabilityAdapterInit:
 
     def test_default_cache_adapter_created_when_not_provided(self, adapter_models):
         from codex_django.booking.adapters.availability import DjangoAvailabilityAdapter
+
         with (
             patch("codex_django.booking.adapters.availability.SlotCalculator"),
             patch("codex_django.booking.adapters.availability.BookingCacheAdapter") as mock_cls,
@@ -106,6 +112,7 @@ class TestDjangoAvailabilityAdapterInit:
 # ---------------------------------------------------------------------------
 # _resolve_master_ids
 # ---------------------------------------------------------------------------
+
 
 class TestResolveMasterIds:
     def test_returns_locked_master_id_when_provided(self, adapter):
@@ -179,6 +186,7 @@ class TestResolveMasterIds:
 # _normalize_master_selections
 # ---------------------------------------------------------------------------
 
+
 class TestNormalizeMasterSelections:
     def test_returns_empty_for_none(self, adapter):
         assert adapter._normalize_master_selections([5, 7], None) == {}
@@ -203,6 +211,7 @@ class TestNormalizeMasterSelections:
 # ---------------------------------------------------------------------------
 # get_working_hours
 # ---------------------------------------------------------------------------
+
 
 class TestGetWorkingHours:
     def _master(self, tz="UTC", work_start=None, work_end=None):
@@ -287,6 +296,7 @@ class TestGetWorkingHours:
 # get_break_interval
 # ---------------------------------------------------------------------------
 
+
 class TestGetBreakInterval:
     def _master(self, tz="UTC", break_start=None, break_end=None):
         m = MagicMock()
@@ -335,6 +345,7 @@ class TestGetBreakInterval:
 # ---------------------------------------------------------------------------
 # _get_busy_intervals
 # ---------------------------------------------------------------------------
+
 
 class TestGetBusyIntervals:
     def _make_appointment(self, master_id, start_dt, duration_minutes):
@@ -405,6 +416,7 @@ class TestGetBusyIntervals:
 # result_to_slots_map
 # ---------------------------------------------------------------------------
 
+
 class TestResultToSlotsMap:
     def test_empty_result_gives_empty_dict(self, adapter):
         mock_result = MagicMock()
@@ -427,6 +439,7 @@ class TestResultToSlotsMap:
 # ---------------------------------------------------------------------------
 # lock_masters
 # ---------------------------------------------------------------------------
+
 
 class TestLockMasters:
     def test_noop_when_empty_list(self, adapter, adapter_models):
@@ -461,6 +474,7 @@ class TestLockMasters:
 # _get_buffer_minutes
 # ---------------------------------------------------------------------------
 
+
 class TestGetBufferMinutes:
     def test_uses_master_buffer_when_set(self, adapter):
         master = MagicMock()
@@ -488,6 +502,7 @@ class TestGetBufferMinutes:
 # ---------------------------------------------------------------------------
 # _get_tz
 # ---------------------------------------------------------------------------
+
 
 class TestGetTz:
     def test_uses_master_timezone(self, adapter):
@@ -519,6 +534,7 @@ class TestGetTz:
 # build_engine_request
 # ---------------------------------------------------------------------------
 
+
 class TestBuildEngineRequest:
     def test_returns_service_requests(self, adapter, adapter_models):
         service = MagicMock()
@@ -529,9 +545,7 @@ class TestBuildEngineRequest:
         adapter_models["service"].objects.filter.return_value.select_related.return_value = [service]
 
         with patch.object(adapter, "_resolve_master_ids", return_value=["1", "2"]):
-            result = adapter.build_engine_request(
-                service_ids=[5], target_date=date(2025, 1, 6)
-            )
+            result = adapter.build_engine_request(service_ids=[5], target_date=date(2025, 1, 6))
         assert len(result.service_requests) == 1
         sr = result.service_requests[0]
         assert sr.service_id == "5"
@@ -541,15 +555,15 @@ class TestBuildEngineRequest:
     def test_skips_service_not_in_db_raises_validation(self, adapter, adapter_models):
         """BookingEngineRequest requires >=1 service_request; missing service → ValidationError."""
         from pydantic import ValidationError
+
         adapter_models["service"].objects.filter.return_value.select_related.return_value = []
         with pytest.raises(ValidationError):
-            adapter.build_engine_request(
-                service_ids=[999], target_date=date(2025, 1, 6)
-            )
+            adapter.build_engine_request(service_ids=[999], target_date=date(2025, 1, 6))
 
     def test_skips_service_with_no_masters_raises_validation(self, adapter, adapter_models):
         """If _resolve_master_ids returns [] for all services → ValidationError."""
         from pydantic import ValidationError
+
         service = MagicMock()
         service.id = 5
         service.duration = 60
@@ -558,9 +572,7 @@ class TestBuildEngineRequest:
             patch.object(adapter, "_resolve_master_ids", return_value=[]),
             pytest.raises(ValidationError),
         ):
-            adapter.build_engine_request(
-                service_ids=[5], target_date=date(2025, 1, 6)
-            )
+            adapter.build_engine_request(service_ids=[5], target_date=date(2025, 1, 6))
 
     def test_booking_date_on_request(self, adapter, adapter_models):
         service = MagicMock()
@@ -570,9 +582,7 @@ class TestBuildEngineRequest:
         service.parallel_group = None
         adapter_models["service"].objects.filter.return_value.select_related.return_value = [service]
         with patch.object(adapter, "_resolve_master_ids", return_value=["1"]):
-            result = adapter.build_engine_request(
-                service_ids=[5], target_date=date(2025, 3, 15)
-            )
+            result = adapter.build_engine_request(service_ids=[5], target_date=date(2025, 3, 15))
         assert result.booking_date == date(2025, 3, 15)
 
     def test_multiple_services(self, adapter, adapter_models):
@@ -588,9 +598,7 @@ class TestBuildEngineRequest:
         svc2.parallel_group = None
         adapter_models["service"].objects.filter.return_value.select_related.return_value = [svc1, svc2]
         with patch.object(adapter, "_resolve_master_ids", return_value=["1"]):
-            result = adapter.build_engine_request(
-                service_ids=[1, 2], target_date=date(2025, 1, 6)
-            )
+            result = adapter.build_engine_request(service_ids=[1, 2], target_date=date(2025, 1, 6))
         assert len(result.service_requests) == 2
 
     def test_passes_mode_to_booking_engine_request(self, adapter, adapter_models):

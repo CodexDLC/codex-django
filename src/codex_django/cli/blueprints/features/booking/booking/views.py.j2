@@ -1,12 +1,20 @@
 """
 Booking views — public booking wizard with HTMX + Alpine.js.
+
+Solo mode (single service):
+    POST /confirm/ with service_id=<int>
+
+Multi-service mode:
+    POST /confirm/ with service_ids=<int>&service_ids=<int>&...
+    Requires a BookingPersistenceHook implementation — see wiki.md for details.
 """
 
 from __future__ import annotations
 
+import json
 from datetime import date, datetime
 
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_GET, require_POST
 
@@ -53,7 +61,11 @@ def get_calendar_view(request):
 
 @require_GET
 def get_slots_view(request):
-    """HTMX endpoint — returns available time slots for a date + service."""
+    """HTMX endpoint — returns available time slots for a date + service.
+
+    For multi-service, pass the first (primary) service_id — the engine
+    will compute intersected availability during confirm_booking_view.
+    """
     service_id = request.GET.get("service_id")
     target = request.GET.get("date")
 
@@ -61,9 +73,8 @@ def get_slots_view(request):
         return HttpResponse("Missing parameters", status=400)
 
     target_date = datetime.strptime(target, "%Y-%m-%d").date()
-    service_ids = [int(service_id)]
 
-    result = get_available_slots(service_ids=service_ids, target_date=target_date)
+    result = get_available_slots(service_ids=[int(service_id)], target_date=target_date)
     slots = result.get_unique_start_times() if result.solutions else []
 
     return render(request, "booking/partials/step_time.html", {
@@ -75,13 +86,31 @@ def get_slots_view(request):
 
 @require_POST
 def confirm_booking_view(request):
-    """Final step — creates the booking."""
-    service_id = request.POST.get("service_id")
+    """Final step — creates the booking.
+
+    Solo mode (single service_id):
+        Creates one Appointment, no persistence hook needed.
+
+    Multi-service mode (multiple service_ids):
+        Requires BookingPersistenceHook — implement it in this project
+        and pass it as persistence_hook=. See wiki.md for details.
+
+    POST parameters:
+        service_id  — single service (solo mode, legacy)
+        service_ids — one or more service ids (multi-service mode preferred)
+        date        — YYYY-MM-DD
+        time        — time string as returned by get_available_slots()
+        master_id   — optional, leave blank for "any master"
+        master_selections — optional JSON: {"<service_id>": <master_id>}
+    """
     target = request.POST.get("date")
     selected_time = request.POST.get("time")
-    master_id = request.POST.get("master_id")
 
-    if not all([service_id, target, selected_time, master_id]):
+    # Resolve service_ids: prefer multi-value list, fall back to single service_id
+    raw_ids = request.POST.getlist("service_ids") or [request.POST.get("service_id")]
+    service_ids = [int(s) for s in raw_ids if s]
+
+    if not service_ids or not target or not selected_time:
         return HttpResponse("Missing parameters", status=400)
 
     if not request.user.is_authenticated:
@@ -89,25 +118,57 @@ def confirm_booking_view(request):
 
     target_date = datetime.strptime(target, "%Y-%m-%d").date()
 
+    # master_id (solo) or master_selections JSON (multi)
+    master_id_raw = request.POST.get("master_id")
+    master_id = int(master_id_raw) if master_id_raw else None
+
+    master_selections = None
+    master_selections_raw = request.POST.get("master_selections")
+    if master_selections_raw:
+        try:
+            master_selections = {
+                int(k): (int(v) if v else None)
+                for k, v in json.loads(master_selections_raw).items()
+            }
+        except (json.JSONDecodeError, ValueError):
+            return HttpResponse("Invalid master_selections format", status=400)
+
+    persistence_hook = None
+    if len(service_ids) > 1:
+        # TODO: Implement BookingPersistenceHook for multi-service support.
+        # Example:
+        #   from .hooks import MyBookingPersistenceHook
+        #   persistence_hook = MyBookingPersistenceHook()
+        # See wiki.md — "Multi-service bookings" section for full details.
+        return HttpResponse(
+            "Multi-service booking requires BookingPersistenceHook. "
+            "See booking/wiki.md for implementation guide.",
+            status=501,
+        )
+
     try:
-        appointment = create_booking(
-            service_ids=[int(service_id)],
+        result = create_booking(
+            service_ids=service_ids,
             target_date=target_date,
             selected_time=selected_time,
-            master_id=int(master_id),
+            master_id=master_id,
+            master_selections=master_selections,
             client=request.user,
-            extra_fields={"service_id": int(service_id)},
+            extra_fields={"service_id": service_ids[0]},
+            persistence_hook=persistence_hook,
         )
     except Exception as e:
         return render(request, "booking/partials/step_confirm.html", {
             "error": str(e),
-            "service_id": service_id,
+            "service_ids": service_ids,
             "date": target,
             "time": selected_time,
-            "master_id": master_id,
         })
 
+    # Solo mode returns a single Appointment; multi mode returns a list via hook.
+    appointments = result if isinstance(result, list) else [result]
+
     return render(request, "booking/partials/step_confirm.html", {
-        "appointment": appointment,
+        "appointments": appointments,
         "success": True,
     })

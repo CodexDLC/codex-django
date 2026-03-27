@@ -75,3 +75,68 @@ Public booking page:
 
 Cabinet:
 - `GET /cabinet/my/bookings/` — client's bookings list
+
+## Multi-service Bookings
+
+By default the booking wizard runs in **solo mode** (one service per booking).
+To support booking multiple services in a single session, implement `BookingPersistenceHook`.
+
+### 1. Implement the hook
+
+Create `booking/hooks.py` in your project:
+
+```python
+from __future__ import annotations
+from typing import Any
+from .models import Appointment
+
+
+class MyBookingPersistenceHook:
+    """Persists a multi-service chain as individual Appointment rows."""
+
+    def persist_chain(
+        self,
+        solution: Any,
+        service_ids: list[int],
+        client: Any,
+        extra_fields: dict[str, Any] | None = None,
+    ) -> list[Appointment]:
+        appointments = []
+        for item in solution.items:
+            appointments.append(
+                Appointment.objects.create(
+                    master_id=item.master_id,
+                    service_id=item.service_id,
+                    start_time=item.start_time,
+                    end_time=item.end_time,
+                    client=client,
+                    **(extra_fields or {}),
+                )
+            )
+        return appointments
+```
+
+### 2. Wire it into the confirm view
+
+In `booking/views.py`, find the TODO comment and replace it:
+
+```python
+from .hooks import MyBookingPersistenceHook
+
+# inside confirm_booking_view, replace the TODO block:
+if len(service_ids) > 1:
+    persistence_hook = MyBookingPersistenceHook()
+```
+
+### 3. Update the confirm form
+
+Your form should send multiple `service_ids` values:
+
+```html
+<input type="hidden" name="service_ids" value="3">
+<input type="hidden" name="service_ids" value="7">
+<!-- optional per-service master selection as JSON -->
+<input type="hidden" name="master_selections" value='{"3": 10, "7": null}'>
+```
+
+A `null` value for a service means "any available master".

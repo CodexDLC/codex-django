@@ -20,9 +20,7 @@ def mock_adapter():
     request = MagicMock()
     request.service_requests = [sr]
     adapter.build_engine_request.return_value = request
-    adapter.build_masters_availability.return_value = {
-        "1": MagicMock(), "2": MagicMock()
-    }
+    adapter.build_masters_availability.return_value = {"1": MagicMock(), "2": MagicMock()}
     adapter.lock_masters.return_value = None
     return adapter
 
@@ -42,11 +40,13 @@ def mock_finder():
 # get_available_slots
 # ---------------------------------------------------------------------------
 
+
 class TestGetAvailableSlots:
     def test_calls_build_engine_request(self, mock_adapter, mock_finder):
         finder, _ = mock_finder
         with patch("codex_django.booking.selectors.ChainFinder", return_value=finder):
             from codex_django.booking.selectors import get_available_slots
+
             get_available_slots(mock_adapter, [1, 2], date(2025, 1, 6))
         mock_adapter.build_engine_request.assert_called_once_with(
             service_ids=[1, 2],
@@ -65,6 +65,7 @@ class TestGetAvailableSlots:
         mock_adapter.build_engine_request.return_value.service_requests = [sr]
         with patch("codex_django.booking.selectors.ChainFinder", return_value=finder):
             from codex_django.booking.selectors import get_available_slots
+
             get_available_slots(mock_adapter, [1], date(2025, 1, 6))
         called_ids = mock_adapter.build_masters_availability.call_args[1]["master_ids"]
         assert sorted(called_ids) == [1, 2]
@@ -74,6 +75,7 @@ class TestGetAvailableSlots:
         finder, engine_result = mock_finder
         with patch("codex_django.booking.selectors.ChainFinder", return_value=finder) as finder_cls:
             from codex_django.booking.selectors import get_available_slots
+
             get_available_slots(mock_adapter, [1], date(2025, 1, 6), max_solutions=10)
         finder_cls.assert_called_once_with(step_minutes=30)
         finder.find.assert_called_once()
@@ -82,6 +84,7 @@ class TestGetAvailableSlots:
         finder, engine_result = mock_finder
         with patch("codex_django.booking.selectors.ChainFinder", return_value=finder):
             from codex_django.booking.selectors import get_available_slots
+
             result = get_available_slots(mock_adapter, [1], date(2025, 1, 6))
         assert result is engine_result
 
@@ -89,6 +92,7 @@ class TestGetAvailableSlots:
         finder, _ = mock_finder
         with patch("codex_django.booking.selectors.ChainFinder", return_value=finder):
             from codex_django.booking.selectors import get_available_slots
+
             get_available_slots(mock_adapter, [1], date(2025, 1, 6), cache_ttl=60)
         assert mock_adapter.build_masters_availability.call_args[1]["cache_ttl"] == 60
 
@@ -96,6 +100,7 @@ class TestGetAvailableSlots:
         finder, _ = mock_finder
         with patch("codex_django.booking.selectors.ChainFinder", return_value=finder):
             from codex_django.booking.selectors import get_available_slots
+
             get_available_slots(mock_adapter, [1], date(2025, 1, 6), locked_master_id=5)
         mock_adapter.build_engine_request.assert_called_once_with(
             service_ids=[1],
@@ -111,6 +116,7 @@ class TestGetAvailableSlots:
         finder, _ = mock_finder
         with patch("codex_django.booking.selectors.ChainFinder", return_value=finder):
             from codex_django.booking.selectors import get_available_slots
+
             get_available_slots(mock_adapter, [1], date(2025, 1, 6), max_solutions=5)
         call_kwargs = finder.find.call_args[1]
         assert call_kwargs["max_solutions"] == 5
@@ -144,6 +150,7 @@ class TestGetAvailableSlots:
 # get_calendar_data
 # ---------------------------------------------------------------------------
 
+
 class TestGetCalendarData:
     def test_returns_matrix_from_calendar_engine(self):
         engine_module = ModuleType("codex_services.calendar.engine")
@@ -151,6 +158,7 @@ class TestGetCalendarData:
         engine_module.CalendarEngine.get_month_matrix.return_value = [{"day": 1}]
         with patch.dict("sys.modules", {"codex_services.calendar.engine": engine_module}):
             from codex_django.booking.selectors import get_calendar_data
+
             result = get_calendar_data(2025, 1)
         assert result == [{"day": 1}]
         engine_module.CalendarEngine.get_month_matrix.assert_called_once()
@@ -161,6 +169,7 @@ class TestGetCalendarData:
         engine_module.CalendarEngine.get_month_matrix.return_value = []
         with patch.dict("sys.modules", {"codex_services.calendar.engine": engine_module}):
             from codex_django.booking.selectors import get_calendar_data
+
             get_calendar_data(2025, 1)
         call_kwargs = engine_module.CalendarEngine.get_month_matrix.call_args[1]
         assert "today" in call_kwargs
@@ -173,6 +182,7 @@ class TestGetCalendarData:
         engine_module.CalendarEngine.get_month_matrix.return_value = []
         with patch.dict("sys.modules", {"codex_services.calendar.engine": engine_module}):
             from codex_django.booking.selectors import get_calendar_data
+
             get_calendar_data(2025, 1, selected_date=selected)
         call_kwargs = engine_module.CalendarEngine.get_month_matrix.call_args[1]
         assert call_kwargs["selected_date"] == selected
@@ -183,6 +193,7 @@ class TestGetCalendarData:
         engine_module.CalendarEngine.get_month_matrix.return_value = []
         with patch.dict("sys.modules", {"codex_services.calendar.engine": engine_module}):
             from codex_django.booking.selectors import get_calendar_data
+
             get_calendar_data(2025, 1)
         call_kwargs = engine_module.CalendarEngine.get_month_matrix.call_args[1]
         assert call_kwargs["holidays_subdiv"] == "ST"
@@ -193,6 +204,7 @@ class TestGetCalendarData:
         engine_module.CalendarEngine.get_month_matrix.return_value = []
         with patch.dict("sys.modules", {"codex_services.calendar.engine": engine_module}):
             from codex_django.booking.selectors import get_calendar_data
+
             get_calendar_data(2025, 1, holidays_subdiv="BY")
         call_kwargs = engine_module.CalendarEngine.get_month_matrix.call_args[1]
         assert call_kwargs["holidays_subdiv"] == "BY"
@@ -202,11 +214,13 @@ class TestGetCalendarData:
 # get_nearest_slots
 # ---------------------------------------------------------------------------
 
+
 class TestGetNearestSlots:
     def test_calls_find_nearest(self, mock_adapter, mock_finder):
         finder, engine_result = mock_finder
         with patch("codex_django.booking.selectors.ChainFinder", return_value=finder):
             from codex_django.booking.selectors import get_nearest_slots
+
             get_nearest_slots(mock_adapter, [1], date(2025, 1, 6), search_days=30)
         finder.find_nearest.assert_called_once()
 
@@ -214,6 +228,7 @@ class TestGetNearestSlots:
         finder, engine_result = mock_finder
         with patch("codex_django.booking.selectors.ChainFinder", return_value=finder):
             from codex_django.booking.selectors import get_nearest_slots
+
             result = get_nearest_slots(mock_adapter, [1], date(2025, 1, 6))
         assert result is engine_result
 
@@ -221,6 +236,7 @@ class TestGetNearestSlots:
         finder, _ = mock_finder
         with patch("codex_django.booking.selectors.ChainFinder", return_value=finder):
             from codex_django.booking.selectors import get_nearest_slots
+
             get_nearest_slots(mock_adapter, [1], date(2025, 1, 6), search_days=14)
         call_kwargs = finder.find_nearest.call_args[1]
         assert call_kwargs["search_days"] == 14
@@ -229,6 +245,7 @@ class TestGetNearestSlots:
         finder, _ = mock_finder
         with patch("codex_django.booking.selectors.ChainFinder", return_value=finder):
             from codex_django.booking.selectors import get_nearest_slots
+
             get_nearest_slots(mock_adapter, [1], date(2025, 1, 6))
         call_kwargs = finder.find_nearest.call_args[1]
         assert callable(call_kwargs["get_availability_for_date"])
@@ -237,6 +254,7 @@ class TestGetNearestSlots:
         finder, _ = mock_finder
         with patch("codex_django.booking.selectors.ChainFinder", return_value=finder):
             from codex_django.booking.selectors import get_nearest_slots
+
             get_nearest_slots(mock_adapter, [1], date(2025, 1, 6))
         fn = finder.find_nearest.call_args[1]["get_availability_for_date"]
         fn(date(2025, 1, 7))
@@ -248,6 +266,7 @@ class TestGetNearestSlots:
         finder, _ = mock_finder
         with patch("codex_django.booking.selectors.ChainFinder", return_value=finder):
             from codex_django.booking.selectors import get_nearest_slots
+
             get_nearest_slots(mock_adapter, [1], date(2025, 2, 1))
         call_kwargs = finder.find_nearest.call_args[1]
         assert call_kwargs["search_from"] == date(2025, 2, 1)
@@ -281,6 +300,7 @@ class TestGetNearestSlots:
 # create_booking — unit (fully mocked transaction)
 # ---------------------------------------------------------------------------
 
+
 class TestCreateBookingUnit:
     def _setup_mocks(self, available_times):
         """Return configured mocks for create_booking tests."""
@@ -304,6 +324,7 @@ class TestCreateBookingUnit:
                 from codex_services.booking.slot_master import SlotAlreadyBookedError  # noqa: PLC0415
 
                 from codex_django.booking.selectors import create_booking  # noqa: PLC0415
+
                 with pytest.raises(SlotAlreadyBookedError):
                     create_booking(
                         adapter=mock_adapter,
@@ -330,6 +351,7 @@ class TestCreateBookingUnit:
                 from codex_services.booking.slot_master import SlotAlreadyBookedError  # noqa: PLC0415
 
                 from codex_django.booking.selectors import create_booking  # noqa: PLC0415
+
                 with pytest.raises(SlotAlreadyBookedError):
                     create_booking(
                         adapter=mock_adapter,
@@ -355,6 +377,7 @@ class TestCreateBookingUnit:
                 mock_txn.atomic.return_value.__exit__ = MagicMock(return_value=False)
                 mock_txn.on_commit = MagicMock()
                 from codex_django.booking.selectors import create_booking
+
                 create_booking(
                     adapter=mock_adapter,
                     cache_adapter=MagicMock(),
@@ -384,6 +407,7 @@ class TestCreateBookingUnit:
                 mock_txn.atomic.return_value.__exit__ = MagicMock(return_value=False)
                 mock_txn.on_commit.side_effect = lambda fn: captured_callbacks.append(fn)
                 from codex_django.booking.selectors import create_booking
+
                 cache_adapter = MagicMock()
                 create_booking(
                     adapter=mock_adapter,
@@ -492,6 +516,7 @@ class TestCreateBookingUnit:
 # create_booking — with real Django DB (on_commit fires immediately in tests)
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 class TestCreateBookingWithDb:
     def _engine_result(self, times):
@@ -521,6 +546,7 @@ class TestCreateBookingWithDb:
             finder.find.return_value = engine_result
             finder_cls.return_value = finder
             from codex_django.booking.selectors import create_booking
+
             result = create_booking(
                 adapter=adapter,
                 cache_adapter=MagicMock(),
