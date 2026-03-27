@@ -6,10 +6,18 @@ import pytest
 @pytest.fixture
 def adapter_models():
     """Seven mock model classes for DjangoAvailabilityAdapter construction."""
-    models = {k: MagicMock() for k in [
-        "master", "appointment", "service",
-        "working_day", "day_off", "booking_settings", "site_settings",
-    ]}
+    models = {
+        k: MagicMock()
+        for k in [
+            "master",
+            "appointment",
+            "service",
+            "working_day",
+            "day_off",
+            "booking_settings",
+            "site_settings",
+        ]
+    }
     # Default STATUS_* constants
     models["appointment"].STATUS_PENDING = "pending"
     models["appointment"].STATUS_CONFIRMED = "confirmed"

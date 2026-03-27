@@ -9,6 +9,7 @@ pytestmark = pytest.mark.unit
 
 def _make_adapter(mock_manager):
     from codex_django.booking.adapters.cache import BookingCacheAdapter
+
     with patch(
         "codex_django.booking.adapters.cache.get_booking_cache_manager",
         return_value=mock_manager,
@@ -19,6 +20,7 @@ def _make_adapter(mock_manager):
 class TestBookingCacheAdapterGetBusy:
     def test_returns_cached_intervals(self, mock_booking_manager):
         from codex_django.booking.adapters.cache import BookingCacheAdapter
+
         mock_booking_manager.get_busy.return_value = [["09:00", "10:00"]]
         with patch(
             "codex_django.booking.adapters.cache.get_booking_cache_manager",
@@ -30,6 +32,7 @@ class TestBookingCacheAdapterGetBusy:
 
     def test_returns_none_on_cache_miss(self, mock_booking_manager):
         from codex_django.booking.adapters.cache import BookingCacheAdapter
+
         mock_booking_manager.get_busy.return_value = None
         with patch(
             "codex_django.booking.adapters.cache.get_booking_cache_manager",
@@ -39,6 +42,7 @@ class TestBookingCacheAdapterGetBusy:
 
     def test_passes_correct_args(self, mock_booking_manager):
         from codex_django.booking.adapters.cache import BookingCacheAdapter
+
         mock_booking_manager.get_busy.return_value = None
         with patch(
             "codex_django.booking.adapters.cache.get_booking_cache_manager",
@@ -51,28 +55,27 @@ class TestBookingCacheAdapterGetBusy:
 class TestBookingCacheAdapterSetBusy:
     def test_delegates_with_default_timeout(self, mock_booking_manager):
         from codex_django.booking.adapters.cache import BookingCacheAdapter
+
         with patch(
             "codex_django.booking.adapters.cache.get_booking_cache_manager",
             return_value=mock_booking_manager,
         ):
             BookingCacheAdapter().set_busy("42", "2025-01-15", [["09:00", "10:00"]])
-        mock_booking_manager.set_busy.assert_called_once_with(
-            "42", "2025-01-15", [["09:00", "10:00"]], timeout=300
-        )
+        mock_booking_manager.set_busy.assert_called_once_with("42", "2025-01-15", [["09:00", "10:00"]], timeout=300)
 
     def test_delegates_with_custom_timeout(self, mock_booking_manager):
         from codex_django.booking.adapters.cache import BookingCacheAdapter
+
         with patch(
             "codex_django.booking.adapters.cache.get_booking_cache_manager",
             return_value=mock_booking_manager,
         ):
             BookingCacheAdapter().set_busy("42", "2025-01-15", [], timeout=60)
-        mock_booking_manager.set_busy.assert_called_once_with(
-            "42", "2025-01-15", [], timeout=60
-        )
+        mock_booking_manager.set_busy.assert_called_once_with("42", "2025-01-15", [], timeout=60)
 
     def test_empty_intervals_accepted(self, mock_booking_manager):
         from codex_django.booking.adapters.cache import BookingCacheAdapter
+
         with patch(
             "codex_django.booking.adapters.cache.get_booking_cache_manager",
             return_value=mock_booking_manager,
@@ -84,6 +87,7 @@ class TestBookingCacheAdapterSetBusy:
 class TestBookingCacheAdapterInvalidate:
     def test_delegates_invalidate(self, mock_booking_manager):
         from codex_django.booking.adapters.cache import BookingCacheAdapter
+
         with patch(
             "codex_django.booking.adapters.cache.get_booking_cache_manager",
             return_value=mock_booking_manager,
@@ -94,6 +98,7 @@ class TestBookingCacheAdapterInvalidate:
     def test_factory_called_per_method_call(self, mock_booking_manager):
         """Adapter calls get_booking_cache_manager() inside each method — no caching."""
         from codex_django.booking.adapters.cache import BookingCacheAdapter
+
         adapter = BookingCacheAdapter()
         with patch(
             "codex_django.booking.adapters.cache.get_booking_cache_manager",
