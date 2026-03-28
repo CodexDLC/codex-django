@@ -99,6 +99,7 @@ class BookingSettingsSyncMixin(LifecycleModelMixin, models.Model):
 
     @hook(AFTER_SAVE)  # type: ignore[untyped-decorator]
     def sync_booking_settings_to_redis(self) -> None:
+        """Persist the latest booking settings payload to Redis after save."""
         from django.conf import settings as django_settings
 
         if django_settings.DEBUG and not getattr(django_settings, "CODEX_REDIS_ENABLED", False):

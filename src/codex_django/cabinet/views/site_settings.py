@@ -1,3 +1,5 @@
+"""Views for cabinet site-settings pages and HTMX partials."""
+
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
@@ -7,7 +9,14 @@ _VALID_TABS = frozenset({"contact", "geo", "social", "marketing", "technical", "
 
 @login_required
 def site_settings_view(request: HttpRequest) -> HttpResponse:
-    """Main settings page — shows index.html with contact tab active by default."""
+    """Render the site-settings page with the default tab selected.
+
+    Args:
+        request: Authenticated Django request for the settings page.
+
+    Returns:
+        Full page response with the `contact` tab active by default.
+    """
     return render(
         request,
         "cabinet/site_settings/index.html",
@@ -21,6 +30,15 @@ def site_settings_tab_view(request: HttpRequest, tab: str) -> HttpResponse:
 
     Renders the full page if the request is not an HTMX request,
     so direct URL navigation works correctly.
+
+    Args:
+        request: Authenticated Django request, optionally carrying the
+            ``HX-Request`` header.
+        tab: Requested settings tab slug.
+
+    Returns:
+        An HTMX partial response for valid HTMX requests, otherwise the full
+        site-settings page.
     """
     if tab not in _VALID_TABS:
         tab = "contact"

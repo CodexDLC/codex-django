@@ -316,7 +316,7 @@ class DjangoAvailabilityAdapter:
     # ------------------------------------------------------------------
 
     def result_to_slots_map(self, result: EngineResult) -> dict[str, bool]:
-        """Convert engine result to a simple {HH:MM: True} map for templates."""
+        """Convert an engine result to a simple ``{HH:MM: True}`` map."""
         times = result.get_unique_start_times()
         return dict.fromkeys(times, True)
 
@@ -394,12 +394,14 @@ class DjangoAvailabilityAdapter:
         return normalized
 
     def _get_buffer_minutes(self, master: Any, settings: Any) -> int:
+        """Return the effective buffer duration for a master."""
         individual = getattr(master, "buffer_between_minutes", None)
         if individual is not None:
             return individual  # type: ignore[no-any-return]
         return getattr(settings, "default_buffer_between_minutes", 0)
 
     def _get_tz(self, master: Any) -> zoneinfo.ZoneInfo:
+        """Resolve the master timezone, falling back to the site timezone."""
         tz_name = getattr(master, "timezone", None)
         if not tz_name:
             site = self._get_site_settings()
@@ -410,11 +412,13 @@ class DjangoAvailabilityAdapter:
             return zoneinfo.ZoneInfo("UTC")
 
     def _get_booking_settings(self) -> Any:
+        """Lazy-load and memoize the booking settings singleton."""
         if self._booking_settings is None:
             self._booking_settings = self.booking_settings_model.objects.first()
         return self._booking_settings
 
     def _get_site_settings(self) -> Any:
+        """Lazy-load and memoize the site settings singleton."""
         if self._site_settings is None:
             self._site_settings = self.site_settings_model.objects.first()
         return self._site_settings

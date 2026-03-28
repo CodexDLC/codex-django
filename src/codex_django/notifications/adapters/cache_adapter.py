@@ -19,16 +19,14 @@ from codex_django.core.redis.managers.notifications import get_notifications_cac
 
 
 class DjangoCacheAdapter:
-    """
-    Implements ContentCacheAdapter Protocol from codex_platform.notifications.interfaces.
-
-    Delegates to codex_django NotificationsCacheManager.
-    """
+    """Notification content cache adapter backed by Redis."""
 
     def get(self, key: str) -> str | None:
+        """Return a cached content value by key."""
         manager = get_notifications_cache_manager()
         return manager.get(key)
 
     def set(self, key: str, value: str, timeout: int) -> None:
+        """Store a cached content value with a TTL."""
         manager = get_notifications_cache_manager()
         manager.set(key, value, timeout=timeout)

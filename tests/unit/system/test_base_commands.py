@@ -3,6 +3,7 @@ Unit tests for codex_django.system.management.base_commands
 ============================================================
 All Redis/filesystem calls are mocked.
 """
+
 from io import StringIO
 from pathlib import Path
 from typing import Any
@@ -15,7 +16,6 @@ from codex_django.system.management.base_commands import (
     BaseHashProtectedCommand,
     BaseUpdateAllContentCommand,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -67,12 +67,14 @@ class TestBaseUpdateAllContentCommand:
 
     def test_one_subcommand_fails_raises_command_error(self):
         cmd = self._make_cmd()
-        with patch(
-            "codex_django.system.management.base_commands.call_command",
-            side_effect=Exception("Boom"),
+        with (
+            patch(
+                "codex_django.system.management.base_commands.call_command",
+                side_effect=Exception("Boom"),
+            ),
+            pytest.raises(CommandError, match="One or more subcommands failed"),
         ):
-            with pytest.raises(CommandError, match="One or more subcommands failed"):
-                cmd.handle(force=False)
+            cmd.handle(force=False)
 
     def test_force_flag_passed_to_subcommands(self):
         cmd = self._make_cmd()

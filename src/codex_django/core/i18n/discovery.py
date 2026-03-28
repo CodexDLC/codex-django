@@ -1,15 +1,34 @@
+"""Helpers for discovering Django locale directories.
+
+Examples:
+    Resolve locale paths for a generated project root::
+
+        from pathlib import Path
+        from codex_django.core.i18n import discover_locale_paths
+
+        LOCALE_PATHS = discover_locale_paths(Path(BASE_DIR))
+"""
+
 from pathlib import Path
 
 
 def discover_locale_paths(base_dir: Path, include_features: bool = True) -> list[str]:
-    """
-    Dynamically discovers all locale directories in the project.
-    Scans:
-    1. Top-level apps (directories with locale/ in base_dir).
-    2. Features (directories with locale/ in base_dir/features/).
+    """Discover locale directories that should be added to ``LOCALE_PATHS``.
 
-    Usage in settings.py:
-    LOCALE_PATHS = discover_locale_paths(BASE_DIR)
+    The helper supports both a centralized ``locale/<domain>/<lang>``
+    structure and per-app ``locale/`` directories. Feature apps under
+    ``base_dir / "features"`` can be included or skipped explicitly.
+
+    Args:
+        base_dir: Project root that contains apps, optional ``locale/``, and
+            optional ``features/`` directories.
+        include_features: Whether locale directories inside the ``features``
+            subtree should be included in the result.
+
+    Returns:
+        A list of locale directory paths suitable for Django's
+        ``LOCALE_PATHS`` setting. Paths are returned in discovery order and
+        are de-duplicated across supported layouts.
     """
     paths = []
 

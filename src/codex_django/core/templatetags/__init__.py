@@ -1,1 +1,1 @@
-# Empty file for core templatetags package
+"""Template tag package for core codex-django helpers."""

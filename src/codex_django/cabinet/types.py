@@ -1,3 +1,10 @@
+"""Data contracts used by the cabinet registry and dashboard layer.
+
+The dataclasses defined here describe sections, actions, widgets, and table
+payloads that travel between feature apps, selectors, context processors, and
+templates.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -8,6 +15,8 @@ from typing import Any
 
 @dataclass
 class TableColumn:
+    """Describe one column in a dashboard table widget."""
+
     key: str
     label: str
     align: str = "left"
@@ -20,6 +29,8 @@ class TableColumn:
 
 @dataclass
 class ListItem:
+    """Describe one row-like item in a dashboard list widget."""
+
     label: str
     value: str
     avatar: str | None = None
@@ -29,6 +40,8 @@ class ListItem:
 
 @dataclass
 class MetricWidgetData:
+    """Payload contract for a KPI-style metric widget."""
+
     label: str
     value: str
     unit: str | None = None
@@ -40,12 +53,16 @@ class MetricWidgetData:
 
 @dataclass
 class TableWidgetData:
+    """Payload contract for a table widget."""
+
     columns: list[TableColumn]
     rows: list[dict[str, Any]]
 
 
 @dataclass
 class ListWidgetData:
+    """Payload contract for a list widget."""
+
     items: list[ListItem]
     title: str | None = None
 
@@ -55,7 +72,12 @@ class ListWidgetData:
 
 @dataclass(frozen=True)
 class DashboardWidget:
-    """Declaration of a dashboard widget."""
+    """Declaration of a dashboard widget.
+
+    Notes:
+        The widget contract stores layout, grouping, and permission metadata
+        used by the registry and template layer.
+    """
 
     template: str
     col: str = "col-lg-6"
@@ -65,6 +87,7 @@ class DashboardWidget:
     order: int = 99
 
     def __post_init__(self) -> None:
+        """Validate the configured navigation group."""
         from django.core.exceptions import ImproperlyConfigured
 
         if self.nav_group not in ("admin", "services", "client"):
@@ -75,6 +98,8 @@ class DashboardWidget:
 
 @dataclass(frozen=True)
 class NavAction:
+    """Describe an action link rendered in cabinet navigation areas."""
+
     label: str
     url: str
     icon: str | None = None
@@ -96,6 +121,7 @@ class CabinetSection:
     order: int = 99
 
     def __post_init__(self) -> None:
+        """Validate the configured navigation group."""
         from django.core.exceptions import ImproperlyConfigured
 
         if self.nav_group not in ("admin", "services", "client"):

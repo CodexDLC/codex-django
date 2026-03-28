@@ -1,3 +1,15 @@
+"""Reusable abstract Django model mixins shared across codex-django packages.
+
+Examples:
+    Combine several mixins in a project model::
+
+        from django.db import models
+        from codex_django.core.mixins.models import TimestampMixin, ActiveMixin, SeoMixin
+
+        class Article(TimestampMixin, ActiveMixin, SeoMixin, models.Model):
+            title = models.CharField(max_length=200)
+"""
+
 import uuid
 
 from django.db import models
@@ -5,15 +17,16 @@ from django.utils.translation import gettext_lazy as _
 
 
 class TimestampMixin(models.Model):
-    """
-    Adds created_at and updated_at fields.
+    """Add creation and update timestamps to a model.
 
-    Admin fieldsets example (usually read-only):
-    --------------------------------------------
-        (_("Timestamps"), {
-            "fields": ("created_at", "updated_at"),
-            "classes": ("collapse",)
-        }),
+    Notes:
+        ``created_at`` is written once on insert, while ``updated_at`` is
+        refreshed on every save.
+
+    Admin:
+        fieldsets:
+            (_("Timestamps"), {"fields": ("created_at", "updated_at"), "classes": ("collapse",)})
+        readonly_fields: ("created_at", "updated_at")
     """
 
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
@@ -24,14 +37,16 @@ class TimestampMixin(models.Model):
 
 
 class ActiveMixin(models.Model):
-    """
-    Adds is_active field for visibility control.
+    """Add an ``is_active`` flag for publication and visibility control.
 
-    Admin fieldsets example:
-    ------------------------
-        (_("Status"), {
-            "fields": ("is_active",),
-        }),
+    Notes:
+        Use this mixin when objects should remain queryable in the database
+        but be hidden from public listings, navigation, or API responses.
+
+    Admin:
+        fieldsets:
+            (_("Status"), {"fields": ("is_active",)})
+        list_filter: ("is_active",)
     """
 
     is_active = models.BooleanField(
@@ -45,15 +60,15 @@ class ActiveMixin(models.Model):
 
 
 class SeoMixin(models.Model):
-    """
-    Adds SEO fields (title, description, OG Image).
+    """Add basic per-object SEO fields for title, description, and OG image.
 
-    Admin fieldsets example:
-    ------------------------
-        (_("SEO Settings"), {
-            "fields": ("seo_title", "seo_description", "seo_image"),
-            "classes": ("collapse",)
-        }),
+    Notes:
+        This mixin is intended for content models that need per-instance
+        metadata overrides in templates, cards, or sitemap-adjacent views.
+
+    Admin:
+        fieldsets:
+            (_("SEO Settings"), {"fields": ("seo_title", "seo_description", "seo_image"), "classes": ("collapse",)})
     """
 
     seo_title = models.CharField(_("SEO Title"), max_length=255, blank=True)
@@ -65,14 +80,16 @@ class SeoMixin(models.Model):
 
 
 class OrderableMixin(models.Model):
-    """
-    Adds a generic 'order' field for custom sorting.
+    """Add a generic ``order`` field for custom manual sorting.
 
-    Admin fieldsets example:
-    ------------------------
-        (_("Ordering"), {
-            "fields": ("order",),
-        }),
+    Notes:
+        The mixin sets ``Meta.ordering = ["order"]`` on the abstract base.
+
+    Admin:
+        fieldsets:
+            (_("Ordering"), {"fields": ("order",)})
+        list_display:
+            include ``order`` when manual ordering should be visible in admin.
     """
 
     order = models.PositiveIntegerField(_("Sorting Order"), default=0, db_index=True)
@@ -83,15 +100,16 @@ class OrderableMixin(models.Model):
 
 
 class SoftDeleteMixin(models.Model):
-    """
-    Adds 'is_deleted' flag to prevent data loss on deletion.
+    """Add an ``is_deleted`` flag for soft-deletion workflows.
 
-    Admin fieldsets example:
-    ------------------------
-        (_("Archive / Deletion"), {
-            "fields": ("is_deleted",),
-            "classes": ("collapse",)
-        }),
+    Notes:
+        The model instance remains in the database. Call ``soft_delete()``
+        when the project wants reversible deletion semantics.
+
+    Admin:
+        fieldsets:
+            (_("Archive / Deletion"), {"fields": ("is_deleted",), "classes": ("collapse",)})
+        list_filter: ("is_deleted",)
     """
 
     is_deleted = models.BooleanField(_("Is Deleted"), default=False)
@@ -100,23 +118,27 @@ class SoftDeleteMixin(models.Model):
         abstract = True
 
     def soft_delete(self) -> None:
-        """Soft deletes the object by setting the is_deleted flag."""
+        """Mark the object as deleted without removing the database row.
+
+        Notes:
+            The method updates ``is_deleted`` and immediately saves the model
+            instance using the default manager behavior.
+        """
         self.is_deleted = True
         self.save()
 
 
 class UUIDMixin(models.Model):
-    """
-    Replaces standard integer PK with a secure UUID4.
+    """Replace the default integer primary key with a UUID4 identifier.
 
-    Admin fieldsets example (usually read-only in admin!):
-    ------------------------------------------------------
-        (_("Identifiers"), {
-            "fields": ("id",),
-            "classes": ("collapse",)
-        }),
+    Notes:
+        This mixin is useful for public-facing URLs or distributed systems
+        where sequential integer identifiers should not be exposed.
 
-        # NOTE: Make sure to add "id" to readonly_fields in ModelAdmin
+    Admin:
+        fieldsets:
+            (_("Identifiers"), {"fields": ("id",), "classes": ("collapse",)})
+        readonly_fields: ("id",)
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -126,17 +148,18 @@ class UUIDMixin(models.Model):
 
 
 class SlugMixin(models.Model):
-    """
-    Adds a unique 'slug' field for URLs.
+    """Add a unique slug field suitable for URL routing.
 
-    Admin fieldsets example:
-    ------------------------
-        (_("URL"), {
-            "fields": ("slug",),
-        }),
+    Notes:
+        The field is intentionally declared with ``blank=True`` so projects
+        can populate it through admin prepopulation, model hooks, or custom
+        save logic.
 
-        # NOTE: You usually want to prepopulate this field in ModelAdmin:
-        # prepopulated_fields = {"slug": ("title",)}  # Replace 'title' with your model's title field
+    Admin:
+        fieldsets:
+            (_("URL"), {"fields": ("slug",)})
+        prepopulated_fields:
+            {"slug": ("title",)}  # Replace ``title`` with the concrete source field.
     """
 
     slug = models.SlugField(_("URL Slug"), max_length=255, unique=True, blank=True)

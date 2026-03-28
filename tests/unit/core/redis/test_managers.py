@@ -5,6 +5,7 @@ import pytest
 from codex_django.core.redis.managers.notifications import NotificationsCacheManager
 from codex_django.core.redis.managers.seo import SeoRedisManager
 from codex_django.core.redis.managers.settings import DjangoSiteSettingsManager
+from codex_django.core.redis.managers.static_content import StaticContentManager
 from codex_django.system.redis.managers.fixtures import FixtureHashManager
 
 pytestmark = pytest.mark.django_db
@@ -121,6 +122,43 @@ def test_settings_manager_save_instance(settings_manager):
     mock_instance.to_dict.return_value = {"k": "v"}
     settings_manager.save_instance(mock_instance)
     settings_manager.hash.set_fields.assert_called_once_with(settings_manager.make_key("site_settings"), {"k": "v"})
+
+
+@pytest.fixture
+def static_content_manager(mock_redis_from_url):
+    mgr = StaticContentManager()
+    mgr.hash = AsyncMock()
+    return mgr
+
+
+@pytest.mark.asyncio
+async def test_static_content_manager_aload_cached(static_content_manager):
+    static_content_manager.hash.get_all.return_value = {"hero_title": "Welcome!"}
+    res = await static_content_manager.aload_cached(None)
+    assert res == {"hero_title": "Welcome!"}
+
+
+def test_static_content_manager_load_cached(static_content_manager):
+    static_content_manager.hash.get_all.return_value = {"hero_title": "Welcome!"}
+    res = static_content_manager.load_cached(None)
+    assert res == {"hero_title": "Welcome!"}
+
+
+@pytest.mark.asyncio
+async def test_static_content_manager_asave_mapping(static_content_manager):
+    await static_content_manager.asave_mapping({"hero_title": "Welcome!"})
+    static_content_manager.hash.set_fields.assert_called_once_with(
+        static_content_manager.make_key("static_content"),
+        {"hero_title": "Welcome!"},
+    )
+
+
+def test_static_content_manager_save_mapping(static_content_manager):
+    static_content_manager.save_mapping({"hero_title": "Welcome!"})
+    static_content_manager.hash.set_fields.assert_called_once_with(
+        static_content_manager.make_key("static_content"),
+        {"hero_title": "Welcome!"},
+    )
 
 
 @pytest.fixture

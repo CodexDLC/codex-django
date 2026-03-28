@@ -7,6 +7,7 @@ import pytest
 @pytest.fixture
 def mock_i18n_adapter():
     """i18n adapter whose translation_override is a real context manager."""
+
     @contextmanager
     def _override(lang):
         yield

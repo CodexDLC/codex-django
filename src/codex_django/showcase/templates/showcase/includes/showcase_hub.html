@@ -1,10 +1,13 @@
 <style>
     :root {
-        --codex-primary: #6366f1;
+        --codex-primary: #2563eb;
         --codex-dark: #0f172a;
+        --codex-accent: #f59e0b;
     }
     .showcase-header {
-        background: linear-gradient(135deg, var(--codex-dark) 0%, #1e293b 100%);
+        background:
+            radial-gradient(circle at top right, rgba(245, 158, 11, 0.2), transparent 28%),
+            linear-gradient(135deg, var(--codex-dark) 0%, #1e293b 100%);
         color: white;
         padding: 4rem 0;
         margin-bottom: 3rem;
@@ -32,20 +35,79 @@
         display: inline-block;
     }
     .btn-codex:hover {
-        background-color: #4f46e5;
+        background-color: #1d4ed8;
         color: white;
+    }
+    .showcase-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+    .showcase-section {
+        margin-bottom: 3rem;
+    }
+    .showcase-note {
+        max-width: 760px;
+        margin: 0 auto;
+    }
+    .showcase-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: center;
+        margin-top: 1.25rem;
+    }
+    .showcase-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.55rem 0.9rem;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1e3a8a;
+        font-size: 0.92rem;
+        font-weight: 600;
     }
 </style>
 
 <header class="showcase-header text-center shadow-sm">
     <div class="container">
+        <div class="showcase-kicker mb-3">
+            <span class="bi bi-lightning-charge-fill"></span>
+            Reference Demo
+        </div>
         <h1 class="display-4 fw-bold">Codex Showcase</h1>
-        <p class="lead opacity-75">Explore the reference implementation of our cabinet system</p>
+        <p class="lead opacity-75 showcase-note">
+            Explore the reference implementation of the library: public-to-cabinet flow, staff tools, client journey, booking, and notification UX in one connected demo space.
+        </p>
         <div class="badge bg-danger">DEMO STATE</div>
     </div>
 </header>
 
-<div class="row g-4 justify-content-center">
+<section class="showcase-section text-center">
+    <div class="container">
+        <h2 class="h4 fw-bold mb-3">What this demo is meant to show</h2>
+        <p class="text-muted showcase-note mb-0">
+            Showcase is not the project homepage. It is the guided reference area for developers to inspect patterns, screens, and interactions before adapting them to a real product.
+        </p>
+        <div class="showcase-list">
+            <span class="showcase-pill"><i class="bi bi-speedometer2"></i> Staff dashboards</span>
+            <span class="showcase-pill"><i class="bi bi-calendar-check"></i> Booking flows</span>
+            <span class="showcase-pill"><i class="bi bi-bell"></i> Notifications</span>
+            <span class="showcase-pill"><i class="bi bi-person-badge"></i> Client cabinet</span>
+        </div>
+    </div>
+</section>
+
+<div class="row g-4 justify-content-center showcase-section">
     <!-- Staff Cabinet -->
     <div class="col-md-5">
         <div class="card demo-card h-100">
@@ -55,11 +117,22 @@
                 </div>
                 <h3 class="card-title h4 fw-bold">Staff Cabinet</h3>
                 <p class="card-text text-muted mb-4">
-                    Full-featured administration panel with stats, user management, and site settings.
+                    Connected reference flow for dashboard, clients, catalog, staff operations, conversations, booking, and admin settings.
                 </p>
                 <a href="{% url 'codex_showcase:dashboard' %}" class="btn btn-codex w-100">
                     Launch Staff Demo
                 </a>
+                <div class="mt-3 d-flex flex-wrap gap-2 justify-content-center">
+                    <a href="{% url 'codex_showcase:booking' %}" class="btn btn-sm btn-outline-secondary">
+                        Booking Flow
+                    </a>
+                    <a href="{% url 'codex_showcase:notifications_log' %}" class="btn btn-sm btn-outline-secondary">
+                        Notifications Log
+                    </a>
+                    <a href="{% url 'codex_showcase:notifications_templates' %}" class="btn btn-sm btn-outline-secondary">
+                        Template Preview
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -73,11 +146,19 @@
                 </div>
                 <h3 class="card-title h4 fw-bold">Client Cabinet</h3>
                 <p class="card-text text-muted mb-4">
-                    User-friendly portal for customers with profile settings, orders, and notifications.
+                    Customer-side journey with profile, appointment history, and notification preferences.
                 </p>
                 <a href="{% url 'codex_showcase:my_appointments' %}" class="btn btn-outline-primary w-100 border-2">
                     Launch Client Demo
                 </a>
+                <div class="mt-3 d-flex flex-wrap gap-2 justify-content-center">
+                    <a href="{% url 'codex_showcase:profile' %}" class="btn btn-sm btn-outline-secondary">
+                        Profile
+                    </a>
+                    <a href="{% url 'codex_showcase:settings_notifications' %}" class="btn btn-sm btn-outline-secondary">
+                        Notification Settings
+                    </a>
+                </div>
             </div>
         </div>
     </div>

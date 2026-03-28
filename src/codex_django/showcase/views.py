@@ -125,3 +125,23 @@ def catalog_view(request: HttpRequest, category_pk: int | None = None) -> HttpRe
     return render(
         request, "showcase/cabinet/catalog/index.html", ShowcaseMockData.get_catalog_context(category_pk=category_pk)
     )
+
+
+@debug_only
+def notifications_log_view(request: HttpRequest) -> HttpResponse:
+    channel = request.GET.get("channel", "all")
+    status = request.GET.get("status", "all")
+    return render(
+        request,
+        "showcase/cabinet/notifications/log.html",
+        ShowcaseMockData.get_notifications_log_context(channel=channel, status=status),
+    )
+
+
+@debug_only
+def notifications_templates_view(request: HttpRequest) -> HttpResponse:
+    return render(
+        request,
+        "showcase/cabinet/notifications/templates.html",
+        ShowcaseMockData.get_notification_templates_context(),
+    )

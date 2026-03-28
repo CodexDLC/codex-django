@@ -1116,3 +1116,352 @@ class ShowcaseMockData:
             "active_category": active_category,
             "items": cls.CATALOG_ITEMS.get(active_category["pk"], []),
         }
+
+    # ── Notifications ──────────────────────────────────────────────────────────
+
+    _NOTIF_STATUSES: dict[str, dict[str, str]] = {
+        "sent": {"label": "Sent", "color": "#16a34a", "bg": "#dcfce7"},
+        "failed": {"label": "Failed", "color": "#dc2626", "bg": "#fee2e2"},
+        "pending": {"label": "Pending", "color": "#d97706", "bg": "#fef3c7"},
+    }
+
+    _NOTIF_CHANNELS: dict[str, dict[str, str]] = {
+        "email": {"label": "Email", "icon": "bi-envelope", "color": "#3b82f6", "bg": "#eff6ff"},
+        "telegram": {"label": "Telegram", "icon": "bi-telegram", "color": "#0ea5e9", "bg": "#f0f9ff"},
+    }
+
+    _NOTIF_LOG_ENTRIES: list[dict[str, Any]] = [
+        {
+            "recipient": "Alice Johnson",
+            "email": "alice@example.com",
+            "channel": "email",
+            "template_key": "booking_confirmed",
+            "template_label": "Booking Confirmed",
+            "subject": "Your booking is confirmed",
+            "status": "sent",
+            "sent_at": "26 Mar 2026, 14:32",
+        },
+        {
+            "recipient": "Bob Martinez",
+            "email": "bob@example.com",
+            "channel": "telegram",
+            "template_key": "booking_reminder",
+            "template_label": "Booking Reminder",
+            "subject": "Reminder: appointment tomorrow",
+            "status": "sent",
+            "sent_at": "26 Mar 2026, 12:00",
+        },
+        {
+            "recipient": "Clara Müller",
+            "email": "clara@example.com",
+            "channel": "email",
+            "template_key": "booking_cancelled",
+            "template_label": "Booking Cancelled",
+            "subject": "Your booking has been cancelled",
+            "status": "sent",
+            "sent_at": "26 Mar 2026, 10:15",
+        },
+        {
+            "recipient": "David Lee",
+            "email": "david@example.com",
+            "channel": "email",
+            "template_key": "welcome",
+            "template_label": "Welcome",
+            "subject": "Welcome to Codex Studio",
+            "status": "failed",
+            "sent_at": "25 Mar 2026, 18:44",
+            "error": "SMTP connection timeout",
+        },
+        {
+            "recipient": "Elena Kovač",
+            "email": "elena@example.com",
+            "channel": "telegram",
+            "template_key": "booking_confirmed",
+            "template_label": "Booking Confirmed",
+            "subject": "Your booking is confirmed",
+            "status": "sent",
+            "sent_at": "25 Mar 2026, 16:20",
+        },
+        {
+            "recipient": "Frank Nguyen",
+            "email": "frank@example.com",
+            "channel": "email",
+            "template_key": "booking_reminder",
+            "template_label": "Booking Reminder",
+            "subject": "Reminder: appointment tomorrow",
+            "status": "sent",
+            "sent_at": "25 Mar 2026, 12:00",
+        },
+        {
+            "recipient": "Grace Kim",
+            "email": "grace@example.com",
+            "channel": "email",
+            "template_key": "password_reset",
+            "template_label": "Password Reset",
+            "subject": "Reset your password",
+            "status": "sent",
+            "sent_at": "25 Mar 2026, 09:31",
+        },
+        {
+            "recipient": "Henry Popov",
+            "email": "henry@example.com",
+            "channel": "telegram",
+            "template_key": "booking_cancelled",
+            "template_label": "Booking Cancelled",
+            "subject": "Your booking has been cancelled",
+            "status": "failed",
+            "sent_at": "24 Mar 2026, 20:05",
+            "error": "Telegram API: bot blocked by user",
+        },
+        {
+            "recipient": "Irina Sokolova",
+            "email": "irina@example.com",
+            "channel": "email",
+            "template_key": "booking_confirmed",
+            "template_label": "Booking Confirmed",
+            "subject": "Your booking is confirmed",
+            "status": "sent",
+            "sent_at": "24 Mar 2026, 15:48",
+        },
+        {
+            "recipient": "James Park",
+            "email": "james@example.com",
+            "channel": "email",
+            "template_key": "welcome",
+            "template_label": "Welcome",
+            "subject": "Welcome to Codex Studio",
+            "status": "sent",
+            "sent_at": "24 Mar 2026, 11:22",
+        },
+        {
+            "recipient": "Katrin Bauer",
+            "email": "katrin@example.com",
+            "channel": "telegram",
+            "template_key": "booking_reminder",
+            "template_label": "Booking Reminder",
+            "subject": "Reminder: appointment tomorrow",
+            "status": "pending",
+            "sent_at": "27 Mar 2026, 08:00",
+        },
+        {
+            "recipient": "Leon Dupont",
+            "email": "leon@example.com",
+            "channel": "email",
+            "template_key": "booking_confirmed",
+            "template_label": "Booking Confirmed",
+            "subject": "Your booking is confirmed",
+            "status": "sent",
+            "sent_at": "23 Mar 2026, 17:10",
+        },
+        {
+            "recipient": "Maya Okafor",
+            "email": "maya@example.com",
+            "channel": "email",
+            "template_key": "booking_reminder",
+            "template_label": "Booking Reminder",
+            "subject": "Reminder: appointment tomorrow",
+            "status": "sent",
+            "sent_at": "23 Mar 2026, 12:00",
+        },
+        {
+            "recipient": "Noah Fischer",
+            "email": "noah@example.com",
+            "channel": "telegram",
+            "template_key": "booking_confirmed",
+            "template_label": "Booking Confirmed",
+            "subject": "Your booking is confirmed",
+            "status": "sent",
+            "sent_at": "23 Mar 2026, 09:45",
+        },
+        {
+            "recipient": "Olivia Chen",
+            "email": "olivia@example.com",
+            "channel": "email",
+            "template_key": "password_reset",
+            "template_label": "Password Reset",
+            "subject": "Reset your password",
+            "status": "failed",
+            "sent_at": "22 Mar 2026, 22:03",
+            "error": "Mailbox full",
+        },
+        {
+            "recipient": "Pavel Novak",
+            "email": "pavel@example.com",
+            "channel": "email",
+            "template_key": "booking_cancelled",
+            "template_label": "Booking Cancelled",
+            "subject": "Your booking has been cancelled",
+            "status": "sent",
+            "sent_at": "22 Mar 2026, 14:27",
+        },
+        {
+            "recipient": "Quinn Walsh",
+            "email": "quinn@example.com",
+            "channel": "telegram",
+            "template_key": "welcome",
+            "template_label": "Welcome",
+            "subject": "Welcome to Codex Studio",
+            "status": "sent",
+            "sent_at": "22 Mar 2026, 10:58",
+        },
+        {
+            "recipient": "Rosa García",
+            "email": "rosa@example.com",
+            "channel": "email",
+            "template_key": "booking_confirmed",
+            "template_label": "Booking Confirmed",
+            "subject": "Your booking is confirmed",
+            "status": "sent",
+            "sent_at": "21 Mar 2026, 16:33",
+        },
+        {
+            "recipient": "Sam Torres",
+            "email": "sam@example.com",
+            "channel": "email",
+            "template_key": "booking_reminder",
+            "template_label": "Booking Reminder",
+            "subject": "Reminder: appointment tomorrow",
+            "status": "pending",
+            "sent_at": "27 Mar 2026, 08:00",
+        },
+        {
+            "recipient": "Tanya Ivanova",
+            "email": "tanya@example.com",
+            "channel": "telegram",
+            "template_key": "booking_confirmed",
+            "template_label": "Booking Confirmed",
+            "subject": "Your booking is confirmed",
+            "status": "sent",
+            "sent_at": "21 Mar 2026, 11:15",
+        },
+    ]
+
+    _NOTIF_TEMPLATES: list[dict[str, Any]] = [
+        {
+            "key": "booking_confirmed",
+            "label": "Booking Confirmed",
+            "trigger": "On staff confirmation of booking",
+            "channels": ["email", "telegram"],
+            "subject": "Your booking is confirmed — {{ service_name }}",
+            "preview": (
+                "Hi {{ client_name }}, your appointment for {{ service_name }} "
+                "with {{ staff_name }} is confirmed for {{ date }} at {{ time }}. "
+                "We look forward to seeing you!"
+            ),
+        },
+        {
+            "key": "booking_cancelled",
+            "label": "Booking Cancelled",
+            "trigger": "On booking cancellation",
+            "channels": ["email", "telegram"],
+            "subject": "Your booking has been cancelled",
+            "preview": (
+                "Hi {{ client_name }}, unfortunately your appointment for "
+                "{{ service_name }} on {{ date }} has been cancelled. "
+                "Please contact us to reschedule."
+            ),
+        },
+        {
+            "key": "booking_reminder",
+            "label": "Booking Reminder",
+            "trigger": "24 hours before appointment (ARQ scheduled task)",
+            "channels": ["email", "telegram"],
+            "subject": "Reminder: your appointment is tomorrow",
+            "preview": (
+                "Hi {{ client_name }}, just a reminder that your appointment for "
+                "{{ service_name }} with {{ staff_name }} is tomorrow at "
+                "{{ time }}. See you soon!"
+            ),
+        },
+        {
+            "key": "welcome",
+            "label": "Welcome",
+            "trigger": "On new client registration",
+            "channels": ["email"],
+            "subject": "Welcome to {{ site_name }}",
+            "preview": (
+                "Welcome, {{ client_name }}! Your account has been created. "
+                "You can now book appointments, track your visit history, and "
+                "manage your settings in your personal cabinet."
+            ),
+        },
+        {
+            "key": "password_reset",
+            "label": "Password Reset",
+            "trigger": "On password reset request",
+            "channels": ["email"],
+            "subject": "Reset your password — {{ site_name }}",
+            "preview": (
+                "Hi {{ client_name }}, you requested a password reset. Click the "
+                "link below to set a new password. The link is valid for 24 hours. "
+                "If you did not request this, ignore this email."
+            ),
+        },
+    ]
+
+    @classmethod
+    def get_notifications_log_context(cls, *, channel: str = "all", status: str = "all") -> dict[str, Any]:
+        entries = []
+        for entry in cls._NOTIF_LOG_ENTRIES:
+            if channel != "all" and entry["channel"] != channel:
+                continue
+            if status != "all" and entry["status"] != status:
+                continue
+            ch = cls._NOTIF_CHANNELS[entry["channel"]]
+            st = cls._NOTIF_STATUSES[entry["status"]]
+            entries.append(
+                {
+                    **entry,
+                    "channel_label": ch["label"],
+                    "channel_icon": ch["icon"],
+                    "channel_color": ch["color"],
+                    "channel_bg": ch["bg"],
+                    "status_label": st["label"],
+                    "status_color": st["color"],
+                    "status_bg": st["bg"],
+                    "error": entry.get("error"),
+                }
+            )
+
+        total = len(cls._NOTIF_LOG_ENTRIES)
+        sent = sum(1 for e in cls._NOTIF_LOG_ENTRIES if e["status"] == "sent")
+        failed = sum(1 for e in cls._NOTIF_LOG_ENTRIES if e["status"] == "failed")
+        pending = sum(1 for e in cls._NOTIF_LOG_ENTRIES if e["status"] == "pending")
+
+        return {
+            "active_section": "notifications",
+            "entries": entries,
+            "active_channel": channel,
+            "active_status": status,
+            "stats": {"total": total, "sent": sent, "failed": failed, "pending": pending},
+            "channel_tabs": [
+                {"key": "all", "label": "All channels", "count": total},
+                {
+                    "key": "email",
+                    "label": "Email",
+                    "count": sum(1 for e in cls._NOTIF_LOG_ENTRIES if e["channel"] == "email"),
+                },
+                {
+                    "key": "telegram",
+                    "label": "Telegram",
+                    "count": sum(1 for e in cls._NOTIF_LOG_ENTRIES if e["channel"] == "telegram"),
+                },
+            ],
+            "status_tabs": [
+                {"key": "all", "label": "All", "count": total},
+                {"key": "sent", "label": "Sent", "count": sent},
+                {"key": "failed", "label": "Failed", "count": failed},
+                {"key": "pending", "label": "Pending", "count": pending},
+            ],
+        }
+
+    @classmethod
+    def get_notification_templates_context(cls) -> dict[str, Any]:
+        templates = []
+        for tmpl in cls._NOTIF_TEMPLATES:
+            channel_details = [cls._NOTIF_CHANNELS[ch] for ch in tmpl["channels"]]
+            templates.append({**tmpl, "channel_details": channel_details})
+        return {
+            "active_section": "notifications",
+            "templates": templates,
+        }

@@ -1,12 +1,13 @@
 """
 Dashboard Selector
 ==================
-Единая точка входа для данных дашборда. Провайдеры регистрируются через @extend.
-Данные кэшируются в Redis через DashboardRedisManager (JSON, не pickle).
+Single entry point for dashboard data providers.
+Providers are registered through ``@extend`` and cached in Redis through
+``DashboardRedisManager`` using JSON rather than pickle.
 
-Паттерн использования в проекте:
+Example project usage:
 
-    # cabinet/selector/dashboard.py (scaffold в проект)
+    # cabinet/selector/dashboard.py inside the generated project
     from codex_django.cabinet.selector.dashboard import DashboardSelector
     from ..mock import CabinetMockData
 
@@ -14,14 +15,14 @@ Dashboard Selector
     def base_stats(request):
         return {"dashboard_stats": CabinetMockData.get_dashboard_stats()}
 
-Добавление провайдера из модуля (например, Booking):
+Adding a provider from a feature module such as booking:
 
     # features/booking/cabinet.py
     @DashboardSelector.extend(cache_key="booking_kpi", cache_ttl=300)
     def booking_kpi(request):
         return {"booking_kpi": BookingSelector.get_dashboard_kpi(request)}
 
-Инвалидация при сохранении модели:
+Invalidating cached data from a model save hook:
 
     # features/booking/models/booking.py
     from codex_django.cabinet.selector.dashboard import DashboardSelector
@@ -41,14 +42,15 @@ _manager = DashboardRedisManager()
 
 
 class DashboardAdapter(ABC):
-    """
-    Base class for dashboard data adapters.
-    Adapters are responsible for fetching and formatting data for specific widgets.
+    """Base class for dashboard data adapters.
+
+    Adapters are responsible for fetching and formatting data for specific
+    widget types before the selector merges them into the template context.
     """
 
     @abstractmethod
     def get_data(self, request: Any) -> dict[str, Any]:
-        """Fetch and return data as a dictionary."""
+        """Fetch and return widget data as a dictionary payload."""
         pass
 
 
@@ -59,6 +61,7 @@ class MetricAdapter(DashboardAdapter):
         self.provider_fn = provider_fn
 
     def get_data(self, request: Any) -> dict[str, Any]:
+        """Wrap metric payloads under the ``metric`` key."""
         data = self.provider_fn(request)
         return {"metric": data}
 
@@ -70,6 +73,7 @@ class TableAdapter(DashboardAdapter):
         self.provider_fn = provider_fn
 
     def get_data(self, request: Any) -> dict[str, Any]:
+        """Wrap table payloads under the ``table`` key."""
         data = self.provider_fn(request)
         return {"table": data}
 
@@ -81,6 +85,7 @@ class ListAdapter(DashboardAdapter):
         self.provider_fn = provider_fn
 
     def get_data(self, request: Any) -> dict[str, Any]:
+        """Wrap list payloads under the ``list`` key."""
         data = self.provider_fn(request)
         return {"list": data}
 
@@ -146,6 +151,7 @@ class DashboardSelector:
 
     @classmethod
     def _resolve(cls, provider: dict[str, Any], request: Any) -> dict[str, Any]:
+        """Resolve one provider, using Redis when caching is enabled."""
         cache_ttl = provider["cache_ttl"]
         cache_key = provider["cache_key"]
 

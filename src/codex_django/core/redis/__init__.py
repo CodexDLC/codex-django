@@ -1,3 +1,9 @@
+"""Redis integration helpers used by the codex-django core modules.
+
+This package re-exports the most common manager classes and factory
+functions so projects can import them from a single place.
+"""
+
 from .managers import (
     BaseDjangoRedisManager,
     BookingCacheManager,

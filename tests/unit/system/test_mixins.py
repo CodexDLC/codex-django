@@ -4,14 +4,15 @@ Unit tests for codex_django.system.mixins
 Imports from individual submodules (not __init__) to avoid
 encrypted_model_fields loading when it's not under test.
 """
+
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # SiteSettingsSyncMixin — to_dict() and sync_to_redis()
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestSiteSettingsSyncMixin:
@@ -96,6 +97,7 @@ class TestSiteSettingsSyncMixin:
 # AbstractStaticPageSeo — save() invalidates cache
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestAbstractStaticPageSeo:
     def test_save_invalidates_seo_cache(self):
@@ -119,6 +121,7 @@ class TestAbstractStaticPageSeo:
 # ---------------------------------------------------------------------------
 # AbstractUserProfile — get_full_name() / get_initials()
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestAbstractUserProfile:
@@ -160,6 +163,7 @@ class TestAbstractUserProfile:
 # ---------------------------------------------------------------------------
 # AbstractStaticTranslation — __str__()
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestAbstractStaticTranslation:

@@ -3,11 +3,11 @@ Unit tests for:
   - codex_django.core.context_processors.seo_settings
   - codex_django.core.templatetags.codex_i18n.translate_url
 """
+
 from unittest.mock import MagicMock, patch
 
 import pytest
 from django.test import RequestFactory
-
 
 # ---------------------------------------------------------------------------
 # core.context_processors.seo_settings
