@@ -11,12 +11,7 @@
 - [Cabinet](./cabinet.md)
 - [Showcase](./showcase.md)
 
-## CLI
+## Примечание
 
-- [CLI Overview](./cli/README.md)
-- [CLI Module](./cli/index.md)
-- [Entrypoints](./cli/entrypoints.md)
-- [Blueprints](./cli/blueprints.md)
-- [Engine](./cli/engine.md)
-- [Commands](./cli/commands.md)
-- [Project Output](./cli/project-output.md)
+CLI-архитектура переехала в companion package `codex-django-cli`.
+Этот репозиторий документирует только runtime package.

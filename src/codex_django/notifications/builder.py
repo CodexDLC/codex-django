@@ -18,10 +18,10 @@ from typing import Any
 
 
 class NotificationPayloadBuilder:
-    """
-    Builds serializable payload dicts for the universal notification task.
+    """Build serializable payload dictionaries for notification queue tasks.
 
-    No Django imports — safe to use anywhere.
+    The builder is framework-agnostic and intentionally avoids Django imports
+    so it can be reused in synchronous, asynchronous, and worker contexts.
     """
 
     def build_template(
@@ -38,10 +38,23 @@ class NotificationPayloadBuilder:
         channels: list[str],
         language: str = "de",
     ) -> dict[str, Any]:
-        """
-        Mode 1: worker receives template_name + context_data and renders itself.
+        """Build a payload where the worker renders the template itself.
 
-        Corresponds to TemplateNotificationDTO in codex_platform.notifications.dto.
+        Args:
+            notification_id: Unique notification identifier.
+            recipient_email: Destination email address.
+            recipient_phone: Optional phone number for SMS/WhatsApp channels.
+            client_name: Optional human-readable recipient name.
+            template_name: Worker-side template path to render.
+            subject: Localized notification subject.
+            event_type: Logical event identifier.
+            context_data: Extra template context data.
+            channels: Delivery channels requested for the notification.
+            language: Language code attached to the payload.
+
+        Returns:
+            A plain dictionary compatible with the template-based notification
+            DTO expected by the queue worker.
         """
         return {
             "mode": "template",
@@ -71,10 +84,23 @@ class NotificationPayloadBuilder:
         channels: list[str],
         language: str = "de",
     ) -> dict[str, Any]:
-        """
-        Mode 2: payload contains pre-rendered HTML, worker sends as-is.
+        """Build a payload that already contains rendered notification content.
 
-        Corresponds to NotificationPayloadDTO in codex_platform.notifications.dto.
+        Args:
+            notification_id: Unique notification identifier.
+            recipient_email: Destination email address.
+            recipient_phone: Optional phone number for SMS/WhatsApp channels.
+            client_name: Optional human-readable recipient name.
+            html_content: Pre-rendered HTML body.
+            text_content: Optional plain-text body.
+            subject: Localized notification subject.
+            event_type: Logical event identifier.
+            channels: Delivery channels requested for the notification.
+            language: Language code attached to the payload.
+
+        Returns:
+            A plain dictionary compatible with the rendered notification DTO
+            expected by the queue worker.
         """
         return {
             "mode": "rendered",

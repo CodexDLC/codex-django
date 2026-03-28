@@ -1,20 +1,9 @@
-"""
-codex_django.system.mixins.settings
-===================================
-Models for Site Settings builder.
+"""Reusable mixins for building a project-specific site settings model.
 
-Usage:
-------
-1. Create a model in your system app (e.g. `system/models/settings.py`):
-    class SiteSettings(AbstractSiteSettings, SiteContactSettingsMixin, SiteSocialSettingsMixin):
-        class Meta:
-            verbose_name = _("Настройки сайта")
-
-2. Add to settings.py:
-    CODEX_SITE_SETTINGS_MODEL = 'system.SiteSettings'
-
-All mixins are applied automatically and data is synced with Redis
-thanks to AbstractSiteSettings inheritance.
+Combine :class:`AbstractSiteSettings` with the desired field mixins inside the
+target project's ``system`` app, then point
+``settings.CODEX_SITE_SETTINGS_MODEL`` to the concrete model. Instances are
+serialized to Redis automatically through :class:`SiteSettingsSyncMixin`.
 """
 
 from typing import Any
@@ -27,8 +16,11 @@ from codex_django.core.redis.managers.settings import DjangoSiteSettingsManager
 
 
 class SiteSettingsSyncMixin(LifecycleModelMixin, models.Model):
-    """
-    Low-level mixin for Redis synchronization.
+    """Provide Redis synchronization helpers for site settings models.
+
+    Notes:
+        Projects usually do not instantiate this mixin directly. Instead it
+        is inherited through :class:`AbstractSiteSettings`.
     """
 
     class Meta:
@@ -38,7 +30,12 @@ class SiteSettingsSyncMixin(LifecycleModelMixin, models.Model):
     redis_manager_class = DjangoSiteSettingsManager
 
     def to_dict(self) -> dict[str, Any]:
-        """Collects concrete model fields into a mapping for Redis."""
+        """Serialize concrete model fields into a Redis-friendly mapping.
+
+        Returns:
+            A dictionary containing concrete non-relational field values.
+            File fields are converted to their public URL when available.
+        """
         data: dict[str, Any] = {}
         for field in self._meta.get_fields():
             if field.concrete and not field.many_to_many and not field.one_to_many:
@@ -75,22 +72,27 @@ class SiteSettingsSyncMixin(LifecycleModelMixin, models.Model):
 
 
 class SiteContactSettingsMixin(models.Model):
-    """
-    A comprehensive set of contact fields.
+    """Add contact information fields to a site settings model.
 
-    Admin fieldsets example:
-    ------------------------
-        (_("Contact Information"), {
-            "fields": (
-                "phone",
-                "email",
-                "address_street",
-                "address_locality",
-                "address_postal_code",
-                "contact_person",
-                "working_hours",
-            ),
-        }),
+    Notes:
+        Use this mixin when the project needs a single editable source for
+        phone, email, address, and public contact metadata.
+
+    Admin:
+        fieldsets: (
+            _("Contact Information"),
+            {
+                "fields": (
+                    "phone",
+                    "email",
+                    "address_street",
+                    "address_locality",
+                    "address_postal_code",
+                    "contact_person",
+                    "working_hours",
+                ),
+            },
+        )
     """
 
     phone = models.CharField(_("Phone"), max_length=50, blank=True)
@@ -107,19 +109,15 @@ class SiteContactSettingsMixin(models.Model):
 
 
 class SiteGeoSettingsMixin(models.Model):
-    """
-    Geographical information.
+    """Add map and geographic metadata fields to a site settings model.
 
-    Admin fieldsets example:
-    ------------------------
-        (_("Geography & Map"), {
-            "fields": (
-                "google_maps_link",
-                "latitude",
-                "longitude",
-            ),
-            "classes": ("collapse",)
-        }),
+    Notes:
+        These fields are useful for map embeds, structured data, and contact
+        pages that need coordinates or provider links.
+
+    Admin:
+        fieldsets:
+            (_("Geography & Map"), {"fields": ("google_maps_link", "latitude", "longitude"), "classes": ("collapse",)})
     """
 
     google_maps_link = models.URLField(_("Google Maps Link"), blank=True, max_length=500)
@@ -131,25 +129,30 @@ class SiteGeoSettingsMixin(models.Model):
 
 
 class SiteSocialSettingsMixin(models.Model):
-    """
-    Links to social networks.
+    """Add social network URL fields to a site settings model.
 
-    Admin fieldsets example:
-    ------------------------
-        (_("Social Networks"), {
-            "fields": (
-                "instagram_url",
-                "facebook_url",
-                "telegram_url",
-                "whatsapp_url",
-                "youtube_url",
-                "linkedin_url",
-                "tiktok_url",
-                "twitter_url",
-                "pinterest_url",
-            ),
-            "classes": ("collapse",)
-        }),
+    Notes:
+        The mixin is intentionally broad so projects can expose only the
+        subset of networks they actually render in templates.
+
+    Admin:
+        fieldsets: (
+            _("Social Networks"),
+            {
+                "fields": (
+                    "instagram_url",
+                    "facebook_url",
+                    "telegram_url",
+                    "whatsapp_url",
+                    "youtube_url",
+                    "linkedin_url",
+                    "tiktok_url",
+                    "twitter_url",
+                    "pinterest_url",
+                ),
+                "classes": ("collapse",),
+            },
+        )
     """
 
     instagram_url = models.URLField(_("Instagram URL"), blank=True)
@@ -167,20 +170,25 @@ class SiteSocialSettingsMixin(models.Model):
 
 
 class SiteMarketingSettingsMixin(models.Model):
-    """
-    Marketing and analytics tracking codes.
+    """Add analytics and marketing tracking identifiers.
 
-    Admin fieldsets example:
-    ------------------------
-        (_("Marketing & Analytics"), {
-            "fields": (
-                "google_analytics_id",
-                "google_tag_manager_id",
-                "facebook_pixel_id",
-                "tiktok_pixel_id",
-            ),
-            "classes": ("collapse",)
-        }),
+    Notes:
+        These values are typically consumed by template includes that inject
+        analytics and pixel scripts conditionally.
+
+    Admin:
+        fieldsets: (
+            _("Marketing & Analytics"),
+            {
+                "fields": (
+                    "google_analytics_id",
+                    "google_tag_manager_id",
+                    "facebook_pixel_id",
+                    "tiktok_pixel_id",
+                ),
+                "classes": ("collapse",),
+            },
+        )
     """
 
     google_analytics_id = models.CharField(_("Google Analytics ID"), max_length=50, blank=True)
@@ -193,20 +201,20 @@ class SiteMarketingSettingsMixin(models.Model):
 
 
 class SiteTechnicalSettingsMixin(models.Model):
-    """
-    Technical toggles and script injections.
+    """Add operational flags and raw script injection fields.
 
-    Admin fieldsets example:
-    ------------------------
-        (_("Technical Settings"), {
-            "fields": (
-                "app_mode_enabled",
-                "maintenance_mode",
-                "head_scripts",
-                "body_scripts",
-            ),
-            "classes": ("collapse",)
-        }),
+    Notes:
+        This mixin is aimed at operational toggles and controlled script
+        injection, not arbitrary long-form content storage.
+
+    Admin:
+        fieldsets: (
+            _("Technical Settings"),
+            {
+                "fields": ("app_mode_enabled", "maintenance_mode", "head_scripts", "body_scripts"),
+                "classes": ("collapse",),
+            },
+        )
     """
 
     app_mode_enabled = models.BooleanField(_("App Mode Enabled"), default=False)
@@ -219,24 +227,29 @@ class SiteTechnicalSettingsMixin(models.Model):
 
 
 class SiteEmailSettingsMixin(models.Model):
-    """
-    Email infrastructure settings.
+    """Add SMTP and email provider configuration fields.
 
-    Admin fieldsets example:
-    ------------------------
-        (_("Email Source Settings (SMTP)"), {
-            "fields": (
-                "smtp_host",
-                "smtp_port",
-                "smtp_user",
-                "smtp_password",
-                "smtp_from_email",
-                "smtp_use_tls",
-                "smtp_use_ssl",
-                "sendgrid_api_key",
-            ),
-            "classes": ("collapse",)
-        }),
+    Notes:
+        These fields allow small projects to keep delivery configuration in a
+        single singleton-like settings model.
+
+    Admin:
+        fieldsets: (
+            _("Email Source Settings (SMTP)"),
+            {
+                "fields": (
+                    "smtp_host",
+                    "smtp_port",
+                    "smtp_user",
+                    "smtp_password",
+                    "smtp_from_email",
+                    "smtp_use_tls",
+                    "smtp_use_ssl",
+                    "sendgrid_api_key",
+                ),
+                "classes": ("collapse",),
+            },
+        )
     """
 
     smtp_host = models.CharField(_("SMTP Host"), max_length=255, blank=True)
@@ -254,20 +267,20 @@ class SiteEmailSettingsMixin(models.Model):
 
 
 class SiteLegalSettingsMixin(models.Model):
-    """
-    Legal documents in HTML.
+    """Add HTML fields for legal and compliance documents.
 
-    Admin fieldsets example:
-    ------------------------
-        (_("Legal Documents"), {
-            "fields": (
-                "impressum_html",
-                "privacy_html",
-                "terms_html",
-                "cookie_policy_html",
-            ),
-            "classes": ("collapse",)
-        }),
+    Notes:
+        Projects commonly render these fields into privacy, terms, cookie,
+        and imprint pages managed through Django admin.
+
+    Admin:
+        fieldsets: (
+            _("Legal Documents"),
+            {
+                "fields": ("impressum_html", "privacy_html", "terms_html", "cookie_policy_html"),
+                "classes": ("collapse",),
+            },
+        )
     """
 
     impressum_html = models.TextField(_("Impressum HTML"), blank=True)
@@ -280,11 +293,15 @@ class SiteLegalSettingsMixin(models.Model):
 
 
 class AbstractSiteSettings(SiteSettingsSyncMixin, models.Model):
-    """
-    Base abstract settings model.
-    Includes only Redis synchronization logic.
+    """Base abstract site settings model with Redis synchronization only.
 
-    Inherit from this and add required mixins from this module.
+    Notes:
+        Subclass this model and compose it with the field mixins from this
+        module to build the concrete settings model for a project.
+
+    Admin:
+        Typically registered as a singleton-like model combined with the
+        desired fieldset groups from the selected mixins.
     """
 
     class Meta:

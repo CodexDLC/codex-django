@@ -1,3 +1,5 @@
+"""View exports for the reusable cabinet package."""
+
 from .dashboard import dashboard_view
 from .site_settings import site_settings_tab_view, site_settings_view
 

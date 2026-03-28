@@ -65,6 +65,16 @@
         <span class="cab-nav__label">{% trans "Conversations" %}</span>
       </a>
     </li>
+    <li>
+      <a href="{% url 'codex_showcase:notifications_log' %}"
+         class="cab-nav__item {% if active_section == 'notifications' %}cab-nav__item--active{% endif %}"
+         hx-get="{% url 'codex_showcase:notifications_log' %}"
+         hx-target="#cab-content"
+         hx-push-url="true">
+        <i class="bi bi-bell cab-nav__icon"></i>
+        <span class="cab-nav__label">{% trans "Notifications" %}</span>
+      </a>
+    </li>
 
     <li class="cab-nav__section-title mt-3">Settings</li>
     <li>

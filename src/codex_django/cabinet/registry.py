@@ -1,3 +1,10 @@
+"""In-memory registry for cabinet navigation and dashboard contributions.
+
+Feature apps typically interact with this module through :func:`declare`,
+while the internal registry object stores normalized sections, widgets, and
+actions for later rendering in context processors and views.
+"""
+
 from __future__ import annotations
 
 from typing import Any
@@ -6,6 +13,8 @@ from .types import CabinetSection, DashboardWidget, NavAction
 
 
 class CabinetRegistry:
+    """Store cabinet sections, widgets, and actions in process memory."""
+
     def __init__(self) -> None:
         self._sections: dict[str, CabinetSection] = {}
         self._dashboard_widgets: list[DashboardWidget] = []
@@ -20,6 +29,16 @@ class CabinetRegistry:
         topbar_actions: list[NavAction] | None = None,
         actions: list[NavAction] | None = None,
     ) -> None:
+        """Register cabinet contributions for a feature module.
+
+        Args:
+            module_name: Django app or feature identifier.
+            section: Optional sidebar/navigation section declaration.
+            dashboard_widget: Optional dashboard widget declaration or legacy
+                template-string shortcut.
+            topbar_actions: Optional actions for the cabinet top bar.
+            actions: Optional global actions shown elsewhere in the UI.
+        """
         if section:
             self._sections[module_name] = section
 
@@ -38,9 +57,11 @@ class CabinetRegistry:
 
     @property
     def sections(self) -> list[CabinetSection]:
+        """Return all registered sections ordered by their display order."""
         return sorted(self._sections.values(), key=lambda s: s.order)
 
     def get_sections(self, nav_group: str | None = None) -> list[CabinetSection]:
+        """Return registered sections, optionally filtered by nav group."""
         sections = self.sections
         if nav_group:
             sections = [s for s in sections if s.nav_group == nav_group]
@@ -48,9 +69,11 @@ class CabinetRegistry:
 
     @property
     def dashboard_widgets(self) -> list[DashboardWidget]:
+        """Return all registered dashboard widgets ordered by their display order."""
         return sorted(self._dashboard_widgets, key=lambda w: w.order)
 
     def get_dashboard_widgets(self, nav_group: str | None = None) -> list[DashboardWidget]:
+        """Return registered dashboard widgets, optionally filtered by nav group."""
         widgets = self.dashboard_widgets
         if nav_group:
             widgets = [w for w in widgets if w.nav_group == nav_group]
@@ -58,10 +81,12 @@ class CabinetRegistry:
 
     @property
     def topbar_actions(self) -> list[NavAction]:
+        """Return topbar action declarations in registration order."""
         return self._topbar_actions
 
     @property
     def global_actions(self) -> list[NavAction]:
+        """Return global action declarations in registration order."""
         return self._global_actions
 
 
@@ -77,9 +102,13 @@ def declare(
 ) -> None:
     """Public API for cabinet.py in feature apps. Analogous to admin.site.register().
 
-    module — required explicit parameter, Django app name (e.g. 'booking').
-    section — CabinetSection instance (not dict).
-    dashboard_widget — DashboardWidget instance or template string (legacy).
+    Args:
+        module: Django app name or feature identifier, for example ``booking``.
+        section: Optional :class:`CabinetSection` instance.
+        dashboard_widget: Optional :class:`DashboardWidget` instance or a
+            legacy template-string shortcut.
+        **kwargs: Additional keyword arguments forwarded to
+            :meth:`CabinetRegistry.register`.
     """
     from django.core.exceptions import ImproperlyConfigured
 

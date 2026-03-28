@@ -29,6 +29,8 @@ urlpatterns = [
     path("site/settings/<str:tab>/", views.site_settings_tab_view, name="site_settings_tab"),
     path("catalog/", views.catalog_view, name="catalog"),
     path("catalog/<int:category_pk>/", views.catalog_view, name="catalog_category"),
+    path("notifications/", views.notifications_log_view, name="notifications_log"),
+    path("notifications/templates/", views.notifications_templates_view, name="notifications_templates"),
     # Client side
     path("profile/", _t("showcase/cabinet/client/profile.html"), name="profile"),
     path("my/", _t("showcase/cabinet/client/my_appointments.html"), name="my_appointments"),

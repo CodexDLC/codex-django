@@ -1,14 +1,14 @@
 import os
 import shutil
+from contextlib import suppress
+
 from codex_django.cli.commands.init import handle_init
 
 # Clean up sandbox (safely)
 sandbox_path = "sandbox_v2"
 if os.path.exists(sandbox_path):
-    try:
+    with suppress(Exception):
         shutil.rmtree(sandbox_path)
-    except:
-        pass
 
 print("Running handle_init for test_multi_v2...")
 handle_init(
@@ -18,13 +18,15 @@ handle_init(
     dev_mode=False,
     multilingual=True,
     languages=["en", "ru", "uk"],
-    overwrite=True
+    overwrite=True,
 )
 
-settings_path = os.path.join(sandbox_path, "src", "test_multi_v2", "core", "settings", "modules", "internationalization.py")
+settings_path = os.path.join(
+    sandbox_path, "src", "test_multi_v2", "core", "settings", "modules", "internationalization.py"
+)
 if os.path.exists(settings_path):
     print(f"\nContents of {settings_path}:")
-    with open(settings_path, "r") as f:
+    with open(settings_path) as f:
         print(f.read())
 else:
     print(f"\nERROR: {settings_path} not found!")

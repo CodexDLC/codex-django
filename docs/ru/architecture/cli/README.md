@@ -1,19 +1,19 @@
 <!-- DOC_TYPE: INDEX -->
 
-# CLI Архитектура
+# CLI Архитектура Переехала
 
-## Страницы
+Полная документация по архитектуре CLI теперь живет в companion package `codex-django-cli`.
 
-- [CLI Module](./index.md)
-- [Entrypoints](./entrypoints.md)
-- [Blueprints](./blueprints.md)
-- [Engine](./engine.md)
-- [Commands](./commands.md)
-- [Project Output](./project-output.md)
+В runtime-репозитории эти страницы остаются только как migration stubs, чтобы старые ссылки не ломались мгновенно.
 
-## Область Покрытия
+## Что Еще Есть Здесь
 
-- как пользователь входит в CLI
-- как рендерятся blueprints
-- как commands оркестрируют scaffolding
-- какая структура появляется в generated project
+- временные compatibility shims под `codex_django.cli`
+- runtime-модули, которые импортируют generated projects
+- guide-страницы, объясняющие границу между runtime и CLI
+
+## Куда Смотреть Дальше
+
+- исходники `codex-django-cli` для реальной реализации
+- документация `codex-django-cli` для commands, engine, blueprints и project generation
+- [Runtime и CLI](../../guides/runtime-vs-cli.md) для объяснения границы со стороны runtime-пакета

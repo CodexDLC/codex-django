@@ -18,6 +18,7 @@ class BookingCacheAdapter:
     """
 
     def get_busy(self, master_id: str, date_str: str) -> list[list[str]] | None:
+        """Return cached busy intervals for a master on a specific date."""
         manager = get_booking_cache_manager()
         return manager.get_busy(master_id, date_str)
 
@@ -28,9 +29,11 @@ class BookingCacheAdapter:
         intervals: list[list[str]],
         timeout: int = 300,
     ) -> None:
+        """Store busy intervals for a master/date cache bucket."""
         manager = get_booking_cache_manager()
         manager.set_busy(master_id, date_str, intervals, timeout=timeout)
 
     def invalidate_master_date(self, master_id: str, date_str: str) -> None:
+        """Invalidate the busy-interval cache for one master/date pair."""
         manager = get_booking_cache_manager()
         manager.invalidate_master_date(master_id, date_str)

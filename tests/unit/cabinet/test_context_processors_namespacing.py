@@ -1,5 +1,7 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
+
 from codex_django.cabinet.context_processors import cabinet
 from codex_django.cabinet.registry import CabinetRegistry
 from codex_django.cabinet.types import CabinetSection, DashboardWidget
@@ -38,6 +40,7 @@ def test_context_processor_no_group(registry):
 
 def test_context_processor_admin_group(registry):
     from django.test import RequestFactory
+
     factory = RequestFactory()
     request = factory.get("/")
     request.cabinet_nav_group = "admin"
@@ -59,6 +62,7 @@ def test_context_processor_admin_group(registry):
 
 def test_context_processor_client_group(registry):
     from django.test import RequestFactory
+
     factory = RequestFactory()
     request = factory.get("/")
     request.cabinet_nav_group = "client"

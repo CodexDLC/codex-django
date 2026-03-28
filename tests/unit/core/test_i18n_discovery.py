@@ -3,6 +3,7 @@ Unit tests for codex_django.core.i18n.discovery.discover_locale_paths
 =======================================================================
 Pure filesystem tests — no mocks needed, uses pytest tmp_path.
 """
+
 import pytest
 
 from codex_django.core.i18n.discovery import discover_locale_paths

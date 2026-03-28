@@ -37,17 +37,19 @@ from .builder import NotificationPayloadBuilder
 
 
 class QueueAdapterProtocol(Protocol):
+    """Minimal queue adapter contract required by the notification engine."""
+
     def enqueue(self, task_name: str, payload: dict[str, Any]) -> str | None: ...
     async def aenqueue(self, task_name: str, payload: dict[str, Any]) -> str | None: ...
 
 
 class BaseNotificationEngine:
-    """
-    Wires together selector, builder, and queue adapter to dispatch notifications.
+    """Coordinate subject lookup, payload building, and queue dispatch.
 
-    task_name: name of the ARQ task that handles delivery.
-    mode: "template" (worker renders Jinja2) or "rendered" (pre-rendered HTML).
-          Override per-dispatch via the `mode` kwarg in dispatch().
+    Notes:
+        ``task_name`` identifies the worker task that performs delivery.
+        ``mode`` controls whether the worker renders a template or receives
+        pre-rendered content directly.
     """
 
     task_name: str = "send_universal_notification_task"
@@ -60,6 +62,14 @@ class BaseNotificationEngine:
         i18n_adapter: Any,
         selector: Any,
     ) -> None:
+        """Initialize the engine with project-provided infrastructure adapters.
+
+        Args:
+            queue_adapter: Adapter responsible for queueing or delivering work.
+            cache_adapter: Cache adapter used by the project selector layer.
+            i18n_adapter: Adapter that manages temporary language overrides.
+            selector: Content selector used to resolve localized subjects.
+        """
         self._queue = queue_adapter
         self._cache = cache_adapter
         self._i18n = i18n_adapter
@@ -87,13 +97,24 @@ class BaseNotificationEngine:
         text_content: str = "",
         **context: Any,
     ) -> str | None:
-        """
-        Resolve subject, build payload, enqueue.
+        """Resolve content metadata, build a payload, and enqueue a notification.
 
-        mode="template" (default): passes template_name + context to worker.
-        mode="rendered": passes pre-rendered html_content to worker.
+        Args:
+            recipient_email: Destination email address.
+            recipient_phone: Optional phone number for SMS/WhatsApp channels.
+            client_name: Optional human-readable recipient name.
+            template_name: Worker-side template path for ``template`` mode.
+            event_type: Logical notification event identifier.
+            channels: Delivery channels to request from the worker.
+            language: Language code used for subject lookup and payload metadata.
+            subject_key: Content key used to resolve the localized subject.
+            mode: Optional per-call override for ``template`` or ``rendered`` mode.
+            html_content: Pre-rendered HTML body for ``rendered`` mode.
+            text_content: Optional plain-text fallback for ``rendered`` mode.
+            **context: Extra payload context passed to the worker.
 
-        Returns job_id or None (when using on_commit adapter).
+        Returns:
+            Queue job ID when the adapter returns one, otherwise ``None``.
         """
         effective_mode = mode or self.mode
 
@@ -145,7 +166,25 @@ class BaseNotificationEngine:
         text_content: str = "",
         **context: Any,
     ) -> str | None:
-        """Async version of dispatch() for ASGI views."""
+        """Asynchronous counterpart to :meth:`dispatch` for async call sites.
+
+        Args:
+            recipient_email: Destination email address.
+            recipient_phone: Optional phone number for SMS/WhatsApp channels.
+            client_name: Optional human-readable recipient name.
+            template_name: Worker-side template path for ``template`` mode.
+            event_type: Logical notification event identifier.
+            channels: Delivery channels to request from the worker.
+            language: Language code used for subject lookup and payload metadata.
+            subject_key: Content key used to resolve the localized subject.
+            mode: Optional per-call override for ``template`` or ``rendered`` mode.
+            html_content: Pre-rendered HTML body for ``rendered`` mode.
+            text_content: Optional plain-text fallback for ``rendered`` mode.
+            **context: Extra payload context passed to the worker.
+
+        Returns:
+            Queue job ID when the adapter returns one, otherwise ``None``.
+        """
         effective_mode = mode or self.mode
 
         subject = self._selector.get(subject_key, language) or ""
@@ -182,6 +221,7 @@ class BaseNotificationEngine:
 
 
 def _get_builder() -> NotificationPayloadBuilder:
+    """Return the payload builder used by the notification engine."""
     from .builder import NotificationPayloadBuilder
 
     return NotificationPayloadBuilder()

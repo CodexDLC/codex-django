@@ -51,6 +51,7 @@ def _dispatch_kwargs(**overrides):
 # dispatch() — template mode
 # ---------------------------------------------------------------------------
 
+
 class TestBaseNotificationEngineDispatchTemplateMode:
     def test_dispatch_calls_selector_get(self, engine, mock_selector):
         engine.dispatch(**_dispatch_kwargs())
@@ -96,6 +97,7 @@ class TestBaseNotificationEngineDispatchTemplateMode:
         _, payload = mock_queue.enqueue.call_args[0]
         nid = payload["notification_id"]
         import uuid
+
         uuid.UUID(nid)  # raises if not valid UUID
 
     def test_dispatch_template_name_in_payload(self, engine, mock_queue):
@@ -118,6 +120,7 @@ class TestBaseNotificationEngineDispatchTemplateMode:
 # ---------------------------------------------------------------------------
 # adispatch() — async
 # ---------------------------------------------------------------------------
+
 
 class TestBaseNotificationEngineAdispatch:
     async def test_adispatch_template_mode(self, engine, mock_queue):
@@ -146,6 +149,7 @@ class TestBaseNotificationEngineAdispatch:
 # ---------------------------------------------------------------------------
 # Subclassing
 # ---------------------------------------------------------------------------
+
 
 class TestBaseNotificationEngineSubclassing:
     def test_custom_task_name_used(self, mock_queue, mock_selector):

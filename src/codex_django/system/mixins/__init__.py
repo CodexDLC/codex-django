@@ -1,3 +1,9 @@
+"""Public mixin exports for project-level `system` models.
+
+The re-exported classes cover site settings, SEO, static translations,
+provider integrations, and user profile extensions.
+"""
+
 from .integrations import (
     CrmIntegrationsMixin,
     ExtraIntegrationsMixin,

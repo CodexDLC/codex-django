@@ -1,3 +1,5 @@
+"""URL patterns for the reusable cabinet dashboard and settings views."""
+
 from django.urls import path
 
 from .views import dashboard_view, site_settings_tab_view, site_settings_view

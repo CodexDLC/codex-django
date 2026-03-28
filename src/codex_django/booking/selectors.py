@@ -40,7 +40,7 @@ class BookingPersistenceHook(Protocol):
         client: Any,
         extra_fields: dict[str, Any] | None = None,
     ) -> list[Any]:
-        """Persist chain solution and return created appointment-like objects."""
+        """Persist a multi-service chain and return appointment-like objects."""
         ...
 
 
@@ -62,6 +62,22 @@ def get_available_slots(
 
     Builds the engine request, fetches master availability, and runs
     ``ChainFinder.find()``.
+
+    Args:
+        adapter: Availability adapter that bridges Django models to the engine.
+        service_ids: Ordered list of requested service identifiers.
+        target_date: Date for which slots should be computed.
+        locked_master_id: Optional master id that constrains the search.
+        master_selections: Optional per-service master selection mapping.
+        mode: Booking engine search mode.
+        overlap_allowed: Whether services may overlap in time.
+        parallel_groups: Optional mapping of service id to parallel group id.
+        max_solutions: Maximum number of engine solutions to compute.
+        max_unique_starts: Optional cap for unique start times.
+        cache_ttl: Cache lifetime in seconds for busy-slot reads.
+
+    Returns:
+        Engine result produced by ``ChainFinder.find()``.
     """
     request = adapter.build_engine_request(
         service_ids=service_ids,
@@ -103,6 +119,16 @@ def get_calendar_data(
     """Generate a calendar month matrix for UI rendering.
 
     Wraps ``CalendarEngine.get_month_matrix()`` from codex-services.
+
+    Args:
+        year: Target calendar year.
+        month: Target calendar month.
+        today: Optional date used to highlight the current day.
+        selected_date: Optional date selected in the UI.
+        holidays_subdiv: Region code passed to the calendar engine.
+
+    Returns:
+        Calendar matrix data ready for template rendering.
     """
     from codex_services.calendar.engine import CalendarEngine
 
@@ -134,6 +160,21 @@ def get_nearest_slots(
     """Search for the nearest available date with open slots (waitlist).
 
     Uses ``ChainFinder.find_nearest()`` which scans forward day by day.
+
+    Args:
+        adapter: Availability adapter that bridges Django models to the engine.
+        service_ids: Ordered list of requested service identifiers.
+        search_from: First date included in the forward search.
+        locked_master_id: Optional master id that constrains the search.
+        master_selections: Optional per-service master selection mapping.
+        mode: Booking engine search mode.
+        overlap_allowed: Whether services may overlap in time.
+        parallel_groups: Optional mapping of service id to parallel group id.
+        search_days: Number of forward days to inspect.
+        max_solutions_per_day: Maximum number of solutions evaluated per day.
+
+    Returns:
+        Engine result produced by ``ChainFinder.find_nearest()``.
     """
     request = adapter.build_engine_request(
         service_ids=service_ids,
@@ -198,7 +239,31 @@ def create_booking(
     4. Delegates persistence to ``persistence_hook.persist_chain()``
     5. Invalidates cache for chain masters after commit
 
-    Raises ``SlotAlreadyBookedError`` if the slot was taken.
+    Args:
+        adapter: Availability adapter used for locking and revalidation.
+        cache_adapter: Cache adapter used for post-commit invalidation.
+        appointment_model: Concrete Django model class for appointment rows.
+        service_ids: Ordered list of requested service identifiers.
+        target_date: Booking date selected by the client.
+        selected_time: Selected start time in ``HH:MM`` format.
+        master_id: Master chosen for single-service mode.
+        client: Client object attached to the booking.
+        extra_fields: Optional extra model fields passed to persistence.
+        master_selections: Optional per-service master selection mapping.
+        mode: Booking engine search mode.
+        overlap_allowed: Whether services may overlap in time.
+        parallel_groups: Optional mapping of service id to parallel group id.
+        persistence_hook: Required persistence hook for multi-service mode.
+
+    Returns:
+        A single appointment instance in solo mode, or a list of created
+        appointment-like objects in multi-service mode.
+
+    Raises:
+        codex_services.booking.slot_master.SlotAlreadyBookedError: If the
+            selected slot is no longer available under lock.
+        NotImplementedError: If multi-service mode is requested without a
+            persistence hook.
     """
     is_multi_service = len(service_ids) > 1
 

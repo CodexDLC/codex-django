@@ -3,6 +3,7 @@ Unit tests for codex_django.system.context_processors
 ======================================================
 All external dependencies (Redis, DB, apps) are mocked.
 """
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -83,28 +84,28 @@ class TestStaticContentContextProcessor:
         assert result == {"static_content": {}}
 
     def test_returns_key_content_mapping(self, http_req):
-        """When setting present and objects exist, returns {key: content} dict."""
-        obj1 = MagicMock(key="hero_title", content="Welcome!")
-        obj2 = MagicMock(key="hero_subtitle", content="Best service ever.")
-
-        mock_model = MagicMock()
-        mock_model.objects.all.return_value = [obj1, obj2]
+        """When setting present and cache manager resolves data, returns {key: content} dict."""
+        fake_data = {
+            "hero_title": "Welcome!",
+            "hero_subtitle": "Best service ever.",
+        }
+        mock_manager = MagicMock()
+        mock_manager.load_cached.return_value = fake_data
 
         with (
             patch("codex_django.system.context_processors.settings") as mock_settings,
             patch("codex_django.system.context_processors.apps") as mock_apps,
+            patch(
+                "codex_django.system.context_processors.get_static_content_manager",
+                return_value=mock_manager,
+            ),
         ):
             mock_settings.CODEX_STATIC_TRANSLATION_MODEL = "myapp.StaticTranslation"
-            mock_apps.get_model.return_value = mock_model
+            mock_apps.get_model.return_value = MagicMock()
 
             result = static_content(http_req)
 
-        assert result == {
-            "static_content": {
-                "hero_title": "Welcome!",
-                "hero_subtitle": "Best service ever.",
-            }
-        }
+        assert result == {"static_content": fake_data}
 
     def test_exception_returns_empty_dict(self, http_req):
         """When an exception is raised, returns empty dict."""

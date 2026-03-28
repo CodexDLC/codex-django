@@ -36,9 +36,17 @@ class TestNotificationPayloadBuilderTemplate:
             channels=["email"],
         )
         for key in [
-            "mode", "notification_id", "recipient_email", "recipient_phone",
-            "client_name", "template_name", "subject", "event_type",
-            "context_data", "channels", "language",
+            "mode",
+            "notification_id",
+            "recipient_email",
+            "recipient_phone",
+            "client_name",
+            "template_name",
+            "subject",
+            "event_type",
+            "context_data",
+            "channels",
+            "language",
         ]:
             assert key in payload
 
@@ -183,8 +191,16 @@ class TestNotificationPayloadBuilderRendered:
             channels=["email"],
         )
         for key in [
-            "mode", "notification_id", "recipient_email", "recipient_phone",
-            "client_name", "html_content", "text_content", "subject",
-            "event_type", "channels", "language",
+            "mode",
+            "notification_id",
+            "recipient_email",
+            "recipient_phone",
+            "client_name",
+            "html_content",
+            "text_content",
+            "subject",
+            "event_type",
+            "channels",
+            "language",
         ]:
             assert key in payload

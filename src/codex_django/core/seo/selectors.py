@@ -1,3 +1,11 @@
+"""Selectors for static-page SEO metadata.
+
+Examples:
+    Load cached SEO payload for a resolved page name::
+
+        seo = get_static_page_seo("home")
+"""
+
 import logging
 from typing import Any
 
@@ -11,11 +19,21 @@ log = logging.getLogger(__name__)
 
 
 def get_static_page_seo(page_key: str) -> Any:
-    """
-    Gets SEO data for a static page by key.
-    Uses centralized Redis manager for optimization via hashes.
+    """Load SEO metadata for a static page, using Redis as a read-through cache.
 
-    Requires CODEX_STATIC_PAGE_SEO_MODEL setting in settings.py.
+    The helper first checks the centralized SEO Redis manager. On a cache
+    miss, it resolves the model declared by
+    ``settings.CODEX_STATIC_PAGE_SEO_MODEL``, fetches the matching record by
+    ``page_key``, flattens it to a string-only mapping, and stores the result
+    back in Redis.
+
+    Args:
+        page_key: Logical key that identifies the static page.
+
+    Returns:
+        Cached or freshly loaded SEO data as a mapping-like object, or
+        ``None`` when the model is not configured, the record does not exist,
+        or loading fails.
     """
     manager = get_seo_redis_manager()
 

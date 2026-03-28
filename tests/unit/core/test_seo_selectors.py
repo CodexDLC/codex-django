@@ -3,6 +3,7 @@ Unit tests for codex_django.core.seo.selectors.get_static_page_seo
 ====================================================================
 All Redis and DB calls are mocked.
 """
+
 from unittest.mock import MagicMock, patch
 
 import pytest

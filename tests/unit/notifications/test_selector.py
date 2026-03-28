@@ -20,6 +20,7 @@ def selector(mock_model, mock_cache_adapter, mock_i18n_adapter):
 # Cache hit
 # ---------------------------------------------------------------------------
 
+
 class TestBaseEmailContentSelectorCacheHit:
     def test_returns_cached_value_without_db_query(self, selector, mock_model, mock_cache_adapter):
         mock_cache_adapter.get.return_value = "Booking Confirmed"
@@ -42,6 +43,7 @@ class TestBaseEmailContentSelectorCacheHit:
 # Cache miss — DB lookup
 # ---------------------------------------------------------------------------
 
+
 class TestBaseEmailContentSelectorCacheMiss:
     def test_queries_db_on_cache_miss(self, selector, mock_model, mock_cache_adapter):
         mock_cache_adapter.get.return_value = None
@@ -56,9 +58,7 @@ class TestBaseEmailContentSelectorCacheMiss:
         mock_obj = type("Obj", (), {"text": "Subject text"})()
         mock_model.objects.get.return_value = mock_obj
         selector.get("booking_subject", "de")
-        mock_cache_adapter.set.assert_called_once_with(
-            "booking_subject:de", "Subject text", 3600
-        )
+        mock_cache_adapter.set.assert_called_once_with("booking_subject:de", "Subject text", 3600)
 
     def test_translation_override_called_with_language(
         self, selector, mock_model, mock_cache_adapter, mock_i18n_adapter
@@ -95,12 +95,11 @@ class TestBaseEmailContentSelectorCacheMiss:
 # Invalidate
 # ---------------------------------------------------------------------------
 
+
 class TestBaseEmailContentSelectorInvalidate:
     def test_invalidate_sets_empty_string_with_zero_timeout(self, selector, mock_cache_adapter):
         selector.invalidate("booking_subject", "de")
-        mock_cache_adapter.set.assert_called_once_with(
-            "booking_subject:de", "", timeout=0
-        )
+        mock_cache_adapter.set.assert_called_once_with("booking_subject:de", "", timeout=0)
 
     def test_cache_key_used_in_invalidate(self, selector, mock_cache_adapter):
         selector.invalidate("my_key", "ru")
@@ -117,6 +116,7 @@ class TestBaseEmailContentSelectorInvalidate:
 # ---------------------------------------------------------------------------
 # Custom subclass — cache_key_prefix
 # ---------------------------------------------------------------------------
+
 
 class TestBaseEmailContentSelectorCustomPrefix:
     def test_custom_prefix_in_cache_key(self, mock_model, mock_cache_adapter, mock_i18n_adapter):

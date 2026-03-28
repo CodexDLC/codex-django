@@ -1,3 +1,10 @@
+"""Template context helpers for the cabinet UI shell.
+
+The cabinet context processor filters registered sections and widgets by
+navigation group and user permissions, then exposes the resulting navigation
+payload to every cabinet template render.
+"""
+
 from typing import Any
 
 from django.http import HttpRequest

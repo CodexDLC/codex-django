@@ -1,10 +1,11 @@
 """
 Dashboard Redis Manager
 =======================
-Кэш для данных дашборда. Каждый провайдер хранится отдельным ключом.
+Redis cache for dashboard data. Each provider is stored under its own key.
 
-Сериализация: JSON (не pickle) — чистые данные, читаются из redis-cli.
-Поддерживает: str, int, float, bool, list, dict, Decimal (→ str).
+Serialization uses JSON instead of pickle, which keeps values readable from
+``redis-cli``. Supported value types are ``str``, ``int``, ``float``, ``bool``,
+``list``, ``dict``, and ``Decimal`` converted to ``str``.
 
 Key format: {PROJECT_NAME}:cabinet:dashboard:{provider_key}
 """
@@ -32,10 +33,12 @@ class _Encoder(json.JSONEncoder):
 
 
 def _dumps(data: dict[str, Any]) -> str:
+    """Serialize dashboard payload data to JSON."""
     return json.dumps(data, cls=_Encoder, ensure_ascii=False)
 
 
 def _loads(raw: str) -> dict[str, Any]:
+    """Deserialize dashboard payload data from JSON."""
     return cast(dict[str, Any], json.loads(raw))
 
 
@@ -65,7 +68,7 @@ class DashboardRedisManager(BaseDjangoRedisManager):
     # ── Read ──────────────────────────────────────────────────────────────────
 
     async def aget(self, provider_key: str) -> dict[str, Any] | None:
-        """Returns cached data or None on miss."""
+        """Return cached provider data or ``None`` on cache miss."""
         if self._is_disabled():
             return None
         raw = await self._client.get(self.make_key(provider_key))
@@ -77,12 +80,13 @@ class DashboardRedisManager(BaseDjangoRedisManager):
             return None
 
     def get(self, provider_key: str) -> dict[str, Any] | None:
+        """Synchronously return cached provider data."""
         return async_to_sync(self.aget)(provider_key)
 
     # ── Write ─────────────────────────────────────────────────────────────────
 
     async def aset(self, provider_key: str, data: dict[str, Any], ttl: int) -> None:
-        """Store provider data with TTL (seconds)."""
+        """Store provider data with a TTL in seconds."""
         if self._is_disabled() or not data:
             return
         await self._client.set(
@@ -92,6 +96,7 @@ class DashboardRedisManager(BaseDjangoRedisManager):
         )
 
     def set(self, provider_key: str, data: dict[str, Any], ttl: int) -> None:
+        """Synchronously store provider data with a TTL in seconds."""
         async_to_sync(self.aset)(provider_key, data, ttl)
 
     # ── Invalidation ──────────────────────────────────────────────────────────
@@ -103,10 +108,11 @@ class DashboardRedisManager(BaseDjangoRedisManager):
         await self._client.delete(self.make_key(provider_key))
 
     def invalidate(self, provider_key: str) -> None:
+        """Synchronously delete cache for a single provider."""
         async_to_sync(self.ainvalidate)(provider_key)
 
     async def ainvalidate_all(self) -> None:
-        """Delete all dashboard provider caches (pattern delete)."""
+        """Delete all dashboard provider caches using a key pattern."""
         if self._is_disabled():
             return
         pattern = self.make_key("*")
@@ -115,4 +121,5 @@ class DashboardRedisManager(BaseDjangoRedisManager):
             await self._client.delete(*keys)
 
     def invalidate_all(self) -> None:
+        """Synchronously delete all dashboard provider caches."""
         async_to_sync(self.ainvalidate_all)()
