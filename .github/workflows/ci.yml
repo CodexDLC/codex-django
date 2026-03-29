@@ -70,7 +70,16 @@ jobs:
         run: uv sync --locked --extra maintainer
 
       - name: Run integration tests
-        run: uv run pytest tests/ -m "integration" -v --tb=short --no-cov
+        run: |
+          set +e
+          uv run pytest tests/ -m "integration" -v --tb=short --no-cov
+          status=$?
+          set -e
+          if [ "$status" -eq 5 ]; then
+            echo "No integration tests collected; treating as success."
+            exit 0
+          fi
+          exit "$status"
 
   e2e-tests:
     name: E2E Tests
@@ -90,4 +99,13 @@ jobs:
         run: uv sync --locked --extra maintainer
 
       - name: Run E2E tests
-        run: uv run pytest tests/ -m "e2e" -v --tb=short
+        run: |
+          set +e
+          uv run pytest tests/ -m "e2e" -v --tb=short
+          status=$?
+          set -e
+          if [ "$status" -eq 5 ]; then
+            echo "No E2E tests collected; treating as success."
+            exit 0
+          fi
+          exit "$status"
