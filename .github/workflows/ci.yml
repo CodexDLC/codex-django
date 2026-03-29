@@ -2,10 +2,11 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [develop]
+    branches: [develop, main]
     paths-ignore: ["**.md", "docs/**", ".gitignore"]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   quality-gate:
