@@ -16,9 +16,8 @@
 
 ```bash
 pip install codex-django
-pip install "codex-django[notifications]"
-pip install "codex-django[django-redis]"
-pip install "codex-django[all]"
+pip install "codex-django[cli]"
+pip install "codex-django[dev]"
 ```
 
 Этот режим нужен командам, которые используют runtime-модули `core`, `system`, `booking`, `notifications` и `cabinet`.
@@ -28,7 +27,8 @@ pip install "codex-django[all]"
 Используйте companion CLI package, когда нужно создать новый проект или добавить в него feature scaffolds:
 
 ```bash
-pip install codex-django-cli
+pip install "codex-django[cli]"
+# или: pip install codex-django-cli
 codex-django init myproject
 codex-django add-client-cabinet --project myproject
 codex-django add-booking --project myproject

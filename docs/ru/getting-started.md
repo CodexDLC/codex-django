@@ -8,9 +8,8 @@
 
 ```bash
 pip install codex-django
-pip install "codex-django[notifications]"
-pip install "codex-django[django-redis]"
-pip install "codex-django[all]"
+pip install "codex-django[cli]"
+pip install "codex-django[dev]"
 ```
 
 `codex-django` требует Python 3.12+ и Django 5+.
@@ -20,7 +19,8 @@ pip install "codex-django[all]"
 Генерация проекта теперь живет в companion package `codex-django-cli`:
 
 ```bash
-pip install codex-django-cli
+pip install "codex-django[cli]"
+# или: pip install codex-django-cli
 codex-django init myproject
 cd myproject
 python -m venv .venv

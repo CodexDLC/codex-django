@@ -46,29 +46,19 @@ Repository = "https://github.com/codexdlc/codex-django"
 Issues = "https://github.com/codexdlc/codex-django/issues"
 
 [project.optional-dependencies]
-notifications = ["aiosmtplib>=3.0", "arq>=0.25", "asgiref>=3.7"]
-django-redis = ["django-redis>=5.0.0"]
-all = [
-    "codex-django[notifications,django-redis]",
-]
+cli = ["codex-django-cli>=0.1.0"]
 dev = [
-    "codex-django[all]",
-    "django-ninja>=1.1",
-    "pydantic>=2.0",
-    "django-unfold>=0.20",
-    "django-import-export>=4.0",
-    "django-lifecycle>=1.2",
-    "django-allauth>=0.61",
-    "django-extensions>=3.2",
-    "django-debug-toolbar>=4.3",
+    "codex-django[cli]",
     "pytest>=8.0",
     "pytest-django>=4.8",
-    "pytest-asyncio>=0.23",
     "pytest-cov",
     "ruff>=0.4",
     "mypy>=1.10",
     "django-stubs>=5.0",
     "pre-commit>=3.0",
+]
+maintainer = [
+    "codex-django[dev]",
     "bandit>=1.7",
     "pip-audit>=2.7",
     "detect-secrets>=1.5",
@@ -142,7 +132,7 @@ omit = ["*/_draft/*"]
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 30  # Block 2 raises this — current: ~35%
+fail_under = 90  # Runtime baseline reached on March 29, 2026 audit pass.
 
 [tool.bandit]
 exclude_dirs = ["tests"]

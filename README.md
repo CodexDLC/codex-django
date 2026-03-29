@@ -15,17 +15,14 @@ Project scaffolding now lives in the companion package `codex-django-cli`, while
 ## Install
 
 ```bash
-# Core package
+# Runtime library only
 pip install codex-django
 
-# Notifications stack (ARQ + SMTP helpers)
-pip install "codex-django[notifications]"
+# Runtime + companion CLI package
+pip install "codex-django[cli]"
 
-# Redis integration helpers
-pip install "codex-django[django-redis]"
-
-# All runtime extras
-pip install "codex-django[all]"
+# Runtime + CLI + day-to-day development toolchain
+pip install "codex-django[dev]"
 ```
 
 Requires Python 3.12 or newer.
@@ -36,7 +33,8 @@ The `codex-django` runtime package no longer owns the CLI implementation.
 Use the companion package when you want to scaffold or extend a project:
 
 ```bash
-pip install codex-django-cli
+pip install "codex-django[cli]"
+# or: pip install codex-django-cli
 codex-django init myproject
 codex-django add-client-cabinet --project myproject
 ```
@@ -94,7 +92,7 @@ print(result.get_unique_start_times())
 | :--- | :--- | :--- |
 | `codex_django.core` | - | Shared Django infrastructure: mixins, SEO access path, i18n helpers, sitemap base, Redis managers. |
 | `codex_django.system` | - | Project-state models and admin workflows: site settings, static content, integrations, fixture orchestration. |
-| `codex_django.notifications` | `[notifications]` | Django notification orchestration: content selector, payload builder, queue/direct adapters. |
+| `codex_django.notifications` | - | Django notification orchestration: content selector, payload builder, queue/direct adapters. |
 | `codex_django.booking` | - | Django adapter layer over `codex-services` booking engine: model mixins, availability adapter, booking selectors. |
 | `codex_django.cabinet` | - | Reusable cabinet/dashboard framework with registry-based navigation, widgets, and cached settings. |
 | `codex_django.cli` | compat only | Temporary forwarding layer to `codex-django-cli`; not part of the long-term runtime surface. |

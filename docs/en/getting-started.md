@@ -8,9 +8,8 @@ Choose the smallest dependency set that matches your project:
 
 ```bash
 pip install codex-django
-pip install "codex-django[notifications]"
-pip install "codex-django[django-redis]"
-pip install "codex-django[all]"
+pip install "codex-django[cli]"
+pip install "codex-django[dev]"
 ```
 
 `codex-django` requires Python 3.12+ and Django 5+.
@@ -20,7 +19,8 @@ pip install "codex-django[all]"
 Project scaffolding lives in the companion package `codex-django-cli`:
 
 ```bash
-pip install codex-django-cli
+pip install "codex-django[cli]"
+# or: pip install codex-django-cli
 codex-django init myproject
 cd myproject
 python -m venv .venv
