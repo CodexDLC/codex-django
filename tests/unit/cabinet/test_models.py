@@ -2,9 +2,18 @@
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 import pytest
 
 pytestmark = [pytest.mark.unit, pytest.mark.django_db]
+
+
+@pytest.fixture(autouse=True)
+def _mock_cabinet_settings_redis_sync():
+    """Keep singleton model tests isolated from Redis-backed lifecycle hooks."""
+    with patch("codex_django.cabinet.redis.managers.settings.CabinetSettingsRedisManager.save_instance"):
+        yield
 
 
 class TestCabinetSettingsSingleton:
