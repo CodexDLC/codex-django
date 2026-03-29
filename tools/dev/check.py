@@ -81,6 +81,16 @@ class CheckRunner(BaseCheckRunner):
         if answer == "y" and not self.run_tests("integration"):
             sys.exit(1)
 
+        prompt = f"\n{Colors.YELLOW}🚀 Run E2E Tests? [y/N]: {Colors.ENDC}"
+        try:
+            answer = input(prompt).strip().lower()
+        except EOFError:
+            answer = "n"
+            print("n")
+
+        if answer == "y" and not self.run_tests("e2e"):
+            sys.exit(1)
+
         print(f"\n{Colors.GREEN}{Colors.BOLD}ALL CHECKS PASSED!{Colors.ENDC}")
 
 

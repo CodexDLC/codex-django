@@ -6,6 +6,8 @@ from codex_django.cabinet.context_processors import cabinet
 from codex_django.cabinet.registry import CabinetRegistry
 from codex_django.cabinet.types import CabinetSection, DashboardWidget
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def registry():

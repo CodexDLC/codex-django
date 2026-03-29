@@ -21,6 +21,7 @@ First public release.
 - Refocused `codex-django` on reusable Django runtime modules while project scaffolding lives in `codex-django-cli`.
 - Replaced the old runtime extras layout with `cli`, `dev`, `maintainer`, and `docs`.
 - Updated README, install guides, and CI workflow around the runtime/CLI split.
+- Reworked the docs landing page into a runtime-oriented entry screen with quick-start paths and module navigation.
 - Raised the runtime coverage threshold to reflect the audited baseline.
 
 ### Fixed
@@ -29,6 +30,8 @@ First public release.
 - Online installation flow where a built `codex-django` wheel pulls `codex-django-cli` from the package registry.
 - Compatibility typing around the lazy CLI dispatch module.
 - Empty integration/e2e marker handling in the maintainer quality gate.
+- Async test environment resolution by restoring `arq` and `pytest-asyncio` in development extras.
+- Missing `unit` marker coverage for cabinet context processor tests.
 
 ## [0.2.0] - Internal milestone
 

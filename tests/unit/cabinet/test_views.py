@@ -21,7 +21,9 @@ def test_dashboard_view_renders_selector_context():
     request = _authenticated_request("/cabinet/")
 
     with (
-        patch("codex_django.cabinet.views.dashboard.DashboardSelector.get_context", return_value={"kpi": 7}) as mock_ctx,
+        patch(
+            "codex_django.cabinet.views.dashboard.DashboardSelector.get_context", return_value={"kpi": 7}
+        ) as mock_ctx,
         patch("codex_django.cabinet.views.dashboard.render", return_value=HttpResponse("ok")) as mock_render,
     ):
         response = dashboard_view(request)
