@@ -16,9 +16,8 @@ Install only the package and the extras your Django project actually uses:
 
 ```bash
 pip install codex-django
-pip install "codex-django[notifications]"
-pip install "codex-django[django-redis]"
-pip install "codex-django[all]"
+pip install "codex-django[cli]"
+pip install "codex-django[dev]"
 ```
 
 This mode is for teams consuming the runtime modules such as `core`, `system`, `booking`, `notifications`, and `cabinet`.
@@ -28,7 +27,8 @@ This mode is for teams consuming the runtime modules such as `core`, `system`, `
 Use the companion CLI package when you want to generate a new project or add feature scaffolds to an existing one:
 
 ```bash
-pip install codex-django-cli
+pip install "codex-django[cli]"
+# or: pip install codex-django-cli
 codex-django init myproject
 codex-django add-client-cabinet --project myproject
 codex-django add-booking --project myproject

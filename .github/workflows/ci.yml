@@ -21,7 +21,7 @@ jobs:
           version: "0.10.7"
 
       - name: Sync dev environment
-        run: uv sync --locked --extra dev
+        run: uv sync --locked --extra maintainer
 
       - name: Run pre-commit
         run: uv run pre-commit run --all-files
@@ -46,7 +46,7 @@ jobs:
           version: "0.10.7"
 
       - name: Sync dev environment
-        run: uv sync --locked --extra dev
+        run: uv sync --locked --extra maintainer
 
       - name: Run unit tests
         run: uv run pytest tests/ -m "unit" -v --tb=short
@@ -66,7 +66,7 @@ jobs:
           version: "0.10.7"
 
       - name: Sync dev environment
-        run: uv sync --locked --extra dev
+        run: uv sync --locked --extra maintainer
 
       - name: Run integration tests
         run: uv run pytest tests/ -m "integration" -v --tb=short --no-cov
@@ -86,7 +86,7 @@ jobs:
           version: "0.10.7"
 
       - name: Sync dev environment
-        run: uv sync --locked --extra dev
+        run: uv sync --locked --extra maintainer
 
       - name: Run E2E tests
         run: uv run pytest tests/ -m "e2e" -v --tb=short
