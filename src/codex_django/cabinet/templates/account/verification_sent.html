@@ -1,0 +1,29 @@
+{% extends "cabinet/base_auth.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Verify Your Email" %}{% endblock %}
+
+{% block cabinet_content %}
+<div class="cab-auth__wrap">
+  <div class="cab-auth__card">
+
+    <div class="cab-auth__logo">
+      <span class="cab-auth__logo-icon">&#9670;</span>
+      <span class="cab-auth__logo-name">{{ SITE_NAME|default:"Cabinet" }}</span>
+    </div>
+
+    <p class="cab-auth__title">{% trans "Verify Your Email" %}</p>
+
+    <div class="cab-auth__alert">
+      {% trans "We have sent a verification email to your address. Please follow the link in the email to confirm your account." %}
+    </div>
+
+    <div class="cab-auth__footer">
+      <a class="cab-auth__link" href="{% url 'account_login' %}">
+        {% trans "Back to Sign In" %}
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

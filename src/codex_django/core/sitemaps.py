@@ -1,3 +1,10 @@
+"""Sitemap primitives with codex-django defaults.
+
+The base sitemap centralizes canonical-domain handling, multilingual URL
+generation, and namespace-aware reverse lookups so project sitemaps can stay
+small and focused.
+"""
+
 from typing import Any
 
 from django.conf import settings
@@ -6,12 +13,12 @@ from django.urls import NoReverseMatch, reverse
 from django.utils import translation
 
 
-class BaseSitemap(Sitemap[Any]):
-    """
-    Base class for Codex Django sitemaps.
-    - i18n support enabled by default.
-    - Forces canonical domain and HTTPS.
-    - Generates xhtml:link alternates including x-default.
+class BaseSitemap(Sitemap):  # type: ignore[type-arg]
+    """Base sitemap with Codex defaults for multilingual canonical URLs.
+
+    The implementation enables Django's i18n sitemap mode, forces canonical
+    HTTPS URLs, and centralizes domain resolution through
+    ``settings.CANONICAL_DOMAIN``.
     """
 
     i18n = True
@@ -55,12 +62,23 @@ class BaseSitemap(Sitemap[Any]):
         return urls
 
     def location(self, item: Any) -> str:
-        """
-        Smart location resolver.
-        Handles:
-        1. String names for reverse().
-        2. Namespaced names (e.g. 'booking:wizard').
-        3. Objects with get_absolute_url().
+        """Resolve sitemap items to absolute path components.
+
+        String items are treated as URL pattern names and are first reversed
+        directly, then retried against namespaces listed in
+        ``settings.SITEMAP_LOOKUP_NAMESPACES``. Non-string items are expected
+        to implement ``get_absolute_url()``.
+
+        Args:
+            item: Sitemap item emitted by Django. In i18n mode Django may pass
+                either the raw item or an ``(item, language)`` pair.
+
+        Returns:
+            The resolved path component for the sitemap entry.
+
+        Raises:
+            django.urls.NoReverseMatch: If a string item cannot be reversed
+                directly or through the configured namespace fallbacks.
         """
         actual_item: Any = item[0] if isinstance(item, list | tuple) else item
         if isinstance(actual_item, str):

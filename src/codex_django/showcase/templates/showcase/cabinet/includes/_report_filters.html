@@ -1,0 +1,64 @@
+{% load showcase_extras %}
+{# Report filters bar. Variables: report_tabs, period_options, staff_options, active_tab, active_period, active_staff, extra_params #}
+
+<div class="mb-4">
+
+  {# ── Report type tabs ── #}
+  <div class="d-flex align-items-center gap-2 mb-3 pb-3 border-bottom flex-wrap">
+    {% for tab in report_tabs %}
+    <a href="?tab={{ tab.key }}&period={{ active_period }}{% if active_staff %}&staff={{ active_staff }}{% endif %}{% if extra_params %}&{{ extra_params }}{% endif %}"
+       class="btn btn-sm d-flex align-items-center gap-1"
+       style="font-size:.82rem;{% if active_tab == tab.key %}background:var(--cab-primary,#6366f1);color:#fff;border:none;{% else %}color:#64748b;border:1px solid #e2e8f0;background:#fff;{% endif %}">
+      <span class="bi {{ tab.icon }}"></span>
+      {{ tab.label }}
+    </a>
+    {% endfor %}
+
+    <div class="ms-auto">
+      <button class="btn btn-sm d-flex align-items-center gap-2" style="background:#1d6f42;color:#fff;font-size:.82rem;" @click="showExport=true">
+        <span class="bi bi-file-earmark-excel"></span> Export
+      </button>
+    </div>
+  </div>
+
+  {# ── Filters row ── #}
+  <div class="d-flex align-items-center flex-wrap gap-3 p-3 rounded-3" style="background:#f8fafc;border:1px solid #e2e8f0;">
+
+    {# Period: adaptive select on small screens, pills on large #}
+    <div class="d-none d-md-flex gap-1">
+      {% for p in period_options %}
+      <a href="?tab={{ active_tab }}&period={{ p.key }}{% if active_staff %}&staff={{ active_staff }}{% endif %}"
+         class="btn btn-sm"
+         style="font-size:.78rem;padding:3px 12px;{% if active_period == p.key %}background:#1e293b;color:#fff;border:none;{% else %}background:#fff;border:1px solid #e2e8f0;color:#64748b;{% endif %}">
+        {{ p.label }}
+      </a>
+      {% endfor %}
+    </div>
+    <select class="form-select form-select-sm d-md-none" style="font-size:.78rem;width:auto;">
+      {% for p in period_options %}
+      <option value="{{ p.key }}" {% if active_period == p.key %}selected{% endif %}>{{ p.label }}</option>
+      {% endfor %}
+    </select>
+
+    <div class="vr d-none d-md-block"></div>
+
+    {# Date range #}
+    <div class="d-flex align-items-center gap-2">
+      <span class="text-muted d-none d-sm-inline" style="font-size:.78rem;">Period:</span>
+      <input type="date" class="form-control form-control-sm" value="2026-03-01" style="font-size:.78rem;width:auto;">
+      <span class="text-muted" style="font-size:.78rem;">—</span>
+      <input type="date" class="form-control form-control-sm" value="2026-03-31" style="font-size:.78rem;width:auto;">
+    </div>
+
+    {% if staff_options %}
+    <div class="vr d-none d-md-block"></div>
+    <select class="form-select form-select-sm" style="font-size:.78rem;width:auto;">
+      {% for s in staff_options %}
+      <option {% if active_staff == s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+    {% endif %}
+
+  </div>
+
+</div>

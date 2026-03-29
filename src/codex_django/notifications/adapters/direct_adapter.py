@@ -36,18 +36,12 @@ log = logging.getLogger(__name__)
 
 
 class DjangoDirectAdapter:
-    """
-    Delivers notifications inline via Django send_mail() — no worker required.
+    """Deliver notifications inline via Django ``send_mail()``.
 
-    Implements the same Protocol as DjangoQueueAdapter:
-        enqueue(task_name, payload) → str | None
-        aenqueue(task_name, payload) → str | None (coroutine)
-
-    renderer: optional TemplateRenderer from codex_platform.notifications.renderer.
-        Required only for Mode 1 payloads (mode="template").
-        Not needed for Mode 2 payloads (mode="rendered").
-
-    use_on_commit: wrap sync enqueue in transaction.on_commit() (default True).
+    Notes:
+        The adapter implements the same enqueue interface as the queue-based
+        adapter, which makes it useful for development, testing, and fallback
+        delivery paths.
     """
 
     def __init__(
@@ -59,7 +53,7 @@ class DjangoDirectAdapter:
         self._use_on_commit = use_on_commit
 
     def enqueue(self, task_name: str, payload: dict[str, Any]) -> str | None:
-        """Sync inline delivery. Wraps in transaction.on_commit() by default."""
+        """Synchronously deliver or schedule delivery of a notification payload."""
         if self._use_on_commit:
             from django.db import transaction
 
@@ -68,7 +62,7 @@ class DjangoDirectAdapter:
         return self._send(payload)
 
     async def aenqueue(self, task_name: str, payload: dict[str, Any]) -> str | None:
-        """Async inline delivery (runs send_mail in a thread to avoid blocking)."""
+        """Asynchronously deliver a notification payload in a worker thread."""
         import asyncio
 
         await asyncio.to_thread(self._send, payload)
@@ -79,6 +73,7 @@ class DjangoDirectAdapter:
     # ------------------------------------------------------------------
 
     def _send(self, payload: dict[str, Any]) -> str | None:
+        """Send a rendered notification payload through Django mail."""
         mode = payload.get("mode", "rendered")
 
         if mode == "template":
@@ -111,6 +106,7 @@ class DjangoDirectAdapter:
         return None
 
     def _render(self, payload: dict[str, Any]) -> tuple[str, str]:
+        """Render a template-mode payload using the configured renderer."""
         if self._renderer is None:
             raise ValueError(
                 "DjangoDirectAdapter: 'renderer' is required for Mode 1 payloads "

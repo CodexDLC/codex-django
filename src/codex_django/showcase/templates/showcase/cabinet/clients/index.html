@@ -1,0 +1,184 @@
+{% extends "showcase/cabinet/base_cabinet.html" %}
+
+{% block title %}Clients{% endblock %}
+
+{% block sidebar_title %}
+<span class="bi bi-people fs-5" style="color: var(--cab-primary);"></span>
+<span class="cab-sidebar__title ms-2 fw-semibold text-white" style="font-size: 1rem; white-space: nowrap;">Clients</span>
+{% endblock %}
+
+{% block sidebar_nav %}
+  {% for seg in segments %}
+  <li>
+    <a href="?segment={{ seg.key }}"
+       class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2 {% if active_segment == seg.key %}cab-nav__item--active{% endif %}"
+       hx-get="?segment={{ seg.key }}" hx-target="#cab-content" hx-push-url="true"
+       style="color: var(--cab-sidebar-text); transition: background 0.15s;">
+      <span class="bi {{ seg.icon }} fs-5 flex-shrink-0"></span>
+      <span class="cab-nav__label ms-3 d-flex align-items-center justify-content-between w-100" style="white-space: nowrap;">
+        {{ seg.label }}
+        <span class="badge ms-2" style="background:rgba(255,255,255,0.15);font-weight:400;font-size:.7rem;">{{ seg.count }}</span>
+      </span>
+    </a>
+  </li>
+  {% if seg.key == 'all' %}
+  <li><hr style="border-color:rgba(255,255,255,0.08);margin:4px 16px;"></li>
+  {% endif %}
+  {% if seg.key == 'vip' %}
+  <li><hr style="border-color:rgba(255,255,255,0.08);margin:4px 16px;"></li>
+  {% endif %}
+{% endfor %}
+{% endblock %}
+
+{% block cabinet_content %}
+<div x-data="{ view: localStorage.getItem('clients_view') || 'grid' }"
+     x-effect="localStorage.setItem('clients_view', view)">
+
+  {# ── Toolbar ── #}
+  <div class="d-flex align-items-center gap-3 mb-4">
+
+    {# Search #}
+    <div class="flex-grow-1 position-relative">
+      <span class="bi bi-search position-absolute" style="left:12px;top:50%;transform:translateY(-50%);color:#94a3b8;"></span>
+      <input type="text" class="form-control form-control-sm ps-5"
+             placeholder="Search by name, phone, email..."
+             value="{{ q }}"
+             hx-get="?" hx-trigger="keyup changed delay:400ms" hx-target="#cab-content" hx-include="[name='segment']"
+             name="q"
+             style="border-radius:8px;">
+      <input type="hidden" name="segment" value="{{ active_segment }}">
+    </div>
+
+    {# Found counter #}
+    <span class="text-muted flex-shrink-0" style="font-size:.85rem;">Found: {{ total }}</span>
+
+    {# View toggle #}
+    <div class="btn-group btn-group-sm flex-shrink-0">
+      <button class="btn" :class="view === 'grid' ? 'btn-primary' : 'btn-outline-secondary'" @click="view = 'grid'">
+        <span class="bi bi-grid-3x3-gap"></span>
+      </button>
+      <button class="btn" :class="view === 'list' ? 'btn-primary' : 'btn-outline-secondary'" @click="view = 'list'">
+        <span class="bi bi-list-ul"></span>
+      </button>
+    </div>
+
+    {# Add client #}
+    <button class="btn btn-sm btn-primary flex-shrink-0">
+      <span class="bi bi-person-plus me-1"></span>Add
+    </button>
+
+  </div>
+
+  {# ── Grid view ── #}
+  <div x-show="view === 'grid'">
+    <div class="row g-3">
+      {% for client in clients %}
+      <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="card border-0 shadow-sm h-100" style="border-radius:10px;">
+          <div class="card-body">
+
+            {# Header: initials + name + pencil #}
+            <div class="d-flex align-items-start justify-content-between mb-2">
+              <div class="d-flex align-items-center gap-2">
+                <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white flex-shrink-0"
+                      style="width:36px;height:36px;background:var(--cab-primary);font-size:.7rem;">
+                  {{ client.initials }}
+                </span>
+                <div>
+                  <div class="fw-semibold" style="font-size:.9rem;line-height:1.2;">{{ client.name }}</div>
+                  <span class="badge" style="background:{{ client.status_meta.bg }};color:{{ client.status_meta.color }};font-size:.65rem;font-weight:500;">
+                    {{ client.status_meta.label }}
+                  </span>
+                </div>
+              </div>
+              <button class="btn btn-sm btn-outline-secondary p-1" style="width:28px;height:28px;flex-shrink:0;">
+                <span class="bi bi-pencil" style="font-size:.7rem;"></span>
+              </button>
+            </div>
+
+            {# Contacts #}
+            <div class="mt-2" style="font-size:.8rem;">
+              {% if client.phone %}
+              <div class="text-muted d-flex align-items-center gap-1 mb-1">
+                <span class="bi bi-telephone"></span> {{ client.phone }}
+              </div>
+              {% endif %}
+              {% if client.email %}
+              <div class="text-muted d-flex align-items-center gap-1">
+                <span class="bi bi-envelope"></span> {{ client.email }}
+              </div>
+              {% endif %}
+            </div>
+
+            {# Last visit #}
+            <div class="mt-2 text-muted d-flex align-items-center gap-1" style="font-size:.75rem;">
+              <span class="bi bi-calendar3"></span> {{ client.last_visit }}
+            </div>
+
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12">
+                {% include "showcase/cabinet/includes/_empty_state.html" with icon="bi-people" title="No clients found" subtitle="Try changing the filter or search query" %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {# ── Table view ── #}
+  <div x-show="view === 'list'" x-cloak>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4" style="font-size:.75rem;font-weight:600;color:#64748b;">NAME</th>
+              <th style="font-size:.75rem;font-weight:600;color:#64748b;">STATUS</th>
+              <th style="font-size:.75rem;font-weight:600;color:#64748b;">Phone</th>
+              <th style="font-size:.75rem;font-weight:600;color:#64748b;">EMAIL</th>
+              <th style="font-size:.75rem;font-weight:600;color:#64748b;">Last Visit</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for client in clients %}
+            <tr>
+              <td class="ps-4">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white flex-shrink-0"
+                        style="width:30px;height:30px;background:var(--cab-primary);font-size:.65rem;">
+                    {{ client.initials }}
+                  </span>
+                  <span style="font-size:.9rem;">{{ client.name }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="badge" style="background:{{ client.status_meta.bg }};color:{{ client.status_meta.color }};font-size:.7rem;">
+                  {{ client.status_meta.label }}
+                </span>
+              </td>
+              <td class="text-muted" style="font-size:.875rem;">{{ client.phone|default:"—" }}</td>
+              <td class="text-muted" style="font-size:.875rem;">{{ client.email|default:"—" }}</td>
+              <td class="text-muted" style="font-size:.875rem;">{{ client.last_visit }}</td>
+              <td class="text-end pe-3">
+                <button class="btn btn-sm btn-outline-secondary">
+                  <span class="bi bi-pencil"></span>
+                </button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6">
+                {% include "showcase/cabinet/includes/_empty_state.html" with icon="bi-people" title="No clients found" subtitle="Try changing the filter or search query" %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

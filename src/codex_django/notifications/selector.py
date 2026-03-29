@@ -33,15 +33,17 @@ log = logging.getLogger(__name__)
 
 
 class BaseEmailContentSelector:
-    """
-    Retrieves email content text by key with i18n and cache support.
+    """Retrieve notification text blocks with cache and language awareness.
 
-    Cache key format: ``notification_content:{language}:{key}``
-    Default TTL: 3600 seconds (1 hour).
+    The selector is model-agnostic: the concrete content model, cache adapter,
+    and i18n adapter are injected by the project at construction time.
+
+    Notes:
+        Default cache TTL is one hour.
     """
 
     cache_timeout: int = 3600
-    cache_key_prefix: str = "notification_content"
+    cache_key_prefix: str = ""
 
     def __init__(
         self,
@@ -49,18 +51,27 @@ class BaseEmailContentSelector:
         cache_adapter: Any,
         i18n_adapter: Any,
     ) -> None:
+        """Initialize the selector with project-specific dependencies.
+
+        Args:
+            model: Concrete content model class used for lookups.
+            cache_adapter: Cache adapter implementing ``get`` and ``set``.
+            i18n_adapter: Adapter exposing a ``translation_override`` context manager.
+        """
         self._model = model
         self._cache = cache_adapter
         self._i18n = i18n_adapter
 
     def get(self, key: str, language: str = "de") -> str | None:
-        """
-        Return the text for *key* in *language*.
+        """Return the notification text for a key in the requested language.
 
-        1. Check cache → return on hit.
-        2. Query DB inside translation_override(language).
-        3. Store in cache and return.
-        Returns None if no record found.
+        Args:
+            key: Logical content key stored in the backing model.
+            language: Target Django language code used for translation override.
+
+        Returns:
+            The resolved text value, or ``None`` when no matching content block
+            exists.
         """
         cache_key = self._cache_key(key, language)
 
@@ -75,7 +86,12 @@ class BaseEmailContentSelector:
         return value
 
     def invalidate(self, key: str, language: str) -> None:
-        """Remove a single cached entry."""
+        """Invalidate a single cached notification content entry.
+
+        Args:
+            key: Logical content key stored in the backing model.
+            language: Language code associated with the cached value.
+        """
         self._cache.set(self._cache_key(key, language), "", timeout=0)
 
     # ------------------------------------------------------------------
@@ -83,9 +99,11 @@ class BaseEmailContentSelector:
     # ------------------------------------------------------------------
 
     def _cache_key(self, key: str, language: str) -> str:
-        return f"{self.cache_key_prefix}:{language}:{key}"
+        """Build the cache key used for one localized content entry."""
+        return f"{key}:{language}"
 
     def _fetch_from_db(self, key: str, language: str) -> str | None:
+        """Fetch a localized content value directly from the database."""
         try:
             with self._i18n.translation_override(language):
                 obj = self._model.objects.get(key=key)

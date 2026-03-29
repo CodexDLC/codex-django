@@ -1,0 +1,31 @@
+{% extends "cabinet/base_auth.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Sign Out" %}{% endblock %}
+
+{% block cabinet_content %}
+<div class="cab-auth__wrap">
+  <div class="cab-auth__card">
+
+    <div class="cab-auth__logo">
+      <span class="cab-auth__logo-icon">&#9670;</span>
+      <span class="cab-auth__logo-name">{{ SITE_NAME|default:"Cabinet" }}</span>
+    </div>
+
+    <p class="cab-auth__title">{% trans "Sign Out" %}</p>
+
+    <form class="cab-auth__form" method="post" action="{% url 'account_logout' %}">
+      {% csrf_token %}
+
+      <p style="text-align: center; color: var(--cab-text-muted, #6c757d); margin-bottom: 1.5rem;">
+        {% trans "Are you sure you want to sign out?" %}
+      </p>
+
+      <button type="submit" class="cab-auth__submit">
+        {% trans "Sign Out" %}
+      </button>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
