@@ -72,7 +72,7 @@ jobs:
       - name: Run integration tests
         run: |
           set +e
-          uv run pytest tests/ -m "integration" -v --tb=short --no-cov
+          uv run pytest --override-ini addopts='' tests/ -m "integration" -v --tb=short
           status=$?
           set -e
           if [ "$status" -eq 5 ]; then
@@ -101,7 +101,7 @@ jobs:
       - name: Run E2E tests
         run: |
           set +e
-          uv run pytest tests/ -m "e2e" -v --tb=short
+          uv run pytest --override-ini addopts='' tests/ -m "e2e" -v --tb=short
           status=$?
           set -e
           if [ "$status" -eq 5 ]; then
