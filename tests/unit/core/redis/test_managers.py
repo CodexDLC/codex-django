@@ -2,13 +2,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from codex_django.core.redis.managers.booking import BookingCacheManager
 from codex_django.core.redis.managers.notifications import NotificationsCacheManager
 from codex_django.core.redis.managers.seo import SeoRedisManager
 from codex_django.core.redis.managers.settings import DjangoSiteSettingsManager
 from codex_django.core.redis.managers.static_content import StaticContentManager
 from codex_django.system.redis.managers.fixtures import FixtureHashManager
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.unit, pytest.mark.django_db]
 
 
 @pytest.fixture
@@ -44,6 +45,13 @@ def test_seo_manager_get_page(seo_manager):
 async def test_seo_manager_aset_page(seo_manager):
     await seo_manager.aset_page("home", {"title": "New"})
     seo_manager.hash.set_fields.assert_called_once_with(seo_manager.make_key("static_page:home"), {"title": "New"})
+    seo_manager.string.expire.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_seo_manager_aset_page_skips_empty_mapping(seo_manager):
+    await seo_manager.aset_page("home", {})
+    seo_manager.hash.set_fields.assert_not_called()
     seo_manager.string.expire.assert_not_called()
 
 
@@ -109,6 +117,35 @@ def test_settings_manager_load_cached(settings_manager):
     assert res == {"sitename": "My Site"}
 
 
+def test_settings_manager_load_cached_populates_from_db(settings_manager):
+    settings_manager.hash.get_all.return_value = None
+    instance = MagicMock()
+    instance.to_dict.return_value = {"sitename": "From DB"}
+    model_cls = MagicMock()
+    model_cls.objects.first.return_value = instance
+
+    res = settings_manager.load_cached(model_cls)
+
+    assert res == {"sitename": "From DB"}
+    model_cls.objects.first.assert_called_once_with()
+    settings_manager.hash.set_fields.assert_called_once_with(
+        settings_manager.make_key("site_settings"),
+        {"sitename": "From DB"},
+    )
+
+
+def test_settings_manager_load_cached_returns_empty_without_to_dict(settings_manager):
+    settings_manager.hash.get_all.return_value = None
+    instance = MagicMock(spec=[])
+    model_cls = MagicMock()
+    model_cls.objects.first.return_value = instance
+
+    res = settings_manager.load_cached(model_cls)
+
+    assert res == {}
+    settings_manager.hash.set_fields.assert_not_called()
+
+
 @pytest.mark.asyncio
 async def test_settings_manager_asave_instance(settings_manager):
     mock_instance = MagicMock()
@@ -144,6 +181,33 @@ def test_static_content_manager_load_cached(static_content_manager):
     assert res == {"hero_title": "Welcome!"}
 
 
+def test_static_content_manager_load_cached_populates_from_db(static_content_manager):
+    static_content_manager.hash.get_all.return_value = None
+    row1 = MagicMock(key="hero_title", content="Welcome!")
+    row2 = MagicMock(key="cta_label", content="Book now")
+    model_cls = MagicMock()
+    model_cls.objects.all.return_value = [row1, row2]
+
+    res = static_content_manager.load_cached(model_cls)
+
+    assert res == {"hero_title": "Welcome!", "cta_label": "Book now"}
+    static_content_manager.hash.set_fields.assert_called_once_with(
+        static_content_manager.make_key("static_content"),
+        {"hero_title": "Welcome!", "cta_label": "Book now"},
+    )
+
+
+def test_static_content_manager_load_cached_skips_empty_db_result(static_content_manager):
+    static_content_manager.hash.get_all.return_value = None
+    model_cls = MagicMock()
+    model_cls.objects.all.return_value = []
+
+    res = static_content_manager.load_cached(model_cls)
+
+    assert res == {}
+    static_content_manager.hash.set_fields.assert_not_called()
+
+
 @pytest.mark.asyncio
 async def test_static_content_manager_asave_mapping(static_content_manager):
     await static_content_manager.asave_mapping({"hero_title": "Welcome!"})
@@ -159,6 +223,50 @@ def test_static_content_manager_save_mapping(static_content_manager):
         static_content_manager.make_key("static_content"),
         {"hero_title": "Welcome!"},
     )
+
+
+@pytest.mark.asyncio
+async def test_static_content_manager_asave_mapping_skips_empty_payload(static_content_manager):
+    await static_content_manager.asave_mapping({})
+    static_content_manager.hash.set_fields.assert_not_called()
+
+
+@pytest.fixture
+def booking_manager(mock_redis_from_url):
+    mgr = BookingCacheManager()
+    mgr.string = AsyncMock()
+    return mgr
+
+
+@pytest.mark.asyncio
+async def test_booking_manager_aget_busy_returns_none_on_miss(booking_manager):
+    booking_manager.string.get.return_value = None
+
+    assert await booking_manager.aget_busy("42", "2026-03-29") is None
+
+
+@pytest.mark.asyncio
+async def test_booking_manager_aget_busy_decodes_json(booking_manager):
+    booking_manager.string.get.return_value = '[["2026-03-29T10:00", "2026-03-29T11:00"]]'
+
+    result = await booking_manager.aget_busy("42", "2026-03-29")
+
+    assert result == [["2026-03-29T10:00", "2026-03-29T11:00"]]
+
+
+def test_booking_manager_set_busy(booking_manager):
+    booking_manager.set_busy("42", "2026-03-29", [["10:00", "11:00"]], timeout=900)
+
+    booking_manager.string.set.assert_called_once_with(
+        booking_manager.make_key("busy:42:2026-03-29"),
+        '[["10:00", "11:00"]]',
+        ttl=900,
+    )
+
+
+def test_booking_manager_invalidate_master_date(booking_manager):
+    booking_manager.invalidate_master_date("42", "2026-03-29")
+    booking_manager.string.delete.assert_called_once_with(booking_manager.make_key("busy:42:2026-03-29"))
 
 
 @pytest.fixture
