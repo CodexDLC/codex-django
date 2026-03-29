@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from importlib import import_module
 from types import ModuleType
+from typing import NoReturn
 
 
-def raise_cli_dependency_error(exc: ModuleNotFoundError) -> None:
+def raise_cli_dependency_error(exc: ModuleNotFoundError) -> NoReturn:
     """Raise a helpful error when the split-out CLI package is unavailable."""
     if exc.name and exc.name.startswith("codex_django_cli"):
         raise ModuleNotFoundError(

@@ -13,12 +13,21 @@ class CheckRunner(BaseCheckRunner):
     # CVE-2026-4539: pygments — no fix available yet (latest version)
     AUDIT_FLAGS = "--skip-editable --ignore-vuln CVE-2026-4539"
 
+    @staticmethod
+    def _is_empty_test_selection(output: str) -> bool:
+        """Return True when pytest matched no tests for the requested marker."""
+        normalized = output.lower()
+        return "0 selected" in normalized or "no tests ran" in normalized
+
     def run_tests(self, marker: str = "unit") -> bool:
         self.print_step(f"Running {marker.capitalize()} Tests")
         # integration/e2e: skip coverage threshold to avoid fail on partial runs
         no_cov = "--no-cov" if marker != "unit" else ""
         cmd = f'"{sys.executable}" -m pytest {self.tests_dir} -m {marker} -v --tb=short {no_cov}'.strip()
-        success, _ = self.run_command(cmd)
+        success, out = self.run_command(cmd, capture_output=marker != "unit")
+        if marker != "unit" and not success and self._is_empty_test_selection(out):
+            self.print_success(f"No {marker} tests collected; skipping.")
+            return True
         if success:
             self.print_success(f"{marker.capitalize()} tests passed.")
         else:
