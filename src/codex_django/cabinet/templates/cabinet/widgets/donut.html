@@ -1,0 +1,14 @@
+<div class="card border-0 shadow-sm h-100">
+  <div class="card-header bg-white border-0 pt-3 pb-0">
+    <h6 class="fw-semibold mb-0" style="font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:#64748b;">
+      {% if icon %}<span class="bi {{ icon }} me-2" style="color:var(--cab-primary);"></span>{% endif %}
+      {{ title }}
+    </h6>
+  </div>
+  <div class="card-body d-flex align-items-center gap-4">
+    <div style="width:{{ size|default:'140' }}px;height:{{ size|default:'140' }}px;flex-shrink:0;position:relative;">
+      <canvas id="{{ chart_id }}"></canvas>
+    </div>
+    <ul class="list-unstyled mb-0 flex-grow-1" id="{{ chart_id }}_legend"></ul>
+  </div>
+</div>

@@ -1,0 +1,92 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [develop]
+    paths-ignore: ["**.md", "docs/**", ".gitignore"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.10.7"
+
+      - name: Sync dev environment
+        run: uv sync --locked --extra maintainer
+
+      - name: Run pre-commit
+        run: uv run pre-commit run --all-files
+
+      - name: Run pip-audit
+        run: uv run pip-audit
+
+      - name: Run mypy
+        run: uv run mypy src/
+
+  unit-tests:
+    name: Unit Tests
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.10.7"
+
+      - name: Sync dev environment
+        run: uv sync --locked --extra maintainer
+
+      - name: Run unit tests
+        run: uv run pytest tests/ -m "unit" -v --tb=short
+
+  integration-tests:
+    name: Integration Tests
+    needs: unit-tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.10.7"
+
+      - name: Sync dev environment
+        run: uv sync --locked --extra maintainer
+
+      - name: Run integration tests
+        run: uv run pytest tests/ -m "integration" -v --tb=short --no-cov
+
+  e2e-tests:
+    name: E2E Tests
+    needs: integration-tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.10.7"
+
+      - name: Sync dev environment
+        run: uv sync --locked --extra maintainer
+
+      - name: Run E2E tests
+        run: uv run pytest tests/ -m "e2e" -v --tb=short

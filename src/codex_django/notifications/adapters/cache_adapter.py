@@ -1,7 +1,7 @@
 """
 DjangoCacheAdapter
 ==================
-ContentCacheAdapter implementation using Django's cache framework.
+ContentCacheAdapter implementation using BaseDjangoRedisManager.
 
 A thin infrastructure shim — the caching strategy (key naming, TTL,
 invalidation) lives in BaseEmailContentSelector, not here.
@@ -15,20 +15,18 @@ Usage::
 
 from __future__ import annotations
 
+from codex_django.core.redis.managers.notifications import get_notifications_cache_manager
+
 
 class DjangoCacheAdapter:
-    """
-    Implements ContentCacheAdapter Protocol from codex_platform.notifications.interfaces.
-
-    Delegates to Django's configured cache backend (CACHES in settings).
-    """
+    """Notification content cache adapter backed by Redis."""
 
     def get(self, key: str) -> str | None:
-        from django.core.cache import cache
-
-        return cache.get(key)  # type: ignore[no-any-return]
+        """Return a cached content value by key."""
+        manager = get_notifications_cache_manager()
+        return manager.get(key)
 
     def set(self, key: str, value: str, timeout: int) -> None:
-        from django.core.cache import cache
-
-        cache.set(key, value, timeout)
+        """Store a cached content value with a TTL."""
+        manager = get_notifications_cache_manager()
+        manager.set(key, value, timeout=timeout)

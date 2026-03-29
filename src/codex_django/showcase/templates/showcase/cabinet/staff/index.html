@@ -1,0 +1,196 @@
+{% extends "showcase/cabinet/base_cabinet.html" %}
+{% load showcase_extras %}
+
+{% block title %}Staff{% endblock %}
+
+{% block sidebar_title %}
+<span class="bi bi-person-badge fs-5" style="color: var(--cab-primary);"></span>
+<span class="cab-sidebar__title ms-2 fw-semibold text-white" style="font-size: 1rem; white-space: nowrap;">Staff</span>
+{% endblock %}
+
+{% block sidebar_nav %}
+  {% for seg in segments %}
+  {% if seg.fired %}<li><hr style="border-color:rgba(255,255,255,0.08);margin:4px 16px;"></li>{% endif %}
+  <li>
+    <a href="?segment={{ seg.key }}"
+       class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2 {% if active_segment == seg.key %}cab-nav__item--active{% endif %}"
+       hx-get="?segment={{ seg.key }}" hx-target="#cab-content" hx-push-url="true"
+       style="color: var(--cab-sidebar-text); transition: background 0.15s;">
+      <span class="bi {{ seg.icon }} fs-5 flex-shrink-0"></span>
+      <span class="cab-nav__label ms-3 d-flex align-items-center justify-content-between w-100" style="white-space: nowrap;">
+        {{ seg.label }}
+        <span class="badge ms-2" style="background:rgba(255,255,255,0.15);font-weight:400;font-size:.7rem;">{{ seg.count }}</span>
+      </span>
+    </a>
+  </li>
+  {% if seg.key == 'all' %}<li><hr style="border-color:rgba(255,255,255,0.08);margin:4px 16px;"></li>{% endif %}
+  {% endfor %}
+{% endblock %}
+
+{% block cabinet_content %}
+<div x-data="{ view: localStorage.getItem('staff_view') || 'grid' }"
+     x-effect="localStorage.setItem('staff_view', view)">
+
+  {# ── Toolbar ── #}
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div class="flex-grow-1 position-relative">
+      <span class="bi bi-search position-absolute" style="left:12px;top:50%;transform:translateY(-50%);color:#94a3b8;"></span>
+      <input type="text" class="form-control form-control-sm ps-5"
+             placeholder="Search by name or specialization..."
+             value="{{ q }}"
+             hx-get="?" hx-trigger="keyup changed delay:400ms" hx-target="#cab-content"
+             name="q" style="border-radius:8px;">
+    </div>
+    <span class="text-muted flex-shrink-0" style="font-size:.85rem;">Found: {{ total }}</span>
+    <div class="btn-group btn-group-sm flex-shrink-0">
+      <button class="btn" :class="view === 'grid' ? 'btn-primary' : 'btn-outline-secondary'" @click="view = 'grid'">
+        <span class="bi bi-grid-3x3-gap"></span>
+      </button>
+      <button class="btn" :class="view === 'list' ? 'btn-primary' : 'btn-outline-secondary'" @click="view = 'list'">
+        <span class="bi bi-list-ul"></span>
+      </button>
+    </div>
+    <button class="btn btn-sm btn-primary flex-shrink-0">
+      <span class="bi bi-person-plus me-1"></span>Add
+    </button>
+  </div>
+
+  {# ── Grid view ── #}
+  <div x-show="view === 'grid'">
+    <div class="row g-3">
+      {% for person in staff %}
+      <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="card border-0 shadow-sm h-100" style="border-radius:10px;">
+          <div class="card-body text-center pt-4">
+
+            {# Status badge + pencil #}
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <span>{% for key, meta in status_map.items %}{% if key == person.status %}<span style="background:{{ meta.bg }};color:{{ meta.color }};padding:3px 8px;border-radius:4px;font-size:.7rem;">{{ meta.label }}</span>{% endif %}{% endfor %}</span>
+              <button class="btn btn-sm btn-outline-secondary p-1" style="width:28px;height:28px;">
+                <span class="bi bi-pencil" style="font-size:.7rem;"></span>
+              </button>
+            </div>
+
+            {# Avatar #}
+            <div class="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+                 style="width:72px;height:72px;background:var(--cab-primary);font-size:1.2rem;">
+              {{ person.initials }}
+            </div>
+
+            {# Name + role #}
+            <div class="fw-semibold mb-1">{{ person.name }}</div>
+            <div class="text-muted mb-3" style="font-size:.8rem;">{{ person.role }}</div>
+
+            {# Work days #}
+            <div class="d-flex justify-content-center gap-1 mb-3">
+              {% for day in days_all %}
+              <span class="rounded-circle d-flex align-items-center justify-content-center"
+                    style="width:26px;height:26px;font-size:.65rem;font-weight:600;
+                           {% if day in person.days %}background:var(--cab-primary);color:#fff;{% else %}background:#f1f5f9;color:#94a3b8;{% endif %}">
+                {{ day }}
+              </span>
+              {% endfor %}
+            </div>
+
+            {# Contacts + meta #}
+            <div class="text-start" style="font-size:.8rem;">
+              {% if person.phone %}
+              <div class="text-muted d-flex align-items-center gap-2 mb-1">
+                <span class="bi bi-telephone"></span> {{ person.phone }}
+              </div>
+              {% endif %}
+              {% if person.instagram %}
+              <div class="text-muted d-flex align-items-center gap-2 mb-1">
+                <span class="bi bi-instagram"></span> {{ person.instagram }}
+              </div>
+              {% endif %}
+              {% if person.experience %}
+              <div class="text-muted d-flex align-items-center gap-2 mb-1">
+                <span class="bi bi-briefcase"></span> EXPERIENCE: {{ person.experience }} years
+              </div>
+              {% endif %}
+              <div class="d-flex align-items-center gap-2 mt-2">
+                <span class="bi bi-eye{% if not person.visible_on_site %}-slash{% endif %}"
+                      style="color:{% if person.visible_on_site %}#16a34a{% else %}#94a3b8{% endif %};"></span>
+                <span style="color:{% if person.visible_on_site %}#16a34a{% else %}#94a3b8{% endif %};">
+                  {% if person.visible_on_site %}Visible on site{% else %}Hidden{% endif %}
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        {% include "showcase/cabinet/includes/_empty_state.html" with icon="bi-person-badge" title="Staff not found" %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {# ── Table view ── #}
+  <div x-show="view === 'list'" x-cloak>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4" style="font-size:.75rem;font-weight:600;color:#64748b;">NAME</th>
+              <th style="font-size:.75rem;font-weight:600;color:#64748b;">ROLE</th>
+              <th style="font-size:.75rem;font-weight:600;color:#64748b;">STATUS</th>
+              <th style="font-size:.75rem;font-weight:600;color:#64748b;">DAYS</th>
+              <th style="font-size:.75rem;font-weight:600;color:#64748b;">EXPERIENCE</th>
+              <th style="font-size:.75rem;font-weight:600;color:#64748b;">SITE</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for person in staff %}
+            <tr>
+              <td class="ps-4">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white flex-shrink-0"
+                        style="width:30px;height:30px;background:var(--cab-primary);font-size:.65rem;">
+                    {{ person.initials }}
+                  </span>
+                  <span style="font-size:.9rem;">{{ person.name }}</span>
+                </div>
+              </td>
+              <td class="text-muted" style="font-size:.875rem;">{{ person.role }}</td>
+              <td>
+                {% for key, meta in status_map.items %}{% if key == person.status %}
+                <span class="badge" style="background:{{ meta.bg }};color:{{ meta.color }};font-size:.7rem;">{{ meta.label }}</span>
+                {% endif %}{% endfor %}
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  {% for day in days_all %}
+                  <span class="rounded-circle d-flex align-items-center justify-content-center"
+                        style="width:22px;height:22px;font-size:.6rem;font-weight:600;
+                               {% if day in person.days %}background:var(--cab-primary);color:#fff;{% else %}background:#f1f5f9;color:#94a3b8;{% endif %}">
+                    {{ day }}
+                  </span>
+                  {% endfor %}
+                </div>
+              </td>
+              <td class="text-muted" style="font-size:.875rem;">{{ person.experience }} years</td>
+              <td>
+                <span class="bi bi-eye{% if not person.visible_on_site %}-slash{% endif %}"
+                      style="color:{% if person.visible_on_site %}#16a34a{% else %}#94a3b8{% endif %};"></span>
+              </td>
+              <td class="text-end pe-3">
+                <button class="btn btn-sm btn-outline-secondary">
+                  <span class="bi bi-pencil"></span>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

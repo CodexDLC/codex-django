@@ -1,0 +1,192 @@
+<header class="cab-topbar">
+
+  {# ── Administration dropdown ── #}
+  <div class="dropdown">
+    <button class="btn btn-sm d-flex align-items-center gap-2 dropdown-toggle"
+            type="button" data-bs-toggle="dropdown"
+            style="color: var(--cab-text); font-size: 0.875rem; font-weight: 500;">
+      <span class="bi bi-grid-3x3-gap fs-6"></span>
+      Administration
+    </button>
+    <ul class="dropdown-menu shadow" style="min-width:210px;">
+      <li><h6 class="dropdown-header" style="font-size:.7rem;letter-spacing:.06em;">SECTIONS</h6></li>
+      <li>
+        <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{% url 'codex_showcase:reports' %}">
+          <span class="bi bi-graph-up" style="color:var(--cab-primary);width:16px;"></span>
+          Analytics
+          {% if active_section == 'analytics' %}<span class="ms-auto bi bi-check2" style="color:var(--cab-primary);"></span>{% endif %}
+        </a>
+      </li>
+      <li>
+        <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{% url 'codex_showcase:clients' %}">
+          <span class="bi bi-people" style="color:var(--cab-primary);width:16px;"></span>
+          Clients
+          {% if active_section == 'clients' %}<span class="ms-auto bi bi-check2" style="color:var(--cab-primary);"></span>{% endif %}
+        </a>
+      </li>
+      <li>
+        <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{% url 'codex_showcase:staff' %}">
+          <span class="bi bi-person-badge" style="color:var(--cab-primary);width:16px;"></span>
+          Staff
+          {% if active_section == 'staff' %}<span class="ms-auto bi bi-check2" style="color:var(--cab-primary);"></span>{% endif %}
+        </a>
+      </li>
+      <li>
+        <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{% url 'codex_showcase:catalog' %}">
+          <span class="bi bi-scissors" style="color:var(--cab-primary);width:16px;"></span>
+          Catalog
+          {% if active_section == 'catalog' %}<span class="ms-auto bi bi-check2" style="color:var(--cab-primary);"></span>{% endif %}
+        </a>
+      </li>
+      {# New section — one line here #}
+    </ul>
+  </div>
+
+  {# ── Services dropdown (external integrations) ── #}
+  <div class="dropdown">
+    <button class="btn btn-sm d-flex align-items-center gap-2 dropdown-toggle"
+            type="button" data-bs-toggle="dropdown"
+            style="color: var(--cab-text); font-size: 0.875rem; font-weight: 500;">
+      <span class="bi bi-plug fs-6"></span>
+      Services
+    </button>
+    <ul class="dropdown-menu shadow" style="min-width:210px;">
+      <li><h6 class="dropdown-header" style="font-size:.7rem;letter-spacing:.06em;">Services</h6></li>
+      <li>
+        <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{% url 'codex_showcase:booking' %}">
+          <span class="bi bi-calendar3" style="color:var(--cab-primary);width:16px;"></span>
+          Booking
+          {% if active_section == 'booking' %}<span class="ms-auto bi bi-check2" style="color:var(--cab-primary);"></span>{% endif %}
+        </a>
+      </li>
+      <li>
+        <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{% url 'codex_showcase:conversations' %}">
+          <span class="bi bi-chat-dots" style="color:var(--cab-primary);width:16px;"></span>
+          Conversations
+          {% if active_section == 'conversations' %}<span class="ms-auto bi bi-check2" style="color:var(--cab-primary);"></span>{% endif %}
+        </a>
+      </li>
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <span class="dropdown-item d-flex align-items-center gap-2 py-2" style="opacity:.45;cursor:not-allowed;">
+          <span class="bi bi-credit-card" style="width:16px;"></span>
+          Payment System
+          <span class="badge ms-auto" style="background:#f1f5f9;color:#94a3b8;font-size:.65rem;">Soon</span>
+        </span>
+      </li>
+      <li>
+        <span class="dropdown-item d-flex align-items-center gap-2 py-2" style="opacity:.45;cursor:not-allowed;">
+          <span class="bi bi-whatsapp" style="width:16px;"></span>
+          SMS / WhatsApp
+          <span class="badge ms-auto" style="background:#f1f5f9;color:#94a3b8;font-size:.65rem;">Soon</span>
+        </span>
+      </li>
+      <li>
+        <span class="dropdown-item d-flex align-items-center gap-2 py-2" style="opacity:.45;cursor:not-allowed;">
+          <span class="bi bi-envelope" style="width:16px;"></span>
+          Email-marketing
+          <span class="badge ms-auto" style="background:#f1f5f9;color:#94a3b8;font-size:.65rem;">Soon</span>
+        </span>
+      </li>
+      {# New integration — one line here #}
+    </ul>
+  </div>
+
+  {# ── Separator ── #}
+  <div style="width:1px;height:18px;background:var(--cab-border,#e2e8f0);margin:0 6px;flex-shrink:0;"></div>
+
+  {# ── Shortcuts — add new hot sections here ── #}
+  <nav class="d-flex align-items-center gap-1">
+    {% include "showcase/cabinet/includes/_topbar_shortcut.html" with label="Appointments" url_name="codex_showcase:booking" icon="bi-calendar3" active_key="booking" %}
+  </nav>
+
+  <div class="flex-grow-1"></div>
+
+  {# ── Right: bell + avatar ── #}
+  <div class="d-flex align-items-center gap-2">
+
+    <div class="dropdown">
+      <button class="btn btn-sm position-relative" style="color: var(--cab-text-muted);"
+              type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+        <span class="bi bi-bell fs-5"></span>
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+              style="font-size:.6rem;">3</span>
+      </button>
+      <div class="dropdown-menu dropdown-menu-end shadow p-0" style="width:360px;border-radius:12px;overflow:hidden;">
+
+        <div class="d-flex align-items-center justify-content-between px-3 py-2 border-bottom" style="background:#f8fafc;">
+          <span class="fw-semibold" style="font-size:.875rem;color:#374151;">Notifications</span>
+          <button class="btn btn-link btn-sm p-0 text-muted" style="font-size:.75rem;">Mark all as read</button>
+        </div>
+
+        {# Notification item: new dialog #}
+        <a href="{% url 'codex_showcase:conversations' %}" class="d-flex align-items-start gap-3 px-3 py-3 text-decoration-none border-bottom" style="background:#eff6ff;transition:background .15s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+          <div class="d-flex align-items-center justify-content-center flex-shrink-0 rounded-circle" style="width:36px;height:36px;background:#3b82f6;">
+            <span class="bi bi-chat-dots text-white" style="font-size:.85rem;"></span>
+          </div>
+          <div class="flex-grow-1">
+            <div class="d-flex align-items-center justify-content-between">
+              <span class="fw-semibold" style="font-size:.82rem;color:#1e40af;">New conversation</span>
+              <span class="text-muted" style="font-size:.7rem;">10:28</span>
+            </div>
+            <p class="mb-0" style="font-size:.78rem;color:#374151;line-height:1.4;">Elisa Berger — Booking questions</p>
+          </div>
+          <span class="rounded-circle bg-primary flex-shrink-0" style="width:8px;height:8px;margin-top:4px;"></span>
+        </a>
+
+        {# Notification item: new booking #}
+        <a href="#" class="d-flex align-items-start gap-3 px-3 py-3 text-decoration-none border-bottom" style="background:#eff6ff;transition:background .15s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+          <div class="d-flex align-items-center justify-content-center flex-shrink-0 rounded-circle" style="width:36px;height:36px;background:#8b5cf6;">
+            <span class="bi bi-calendar-check text-white" style="font-size:.85rem;"></span>
+          </div>
+          <div class="flex-grow-1">
+            <div class="d-flex align-items-center justify-content-between">
+              <span class="fw-semibold" style="font-size:.82rem;color:#5b21b6;">New booking</span>
+              <span class="text-muted" style="font-size:.7rem;">yesterday</span>
+            </div>
+            <p class="mb-0" style="font-size:.78rem;color:#374151;line-height:1.4;">Sophie Bahn — Facial, 21 March 15:00</p>
+          </div>
+          <span class="rounded-circle flex-shrink-0" style="width:8px;height:8px;margin-top:4px;background:#8b5cf6;"></span>
+        </a>
+
+        {# Notification item: read #}
+        <a href="#" class="d-flex align-items-start gap-3 px-3 py-3 text-decoration-none border-bottom" style="transition:background .15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+          <div class="d-flex align-items-center justify-content-center flex-shrink-0 rounded-circle" style="width:36px;height:36px;background:#e2e8f0;">
+            <span class="bi bi-chat-dots" style="font-size:.85rem;color:#94a3b8;"></span>
+          </div>
+          <div class="flex-grow-1">
+            <div class="d-flex align-items-center justify-content-between">
+              <span class="fw-semibold" style="font-size:.82rem;color:#6b7280;">Conversation closed</span>
+              <span class="text-muted" style="font-size:.7rem;">Mar 13</span>
+            </div>
+            <p class="mb-0" style="font-size:.78rem;color:#9ca3af;line-height:1.4;">Anna Müller — Work / Career</p>
+          </div>
+        </a>
+
+        <div class="text-center py-2">
+          <a href="{% url 'codex_showcase:conversations' %}" class="text-decoration-none" style="font-size:.78rem;color:var(--cab-primary);">All Notifications</a>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="dropdown">
+      <button class="btn btn-sm d-flex align-items-center gap-2 dropdown-toggle"
+              type="button" data-bs-toggle="dropdown"
+              style="color: var(--cab-text); font-size: 0.875rem;">
+        <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+              style="width:32px;height:32px;background:var(--cab-primary);font-size:.75rem;flex-shrink:0;">
+          {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+        </span>
+        <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+        <li><a class="dropdown-item" href="#"><span class="bi bi-person me-2"></span>Profile</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item text-danger" href="{% url 'account_logout' %}"><span class="bi bi-box-arrow-right me-2"></span>Logout</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+</header>

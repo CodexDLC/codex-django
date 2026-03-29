@@ -19,7 +19,12 @@ from django.utils.translation import gettext_lazy as _
 
 
 class BaseEmailContentMixin(models.Model):
-    """Abstract model for storing email/notification content blocks."""
+    """Abstract model for storing email/notification content blocks.
+
+    Notes:
+        Projects usually subclass this mixin in their own app so the content
+        model can be registered in admin and translated by the chosen stack.
+    """
 
     CATEGORY_CHOICES = [
         ("general", _("General / Shared")),
@@ -38,4 +43,5 @@ class BaseEmailContentMixin(models.Model):
         ordering = ["category", "key"]
 
     def __str__(self) -> str:
+        """Return a readable admin label for the content entry."""
         return f"[{self.category}] {self.key}"

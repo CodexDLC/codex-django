@@ -1,0 +1,126 @@
+site_name: codex-django
+site_description: Django runtime utilities, mixins, adapters, and reusable modules for Codex projects
+site_author: Codex Team
+site_url: https://codexdlc.github.io/codex-django/
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.breadcrumbs
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: cyan
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: cyan
+
+plugins:
+  - search
+  - include-markdown
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_category_heading: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            members_order: source
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
+  - javascripts/mermaid.js
+
+markdown_extensions:
+  - admonition
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+exclude_docs: |
+  dev/
+  en/architecture/cli/
+  ru/architecture/cli/
+
+nav:
+  - Home: index.md
+  - Guide (EN):
+      - Overview: en/README.md
+      - Getting Started: en/getting-started.md
+      - Installation Modes: en/guides/installation-modes.md
+      - Runtime vs CLI: en/guides/runtime-vs-cli.md
+      - Project Structure: en/guides/project-structure.md
+      - Blueprint Workflow: en/guides/blueprints-and-scaffolding.md
+      - Module Guides:
+          - Booking: en/guides/booking.md
+          - Cabinet: en/guides/cabinet.md
+          - Notifications: en/guides/notifications.md
+          - System: en/guides/system.md
+      - Architecture:
+          - Overview: en/architecture/README.md
+          - Core: en/architecture/core.md
+          - System: en/architecture/system.md
+          - Notifications: en/architecture/notifications.md
+          - Booking: en/architecture/booking.md
+          - Cabinet: en/architecture/cabinet.md
+          - Showcase: en/architecture/showcase.md
+  - Руководство (RU):
+      - Обзор: ru/README.md
+      - Быстрый старт: ru/getting-started.md
+      - Режимы установки: ru/guides/installation-modes.md
+      - Runtime и CLI: ru/guides/runtime-vs-cli.md
+      - Структура проекта: ru/guides/project-structure.md
+      - Работа с blueprints: ru/guides/blueprints-and-scaffolding.md
+      - Гайды по модулям:
+          - Booking: ru/guides/booking.md
+          - Cabinet: ru/guides/cabinet.md
+          - Notifications: ru/guides/notifications.md
+          - System: ru/guides/system.md
+      - Архитектура:
+          - Обзор: ru/architecture/README.md
+          - Core: ru/architecture/core.md
+          - System: ru/architecture/system.md
+          - Notifications: ru/architecture/notifications.md
+          - Booking: ru/architecture/booking.md
+          - Cabinet: ru/architecture/cabinet.md
+          - Showcase: ru/architecture/showcase.md
+  - API Reference:
+      - Overview: en/api/README.md
+      - Public API:
+          - Core: en/api/core.md
+          - System: en/api/system.md
+          - Notifications: en/api/notifications.md
+          - Booking: en/api/booking.md
+          - Cabinet: en/api/cabinet.md
+      - Internal Modules:
+          - Core internals: en/api/internal/core.md
+          - System internals: en/api/internal/system.md
+          - Notifications internals: en/api/internal/notifications.md
+          - Booking internals: en/api/internal/booking.md
+          - Cabinet internals: en/api/internal/cabinet.md
+  - Changelog: changelog.md
+
+extra:
+  version:
+    provider: mike
+    default: latest

@@ -1,3 +1,16 @@
+"""Domain-aware wrapper around Django's ``makemessages`` command.
+
+The command scans a Codex project for template-bearing domains, creates
+centralized ``locale/<domain>/`` directories, and runs Django's
+``makemessages`` command separately for each domain plus a shared
+``common`` bucket.
+
+Examples:
+    Preview what would be generated without writing files::
+
+        python manage.py codex_makemessages --dry-run
+"""
+
 import subprocess
 import sys
 from argparse import ArgumentParser
@@ -9,12 +22,26 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
+    """Generate modular translation catalogs for Codex project layouts.
+
+    The command understands three common template layouts:
+
+    - root-level ``templates/<domain>/``
+    - app-local ``<app>/templates/``
+    - feature-local ``features/<feature>/templates/``
+    """
+
     help = (
         "Template-driven modular makemessages: creates locale files based on "
         "subfolders in the root templates directory."
     )
 
     def add_arguments(self, parser: ArgumentParser) -> None:
+        """Register command-line arguments for the management command.
+
+        Args:
+            parser: Django/argparse parser instance for this command.
+        """
         parser.add_argument(
             "--dry-run",
             action="store_true",
@@ -22,6 +49,12 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args: Any, **options: Any) -> None:
+        """Discover domains and run ``makemessages`` for each one.
+
+        Args:
+            *args: Positional arguments forwarded by Django's command runner.
+            **options: Parsed command-line options.
+        """
         base_dir = Path(cast(str, settings.BASE_DIR))  # type: ignore[misc]
         languages = [lang[0] for lang in settings.LANGUAGES]
         dry_run = cast(bool, options["dry_run"])
@@ -96,6 +129,19 @@ class Command(BaseCommand):
     def _build_cmd(
         self, manage_py: Path, languages: list[str], domain: str, base_dir: Path, all_domains: list[str]
     ) -> list[str]:
+        """Build the concrete ``makemessages`` subprocess command.
+
+        Args:
+            manage_py: Path to the project's ``manage.py`` script.
+            languages: Configured Django language codes.
+            domain: Domain currently being processed.
+            base_dir: Project root directory.
+            all_domains: Every discovered domain name used to construct
+                ignore patterns.
+
+        Returns:
+            A subprocess argument list ready to pass to ``subprocess.run``.
+        """
         cmd = [sys.executable, str(manage_py), "makemessages"]
         for lang in languages:
             cmd.extend(["-l", lang])
@@ -141,6 +187,14 @@ class Command(BaseCommand):
         return cmd
 
     def _run_makemessages(self, cmd: list[str], base_dir: Path, domain: str, dry_run: bool) -> None:
+        """Execute or preview a single ``makemessages`` subprocess call.
+
+        Args:
+            cmd: Fully constructed subprocess command.
+            base_dir: Project root used as the subprocess working directory.
+            domain: Domain label used for status output.
+            dry_run: When ``True``, print the command instead of executing it.
+        """
         if dry_run:
             self.stdout.write(f"  [DRY-RUN] Executing: {' '.join(cmd)}")
             return

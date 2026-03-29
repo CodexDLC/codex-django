@@ -5,26 +5,38 @@ build-backend = "hatchling.build"
 [project]
 name = "codex-django"
 dynamic = ["version"]
-description = "Django utilities, mixins, adapters and CLI scaffolding for Codex projects"
+description = "Django runtime utilities, mixins, adapters, and reusable modules for Codex projects"
 readme = { file = "README.md", content-type = "text/markdown" }
 license = { text = "Apache-2.0" }
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 authors = [{ name = "CodexDLC" }]
-keywords = ["django", "mixins", "cli", "scaffold", "notifications", "codex"]
+keywords = ["django", "mixins", "runtime", "notifications", "codex"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Framework :: Django",
 ]
 dependencies = [
     "django>=5.0",
-    "jinja2>=3.1",
-    "rich>=13.0",
-    "questionary>=2.0.0",
+    "loguru>=0.7.0",
+    "redis>=5.0",
+    "Pillow>=10.0.0",
+    "django-prometheus>=2.3.0",
+    "django-unfold>=0.20.0",
+    "django-import-export>=4.0.0",
+    "django-lifecycle>=1.2.0",
+    "django-allauth>=0.61.0",
+    "django-extensions>=3.2.0",
+    "django-debug-toolbar>=4.3.0",
+    "django-ninja>=1.1.0",
+    "django-modeltranslation>=0.19.0",
+    "codex-core",
+    "codex-services",
+    "codex-platform",
+    "django-encrypted-model-fields>=0.6",
 ]
 
 [project.urls]
@@ -34,32 +46,19 @@ Repository = "https://github.com/codexdlc/codex-django"
 Issues = "https://github.com/codexdlc/codex-django/issues"
 
 [project.optional-dependencies]
-platform = ["codex-platform"]
-notifications = ["aiosmtplib>=3.0", "arq>=0.25", "asgiref>=3.7"]
-all = [
-    "codex-django[platform,notifications]",
-]
+cli = ["codex-django-cli>=0.1.0"]
 dev = [
-    "codex-django[all]",
-    "codex-core",
-    "codex-services",
-    "codex-platform",
-    "django-ninja>=1.1",
-    "pydantic>=2.0",
-    "django-unfold>=0.20",
-    "django-import-export>=4.0",
-    "django-lifecycle>=1.2",
-    "django-allauth>=0.61",
-    "django-extensions>=3.2",
-    "django-debug-toolbar>=4.3",
+    "codex-django[cli]",
     "pytest>=8.0",
     "pytest-django>=4.8",
-    "pytest-asyncio>=0.23",
     "pytest-cov",
     "ruff>=0.4",
     "mypy>=1.10",
     "django-stubs>=5.0",
     "pre-commit>=3.0",
+]
+maintainer = [
+    "codex-django[dev]",
     "bandit>=1.7",
     "pip-audit>=2.7",
     "detect-secrets>=1.5",
@@ -71,9 +70,6 @@ docs = [
     "mkdocs-include-markdown-plugin",
     "mike>=2.0",
 ]
-
-[project.scripts]
-codex-django = "codex_django.cli.main:main"
 
 [tool.hatch.version]
 source = "vcs"
@@ -93,6 +89,10 @@ ignore = ["B008"]
 python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy", "mypy_django_plugin.main"]
+exclude = [
+    "src/codex_django/cli/blueprints",
+    "src/codex_django/cabinet/migrations",
+]
 
 [[tool.mypy.overrides]]
 module = [
@@ -102,15 +102,24 @@ module = [
 ]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = [
+    "encrypted_model_fields.*",
+    "django_lifecycle.*",
+]
+ignore_missing_imports = true
+ignore_errors = true
+
 [tool.django-stubs]
 django_settings_module = "tests.settings"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 DJANGO_SETTINGS_MODULE = "tests.settings"
-addopts = "--cov=src/codex_django/cli --cov-report=term-missing"
+addopts = "--cov=src/codex_django --cov-report=term-missing"
 markers = [
     "unit: unit tests (no external dependencies)",
     "integration: integration tests (real file I/O via tmp_path)",
@@ -123,7 +132,7 @@ omit = ["*/_draft/*"]
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 75
+fail_under = 90  # Runtime baseline reached on March 29, 2026 audit pass.
 
 [tool.bandit]
 exclude_dirs = ["tests"]

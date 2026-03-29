@@ -1,0 +1,110 @@
+<div class="d-flex flex-column h-100">
+
+  {# ── Header ── #}
+  <div class="p-4 border-bottom d-flex align-items-center justify-content-between" style="background:#fff;flex-shrink:0;">
+    <div class="d-flex align-items-center gap-3">
+      <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white flex-shrink-0"
+            style="width:42px;height:42px;background:var(--cab-primary);font-size:.75rem;">
+        {{ conv.initials }}
+      </span>
+      <div>
+        <div class="fw-semibold" style="font-size:1rem;color:#111827;">{{ conv.client_name }}</div>
+        <div class="d-flex align-items-center gap-2 mt-1" style="font-size:.78rem;color:#6b7280;">
+          {% if conv.client_email %}
+          <span class="bi bi-envelope me-1"></span>{{ conv.client_email }}
+          {% endif %}
+          {% if conv.client_phone %}
+          <span class="bi bi-telephone ms-2 me-1"></span>{{ conv.client_phone }}
+          {% endif %}
+          {% if conv.client_whatsapp %}
+          <span class="bi bi-whatsapp ms-2 me-1" style="color:#25d366;"></span>{{ conv.client_whatsapp }}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge" style="font-size:.72rem;padding:4px 10px;{% if conv.status == 'open' %}background:#fef3c7;color:#92400e;{% else %}background:#d1fae5;color:#065f46;{% endif %}">
+        {% if conv.status == 'open' %}Open{% else %}Processed{% endif %}
+      </span>
+      <span class="badge" style="font-size:.72rem;padding:4px 10px;background:#f1f5f9;color:#64748b;">{{ conv.topic }}</span>
+      {% if conv.status == 'open' %}
+      <button class="btn btn-sm btn-outline-secondary" style="font-size:.75rem;">
+        <span class="bi bi-check2-circle me-1"></span>Close
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Message thread ── #}
+  <div class="flex-grow-1 overflow-y-auto p-4" style="display:flex;flex-direction:column;gap:16px;">
+
+    {# Initial message from client #}
+    <div class="d-flex gap-3">
+      <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white flex-shrink-0"
+            style="width:34px;height:34px;background:var(--cab-primary);font-size:.65rem;margin-top:2px;">
+        {{ conv.initials }}
+      </span>
+      <div style="max-width:75%;">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="fw-semibold" style="font-size:.82rem;color:#374151;">{{ conv.client_name }}</span>
+          <span class="text-muted" style="font-size:.72rem;">{{ conv.date }}</span>
+          <span class="badge" style="background:#f1f5f9;color:#64748b;font-size:.62rem;">form</span>
+        </div>
+        <div class="p-3 rounded-3" style="background:#fff;border:1px solid #e2e8f0;font-size:.875rem;line-height:1.6;color:#374151;white-space:pre-wrap;">{{ conv.initial_message }}</div>
+      </div>
+    </div>
+
+    {# History #}
+    {% for msg in conv.history %}
+    <div class="d-flex gap-3 {% if forloop.first and conv.history %}{% endif %}">
+      {% if msg.channel == 'email' %}
+      <div class="d-flex align-items-center justify-content-center flex-shrink-0"
+           style="width:34px;height:34px;border-radius:50%;background:#eff6ff;margin-top:2px;">
+        <span class="bi bi-envelope" style="color:#3b82f6;font-size:.8rem;"></span>
+      </div>
+      {% else %}
+      <div class="d-flex align-items-center justify-content-center flex-shrink-0"
+           style="width:34px;height:34px;border-radius:50%;background:#f0fdf4;margin-top:2px;">
+        <span class="bi bi-whatsapp" style="color:#25d366;font-size:.8rem;"></span>
+      </div>
+      {% endif %}
+      <div style="max-width:75%;">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="fw-semibold" style="font-size:.82rem;color:#374151;">You</span>
+          <span class="text-muted" style="font-size:.72rem;">{{ msg.date }}</span>
+          <span class="badge" style="{% if msg.channel == 'email' %}background:#eff6ff;color:#3b82f6;{% else %}background:#f0fdf4;color:#16a34a;{% endif %}font-size:.62rem;">
+            {% if msg.channel == 'email' %}email{% else %}WhatsApp{% endif %}
+          </span>
+        </div>
+        <div class="p-3 rounded-3" style="background:#fff;border:1px solid #e2e8f0;font-size:.875rem;line-height:1.6;color:#374151;white-space:pre-wrap;">{{ msg.text }}</div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="text-center text-muted py-3" style="font-size:.85rem;">
+      <span class="bi bi-reply me-1"></span>No replies yet
+    </div>
+    {% endfor %}
+
+  </div>
+
+  {# ── Reply area ── #}
+  <div class="p-4 border-top" style="background:#fff;flex-shrink:0;">
+    <textarea class="form-control mb-3" rows="3" placeholder="Write a reply..."
+              style="border-radius:10px;font-size:.875rem;resize:none;"></textarea>
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-sm btn-primary">
+        <span class="bi bi-envelope me-1"></span>Send Email
+      </button>
+      {% if conv.client_whatsapp %}
+      <button class="btn btn-sm" style="background:#25d366;color:#fff;border:none;">
+        <span class="bi bi-whatsapp me-1"></span>WhatsApp
+      </button>
+      {% endif %}
+      <div class="flex-grow-1"></div>
+      <span class="text-muted" style="font-size:.75rem;">
+        <span class="bi bi-key me-1"></span>Token: <code style="font-size:.72rem;">#{{ conv.pk }}-reply</code>
+      </span>
+    </div>
+  </div>
+
+</div>
