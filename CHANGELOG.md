@@ -4,7 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- Ongoing release polish after the first public packaging pass.
+### Added
+
+- Cabinet redesign groundwork across templates, styles, quick-access flows, notifications, and dashboard/site-settings surfaces.
+- New runtime modules and coverage for conversations, cabinet services/tags, booking contracts, and core app wiring.
+
+### Changed
+
+- Standardized the developer quality gate around `codex_core.dev.check_runner` and moved project policy into `[tool.codex-check]`.
+- Raised the runtime dependency floor to the refreshed Codex package line: `codex-core`, `codex-platform`, and `codex-services` now resolve from `>=0.3.0,<1.0.0`.
+- Raised the optional CLI extra to `codex-django-cli>=0.3.0,<0.4.0` so new installs resolve against the current standalone CLI release line.
+- Expanded English and Russian docs around cabinet architecture, guides, and settings.
 
 ## [0.2.5] - 2026-03-29
 

@@ -33,9 +33,9 @@ dependencies = [
     "django-debug-toolbar>=4.3.0",
     "django-ninja>=1.1.0",
     "django-modeltranslation>=0.19.0",
-    "codex-core",
-    "codex-services",
-    "codex-platform",
+    "codex-core>=0.3.0,<1.0.0",
+    "codex-services>=0.3.0,<1.0.0",
+    "codex-platform>=0.3.0,<1.0.0",
     "django-encrypted-model-fields>=0.6",
 ]
 
@@ -46,7 +46,7 @@ Repository = "https://github.com/codexdlc/codex-django"
 Issues = "https://github.com/codexdlc/codex-django/issues"
 
 [project.optional-dependencies]
-cli = ["codex-django-cli>=0.1.0"]
+cli = ["codex-django-cli>=0.3.0,<0.4.0"]
 dev = [
     "codex-django[cli]",
     "arq>=0.25",
@@ -78,6 +78,12 @@ source = "vcs"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/codex_django"]
+
+[tool.uv.sources]
+codex-core = { path = "../codex-core" }
+codex-platform = { path = "../codex-platform" }
+codex-services = { path = "../codex_services" }
+codex-django-cli = { path = "../codex-django-cli" }
 
 [tool.ruff]
 target-version = "py312"
@@ -140,3 +146,15 @@ fail_under = 90  # Runtime baseline reached on March 29, 2026 audit pass.
 [tool.bandit]
 exclude_dirs = ["tests"]
 skips = ["B602", "B605", "B607", "B404"]
+
+[tool.codex-check]
+project-name = "codex-django"
+audit-flags = "--skip-editable --ignore-vuln CVE-2026-4539 --ignore-vuln CVE-2026-34515 --ignore-vuln CVE-2026-34513 --ignore-vuln CVE-2026-34516 --ignore-vuln CVE-2026-34517 --ignore-vuln CVE-2026-34519 --ignore-vuln CVE-2026-34518 --ignore-vuln CVE-2026-34520 --ignore-vuln CVE-2026-34525 --ignore-vuln CVE-2026-22815 --ignore-vuln CVE-2026-34514 --ignore-vuln CVE-2026-34450 --ignore-vuln CVE-2026-34452 --ignore-vuln CVE-2026-34073 --ignore-vuln CVE-2026-34591"
+integration-requires = "Redis (optional, in-memory mock available)"
+e2e-requires = "isolated filesystem + subprocess"
+test-stages = ["unit", "integration", "e2e"]
+prompt-test-stages = ["integration", "e2e"]
+allow-empty-test-stages = ["integration", "e2e"]
+no-cov-test-stages = ["integration", "e2e"]
+test-paths = ["tests"]
+types-paths = ["src"]

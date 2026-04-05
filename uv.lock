@@ -269,16 +269,33 @@ wheels = [
 
 [[package]]
 name = "codex-core"
-version = "0.2.0"
-source = { registry = "https://pypi.org/simple" }
+source = { directory = "../codex-core" }
 dependencies = [
     { name = "pydantic" },
     { name = "pydantic-settings" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/35/dc/6225a11ac1bbb21a495beebf05c047b75792a31884c5aa30d78172d3d909/codex_core-0.2.0.tar.gz", hash = "sha256:1058cb69beceb779d2b0d87e292a1d01e0d1d0467a09ceb1419dc552b7048981", size = 46707, upload-time = "2026-03-19T10:26:34.211Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a2/66/3de600e984d3c59e9ea9fda7ecf4754a2d5d515189f77d443772dd3584c1/codex_core-0.2.0-py3-none-any.whl", hash = "sha256:e3279a2916e431ce71705570373bac6961512962d776e34ebdb7ccc98703d0ac", size = 28734, upload-time = "2026-03-19T10:26:32.406Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "bandit", marker = "extra == 'dev'", specifier = ">=1.7" },
+    { name = "detect-secrets", marker = "extra == 'dev'", specifier = ">=1.5" },
+    { name = "loguru", marker = "extra == 'loguru'", specifier = ">=0.7.0" },
+    { name = "mike", marker = "extra == 'docs'", specifier = ">=2.0" },
+    { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.5" },
+    { name = "mkdocs-include-markdown-plugin", marker = "extra == 'docs'" },
+    { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.0" },
+    { name = "mkdocstrings", extras = ["python"], marker = "extra == 'docs'", specifier = ">=0.24" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
+    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.7" },
+    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.0" },
+    { name = "pydantic", specifier = ">=2.0,<3.0" },
+    { name = "pydantic-settings", specifier = ">=2.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23" },
+    { name = "pytest-cov", marker = "extra == 'dev'" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4" },
 ]
+provides-extras = ["dev", "docs", "loguru"]
 
 [[package]]
 name = "codex-django"
@@ -347,12 +364,12 @@ requires-dist = [
     { name = "arq", marker = "extra == 'dev'", specifier = ">=0.25" },
     { name = "arq", marker = "extra == 'maintainer'", specifier = ">=0.25" },
     { name = "bandit", marker = "extra == 'maintainer'", specifier = ">=1.7" },
-    { name = "codex-core" },
-    { name = "codex-django-cli", marker = "extra == 'cli'", specifier = ">=0.1.0" },
-    { name = "codex-django-cli", marker = "extra == 'dev'", specifier = ">=0.1.0" },
-    { name = "codex-django-cli", marker = "extra == 'maintainer'", specifier = ">=0.1.0" },
-    { name = "codex-platform" },
-    { name = "codex-services" },
+    { name = "codex-core", directory = "../codex-core" },
+    { name = "codex-django-cli", marker = "extra == 'cli'", directory = "../codex-django-cli" },
+    { name = "codex-django-cli", marker = "extra == 'dev'", directory = "../codex-django-cli" },
+    { name = "codex-django-cli", marker = "extra == 'maintainer'", directory = "../codex-django-cli" },
+    { name = "codex-platform", directory = "../codex-platform" },
+    { name = "codex-services", directory = "../codex_services" },
     { name = "detect-secrets", marker = "extra == 'maintainer'", specifier = ">=1.5" },
     { name = "django", specifier = ">=5.0" },
     { name = "django-allauth", specifier = ">=0.61.0" },
@@ -395,43 +412,110 @@ provides-extras = ["cli", "dev", "docs", "maintainer"]
 
 [[package]]
 name = "codex-django-cli"
-version = "0.2.0"
-source = { registry = "https://pypi.org/simple" }
+source = { directory = "../codex-django-cli" }
 dependencies = [
     { name = "jinja2" },
     { name = "questionary" },
     { name = "rich" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/99/ca/b8ea959100132985ad71f54b74a9fa1472b2355b0ce352e72ceeac6d03c3/codex_django_cli-0.2.0.tar.gz", hash = "sha256:3d5e33ea4c8b090d93aeab572e067c8715b9543439ba50a680bf91724d01469d", size = 115087, upload-time = "2026-03-29T13:14:00.781Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/99/f3/ab7f6767fde570cb4c6ca3bd3ec72f223a6f03361812702cd1fb7262c825/codex_django_cli-0.2.0-py3-none-any.whl", hash = "sha256:cd2412e60a32bcd016924ff9fd88442a9ddf007556b43bd5ae64e5d1bc1172b6", size = 155515, upload-time = "2026-03-29T13:13:59.322Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "bandit", marker = "extra == 'dev'", specifier = ">=1.7" },
+    { name = "codex-core", marker = "extra == 'dev'", specifier = ">=0.3.0,<0.4.0" },
+    { name = "detect-secrets", marker = "extra == 'dev'", specifier = ">=1.5" },
+    { name = "jinja2", specifier = ">=3.1" },
+    { name = "mike", marker = "extra == 'docs'", specifier = ">=2.0" },
+    { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.5" },
+    { name = "mkdocs-include-markdown-plugin", marker = "extra == 'docs'" },
+    { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.0" },
+    { name = "mkdocstrings", extras = ["python"], marker = "extra == 'docs'", specifier = ">=0.24" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
+    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.7" },
+    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "pytest-cov", marker = "extra == 'dev'" },
+    { name = "questionary", specifier = ">=2.0.0" },
+    { name = "rich", specifier = ">=13.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4" },
 ]
+provides-extras = ["dev", "docs"]
 
 [[package]]
 name = "codex-platform"
-version = "0.1.0"
-source = { registry = "https://pypi.org/simple" }
+source = { directory = "../codex-platform" }
 dependencies = [
     { name = "codex-core" },
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/62/d5/1ab482637a4389423707333bae56bb406dae3c431408346a161e602edb46/codex_platform-0.1.0.tar.gz", hash = "sha256:03dfd775fb0395b6200275c50e2a7d8862f44efff89b8e4da90310ea94bcfd11", size = 72799, upload-time = "2026-03-17T22:04:17.296Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/6e/82/77b1c9f3f3497a93b3cd6853a5ac1edf4b026dde27c073faae60b35e6cb6/codex_platform-0.1.0-py3-none-any.whl", hash = "sha256:4907b94655dfe0981f4eddde6544637d25f4b3c85b988cb46667cbe9fc7adb26", size = 50536, upload-time = "2026-03-17T22:04:15.947Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "aiosmtplib", marker = "extra == 'all'", specifier = ">=3.0" },
+    { name = "aiosmtplib", marker = "extra == 'dev'", specifier = ">=3.0" },
+    { name = "aiosmtplib", marker = "extra == 'notifications'", specifier = ">=3.0" },
+    { name = "arq", marker = "extra == 'all'", specifier = ">=0.25" },
+    { name = "arq", marker = "extra == 'arq'", specifier = ">=0.25" },
+    { name = "arq", marker = "extra == 'dev'", specifier = ">=0.25" },
+    { name = "bandit", marker = "extra == 'dev'", specifier = ">=1.7" },
+    { name = "codex-core", specifier = ">=0.3.0,<0.10.0" },
+    { name = "detect-secrets", marker = "extra == 'dev'", specifier = ">=1.5" },
+    { name = "fakeredis", extras = ["lua"], marker = "extra == 'dev'", specifier = ">=2.20" },
+    { name = "jinja2", marker = "extra == 'all'", specifier = ">=3.1" },
+    { name = "jinja2", marker = "extra == 'dev'", specifier = ">=3.1" },
+    { name = "jinja2", marker = "extra == 'notifications'", specifier = ">=3.1" },
+    { name = "mike", marker = "extra == 'docs'", specifier = ">=2.0" },
+    { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.5,<2.0" },
+    { name = "mkdocs-include-markdown-plugin", marker = "extra == 'docs'" },
+    { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.0" },
+    { name = "mkdocstrings", extras = ["python"], marker = "extra == 'docs'", specifier = ">=0.24" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
+    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.7" },
+    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.0" },
+    { name = "pydantic", specifier = ">=2.0,<3.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23" },
+    { name = "pytest-cov", marker = "extra == 'dev'" },
+    { name = "redis", marker = "extra == 'all'", specifier = ">=5.0" },
+    { name = "redis", marker = "extra == 'dev'", specifier = ">=5.0" },
+    { name = "redis", marker = "extra == 'redis'", specifier = ">=5.0" },
+    { name = "redis", marker = "extra == 'streams'", specifier = ">=5.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4" },
 ]
+provides-extras = ["all", "arq", "dev", "docs", "notifications", "redis", "streams"]
 
 [[package]]
 name = "codex-services"
-version = "0.1.0"
-source = { registry = "https://pypi.org/simple" }
+source = { directory = "../codex_services" }
 dependencies = [
     { name = "codex-core" },
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/53/57/dd1773a1afe90df659ed3180e20d7acc25bb608833487a59868a0dcec53a/codex_services-0.1.0.tar.gz", hash = "sha256:05b96df68e5f1bf378e55197fe25176266cfa42a9ae4ac2885fa7f419e0d7651", size = 50436, upload-time = "2026-03-20T21:22:07.612Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/5c/9f/7336b52dbd4d720f20cbb880098b3d26c7a5861b50ff9dcf859a36ab0e3e/codex_services-0.1.0-py3-none-any.whl", hash = "sha256:e613eaf01bfec0a3ae4fe182427678d2860b2adfd2b618c53a8abcb4c6c152de", size = 32270, upload-time = "2026-03-20T21:22:06.154Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "bandit", marker = "extra == 'dev'", specifier = ">=1.7" },
+    { name = "codex-core", specifier = ">=0.3.0,<1.0.0" },
+    { name = "detect-secrets", marker = "extra == 'dev'", specifier = ">=1.5" },
+    { name = "holidays", marker = "extra == 'all'", specifier = ">=0.40" },
+    { name = "holidays", marker = "extra == 'calendar'", specifier = ">=0.40" },
+    { name = "holidays", marker = "extra == 'dev'", specifier = ">=0.40" },
+    { name = "mike", marker = "extra == 'docs'", specifier = ">=2.0" },
+    { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.5" },
+    { name = "mkdocs-include-markdown-plugin", marker = "extra == 'docs'" },
+    { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.0" },
+    { name = "mkdocs-static-i18n", extras = ["material"], marker = "extra == 'docs'", specifier = ">=1.2.0" },
+    { name = "mkdocstrings", extras = ["python"], marker = "extra == 'docs'", specifier = ">=0.24" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
+    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.7" },
+    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.0" },
+    { name = "pydantic", specifier = ">=2.0,<3.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23" },
+    { name = "pytest-cov", marker = "extra == 'dev'" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4" },
 ]
+provides-extras = ["all", "calendar", "dev", "docs"]
 
 [[package]]
 name = "colorama"
