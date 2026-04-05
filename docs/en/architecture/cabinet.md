@@ -42,31 +42,50 @@ The cabinet app is intentionally isolated:
 
 This makes it possible to reuse cabinet across generated projects without mixing it with the project's public-site structure.
 
+### Two-Space Model
+
+Cabinet hosts two independent spaces under a single app:
+
+| Space | URL prefix | Base template | Audience |
+|-------|-----------|---------------|---------|
+| `staff` | `/cabinet/` | `base_cabinet.html` | Owners and administrators |
+| `client` | `/cabinet/my/` | `base_client.html` | End-customers |
+
+Each space has its own topbar, sidebar, and shortcuts registered separately via `declare(space=...)`.
+CSS token sets are also independent: staff uses `:root { --cab-* }`, client uses `.cab-wrapper--client { --cab-* }`.
+Projects can override both palettes independently.
+
 ### Registry-Based Extension
 
 The key extension mechanism is the in-memory `CabinetRegistry`.
 Feature apps expose cabinet contributions through `cabinet.py`, and `CabinetConfig.ready()` loads those modules via `autodiscover_modules("cabinet")`.
 
-The public API is `declare(...)`, which registers contributions such as:
+The public API is `declare(...)`, which accepts:
 
-- a `CabinetSection`
-- a `DashboardWidget`
-- topbar actions
-- global actions
+- `space` — `"staff"` or `"client"` (v2 API)
+- `topbar` — a `TopbarEntry` for the staff topbar dropdown
+- `sidebar` — a list of `SidebarItem` for the module's sub-navigation
+- `shortcuts` — quick-action links in the topbar
+- `dashboard_widget` — a `DashboardWidget` declaration
+
+Legacy v1 (`section=CabinetSection(...)`) is still supported for backward compatibility.
 
 This design keeps feature modules explicit.
 Projects do not need fragile introspection or convention-only discovery to contribute to the dashboard.
 
-### Immutable Contracts
+### Immutable Contracts — Types Package
 
-The registration contracts are defined as frozen dataclasses:
+All registration and data contracts are defined as frozen dataclasses organized in the `cabinet/types/` package:
 
-- `CabinetSection`
-- `DashboardWidget`
-- `NavAction`
+| Module | Types |
+|--------|-------|
+| `types/nav.py` | `TopbarEntry`, `SidebarItem`, `Shortcut` |
+| `types/widgets.py` | `MetricWidgetData`, `TableWidgetData`, `ListWidgetData`, `TableColumn`, `ListItem` |
+| `types/components.py` | `DataTableData`, `CalendarGridData`, `CardGridData`, `ListViewData`, `SplitPanelData` + supporting types |
+| `types/registry.py` | `DashboardWidget`, `NavAction`, `CabinetSection` (deprecated) |
 
-This is an important design choice.
-Because the registry is global process memory, immutable declarations reduce the chance of accidental mutation from views or middleware.
+Navigation and registry types are `frozen=True` — instances are immutable after creation.
+Because the registry is global process memory, immutable declarations prevent accidental mutation from views or middleware.
 
 ### Group-Based Navigation
 
@@ -120,6 +139,28 @@ Cabinet uses dedicated Redis managers for two kinds of state:
 `CabinetSettings` is modeled as a singleton and synchronized into Redis on save.
 Dashboard provider results are cached separately per provider key, which allows surgical invalidation when one widget's data changes.
 
+### Content Components
+
+Cabinet ships five reusable template components in `cabinet/templates/cabinet/components/`:
+
+| Template | Contract type | Interaction |
+|----------|--------------|-------------|
+| `data_table.html` | `DataTableData` | Alpine search/filters, HTMX row actions |
+| `calendar_grid.html` | `CalendarGridData` | CSS Grid layout, HTMX slot/event click |
+| `card_grid.html` | `CardGridData` | Alpine grid/list toggle |
+| `list_view.html` | `ListViewData` | Alpine search, HTMX row click |
+| `split_panel.html` | `SplitPanelData` | HTMX detail panel loading |
+
+Each component receives a single typed contract object via Django's `{% include ... with obj=obj %}`.
+The backend computes all values; templates contain no business logic.
+
+**Modal dispatch pattern:** components do not embed modals.
+Instead they dispatch `$dispatch('open-modal', {url: '...'})`.
+The page-level `{% include "cabinet/includes/_modal_base.html" %}` listens and loads content via HTMX.
+
+**CSS:** standard Bootstrap 5 is used where possible.
+Custom CSS in `cab_components.css` covers calendar grid (CSS Grid layout) and split panel (two-column grid).
+
 ### Views And Template Shell
 
 The current built-in views are thin:
@@ -133,7 +174,7 @@ The cabinet layer is designed so that:
 
 - the registry defines structure
 - selectors provide data
-- templates compose the UI
+- templates compose the UI from reusable components
 - projects can override or extend pages through normal Django mechanisms
 
 ## Runtime Flow

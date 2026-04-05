@@ -83,6 +83,7 @@ class NotificationPayloadBuilder:
         event_type: str,
         channels: list[str],
         language: str = "de",
+        context_data: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Build a payload that already contains rendered notification content.
 
@@ -114,4 +115,5 @@ class NotificationPayloadBuilder:
             "event_type": event_type,
             "channels": channels,
             "language": language,
+            "context_data": context_data or {},
         }

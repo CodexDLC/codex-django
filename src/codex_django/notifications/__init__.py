@@ -23,7 +23,9 @@ from .adapters.direct_adapter import DjangoDirectAdapter
 from .adapters.i18n_adapter import DjangoI18nAdapter
 from .adapters.queue_adapter import DjangoQueueAdapter
 from .builder import NotificationPayloadBuilder
+from .contracts import ContentSelectorProtocol, NotificationDispatchSpec, NotificationEventHandler, QueueAdapterProtocol
 from .mixins.models import BaseEmailContentMixin
+from .registry import NotificationEventRegistry, notification_event_registry, notification_handler
 from .selector import BaseEmailContentSelector
 from .service import BaseNotificationEngine
 
@@ -33,8 +35,15 @@ __all__ = [
     "DjangoDirectAdapter",
     "DjangoI18nAdapter",
     "DjangoQueueAdapter",
+    "QueueAdapterProtocol",
+    "ContentSelectorProtocol",
+    "NotificationEventHandler",
+    "NotificationDispatchSpec",
     "NotificationPayloadBuilder",
     "BaseEmailContentMixin",
     "BaseEmailContentSelector",
     "BaseNotificationEngine",
+    "NotificationEventRegistry",
+    "notification_event_registry",
+    "notification_handler",
 ]

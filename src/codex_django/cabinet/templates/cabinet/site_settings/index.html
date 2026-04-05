@@ -3,114 +3,57 @@
 
 {% block title %}Настройки сайта{% endblock %}
 
-{% block sidebar_nav %}
-  {% with tabs=active_tab %}
-
-  {% url 'cabinet:site_settings_tab' 'contact' as url_contact %}
-  {% url 'cabinet:site_settings_tab' 'geo' as url_geo %}
-  {% url 'cabinet:site_settings_tab' 'social' as url_social %}
-  {% url 'cabinet:site_settings_tab' 'marketing' as url_marketing %}
-  {% url 'cabinet:site_settings_tab' 'technical' as url_technical %}
-  {% url 'cabinet:site_settings_tab' 'email' as url_email %}
-  {% url 'cabinet:site_settings_tab' 'legal' as url_legal %}
-  {% url 'cabinet:site_settings_tab' 'topbar' as url_topbar %}
-
-  <li>
-    <a href="{{ url_contact }}"
-       hx-get="{{ url_contact }}"
-       hx-target="#cab-content"
-       hx-push-url="true"
-       class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2{% if active_tab == 'contact' %} cab-nav__item--active{% endif %}"
-       style="color: var(--cab-sidebar-text); transition: background 0.15s;">
-      <span class="bi bi-telephone fs-5 flex-shrink-0"></span>
-      <span class="cab-nav__label ms-3" style="white-space: nowrap;">Контакты</span>
-    </a>
-  </li>
-  <li>
-    <a href="{{ url_geo }}"
-       hx-get="{{ url_geo }}"
-       hx-target="#cab-content"
-       hx-push-url="true"
-       class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2{% if active_tab == 'geo' %} cab-nav__item--active{% endif %}"
-       style="color: var(--cab-sidebar-text); transition: background 0.15s;">
-      <span class="bi bi-geo-alt fs-5 flex-shrink-0"></span>
-      <span class="cab-nav__label ms-3" style="white-space: nowrap;">Гео-данные</span>
-    </a>
-  </li>
-  <li>
-    <a href="{{ url_social }}"
-       hx-get="{{ url_social }}"
-       hx-target="#cab-content"
-       hx-push-url="true"
-       class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2{% if active_tab == 'social' %} cab-nav__item--active{% endif %}"
-       style="color: var(--cab-sidebar-text); transition: background 0.15s;">
-      <span class="bi bi-share fs-5 flex-shrink-0"></span>
-      <span class="cab-nav__label ms-3" style="white-space: nowrap;">Соцсети</span>
-    </a>
-  </li>
-  <li>
-    <a href="{{ url_marketing }}"
-       hx-get="{{ url_marketing }}"
-       hx-target="#cab-content"
-       hx-push-url="true"
-       class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2{% if active_tab == 'marketing' %} cab-nav__item--active{% endif %}"
-       style="color: var(--cab-sidebar-text); transition: background 0.15s;">
-      <span class="bi bi-graph-up fs-5 flex-shrink-0"></span>
-      <span class="cab-nav__label ms-3" style="white-space: nowrap;">Маркетинг</span>
-    </a>
-  </li>
-  <li>
-    <a href="{{ url_technical }}"
-       hx-get="{{ url_technical }}"
-       hx-target="#cab-content"
-       hx-push-url="true"
-       class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2{% if active_tab == 'technical' %} cab-nav__item--active{% endif %}"
-       style="color: var(--cab-sidebar-text); transition: background 0.15s;">
-      <span class="bi bi-gear-wide fs-5 flex-shrink-0"></span>
-      <span class="cab-nav__label ms-3" style="white-space: nowrap;">Технические</span>
-    </a>
-  </li>
-  <li>
-    <a href="{{ url_email }}"
-       hx-get="{{ url_email }}"
-       hx-target="#cab-content"
-       hx-push-url="true"
-       class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2{% if active_tab == 'email' %} cab-nav__item--active{% endif %}"
-       style="color: var(--cab-sidebar-text); transition: background 0.15s;">
-      <span class="bi bi-envelope fs-5 flex-shrink-0"></span>
-      <span class="cab-nav__label ms-3" style="white-space: nowrap;">Email / SMTP</span>
-    </a>
-  </li>
-  <li>
-    <a href="{{ url_legal }}"
-       hx-get="{{ url_legal }}"
-       hx-target="#cab-content"
-       hx-push-url="true"
-       class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2{% if active_tab == 'legal' %} cab-nav__item--active{% endif %}"
-       style="color: var(--cab-sidebar-text); transition: background 0.15s;">
-      <span class="bi bi-file-text fs-5 flex-shrink-0"></span>
-      <span class="cab-nav__label ms-3" style="white-space: nowrap;">Юридические</span>
-    </a>
-  </li>
-
-  <li><hr class="mx-3 my-1" style="border-color: rgba(255,255,255,0.08);"></li>
-
-  <li>
-    <a href="{{ url_topbar }}"
-       hx-get="{{ url_topbar }}"
-       hx-target="#cab-content"
-       hx-push-url="true"
-       class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2{% if active_tab == 'topbar' %} cab-nav__item--active{% endif %}"
-       style="color: var(--cab-sidebar-text); transition: background 0.15s;">
-      <span class="bi bi-lightning fs-5 flex-shrink-0"></span>
-      <span class="cab-nav__label ms-3" style="white-space: nowrap;">Быстрый доступ</span>
-    </a>
-  </li>
-  {% endwith %}
+{% block sidebar %}
+  {% include "cabinet/includes/_sidebar_staff.html" with cabinet_sidebar_title="Настройки" cabinet_sidebar=tabs %}
 {% endblock %}
 
 {% block cabinet_content %}
-  {% with partial="cabinet/site_settings/partials/_"|add:active_tab|add:".html" %}
-    {% include partial %}
-  {% endwith %}
+  <div id="settings-response" style="max-width: 1024px;">
+    {% if messages %}
+      <div class="mb-4">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }} border-0 shadow-sm d-flex align-items-center gap-2 mb-2" role="alert" style="border-radius: .75rem;">
+            <span class="bi {% if message.tags == 'success' %}bi-check-circle-fill{% else %}bi-exclamation-circle-fill{% endif %}"></span>
+            <div>{{ message }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="d-flex align-items-center justify-content-between mb-4 sticky-top bg-white py-3 border-bottom" style="z-index: 1020; margin: -1rem 0 2rem 0;">
+      <h4 class="mb-0 fw-bold d-flex align-items-center gap-2">
+        <span class="bi bi-gear-wide-connected text-primary"></span>
+        Настройки сайта
+      </h4>
+      <button type="submit" form="settings-form" class="btn btn-primary d-flex align-items-center gap-2 px-4 shadow-sm fw-semibold">
+        <span class="bi bi-check2-circle fs-5"></span>
+        Сохранить все изменения
+      </button>
+    </div>
+
+    <form id="settings-form"
+          hx-post="{% url 'cabinet:site_settings' %}"
+          hx-target="#settings-response"
+          hx-select="#settings-response"
+          hx-swap="outerHTML">
+
+      {% csrf_token %}
+      {% for tab in tabs %}
+        <section id="{{ tab.slug }}" class="cab-settings-section mb-5">
+          <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-4"
+               style="background:#f8fafc; margin: 0 -1.5rem; padding: 1rem 1.5rem; border-top: 1px solid #e2e8f0;">
+            <h2 class="h5 mb-0 d-flex align-items-center gap-2 fw-semibold">
+              <span class="bi {{ tab.icon }} text-primary"></span>
+              {{ tab.label }}
+            </h2>
+          </div>
+
+          <div class="cab-settings-card">
+            {% include tab.partial_path %}
+          </div>
+        </section>
+      {% endfor %}
+
+    </form>
+  </div>
 {% endblock %}

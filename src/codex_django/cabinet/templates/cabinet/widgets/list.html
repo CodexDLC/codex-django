@@ -1,16 +1,16 @@
 <div class="card border-0 shadow-sm h-100">
   <div class="card-header bg-white border-0 pt-3 pb-0 d-flex align-items-center justify-content-between">
     <h6 class="fw-semibold mb-0" style="font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:#64748b;">
-      {% if icon %}<span class="bi {{ icon }} me-2" style="color:var(--cab-primary);"></span>{% endif %}
-      {{ title }}
+      {% if data.icon %}<span class="bi {{ data.icon }} me-2" style="color:var(--cab-primary);"></span>{% endif %}
+      {{ data.title }}
     </h6>
-    {% if subtitle %}
-    <span class="text-muted" style="font-size:.75rem;">{{ subtitle }}</span>
+    {% if data.subtitle %}
+    <span class="text-muted" style="font-size:.75rem;">{{ data.subtitle }}</span>
     {% endif %}
   </div>
   <div class="card-body p-0">
     <ul class="list-group list-group-flush">
-      {% for item in items %}
+      {% for item in data.items %}
       <li class="list-group-item border-0 d-flex align-items-center justify-content-between px-3 py-2
                  {% if not forloop.last %}border-bottom{% endif %}"
           style="border-color:#f1f5f9 !important;">

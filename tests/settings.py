@@ -1,3 +1,6 @@
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "test-secret-key-not-for-production"  # noqa: S105  # pragma: allowlist secret
 DEBUG = True
 ALLOWED_HOSTS: list[str] = ["*"]

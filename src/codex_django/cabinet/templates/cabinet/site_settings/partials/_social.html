@@ -1,6 +1,6 @@
 {% load i18n %}
 <div class="row g-4">
-  <div class="col-md-7">
+  <div class="col-12">
 
     <div class="card border-0 shadow-sm">
       <div class="card-header bg-white border-0 pt-3 pb-0">
@@ -8,44 +8,16 @@
       </div>
       <div class="card-body">
 
-        {% with socials=True %}
         <div class="d-flex flex-column gap-0">
 
-          {% for item in "·" %}{% endfor %}
 
-          <div class="py-2">
-            <label class="form-label text-muted mb-1 d-flex align-items-center gap-2" style="font-size:.8rem;">
-              <span class="bi bi-instagram" style="color:#e1306c;"></span> Instagram
-            </label>
-            <input type="url" class="form-control form-control-sm"
-                   value="https://instagram.com/mycompany" placeholder="https://instagram.com/...">
-          </div>
-          <hr class="my-0">
-
-          <div class="py-2">
-            <label class="form-label text-muted mb-1 d-flex align-items-center gap-2" style="font-size:.8rem;">
-              <span class="bi bi-facebook" style="color:#1877f2;"></span> Facebook
-            </label>
-            <input type="url" class="form-control form-control-sm"
-                   value="" placeholder="https://facebook.com/...">
-          </div>
-          <hr class="my-0">
 
           <div class="py-2">
             <label class="form-label text-muted mb-1 d-flex align-items-center gap-2" style="font-size:.8rem;">
               <span class="bi bi-telegram" style="color:#229ed9;"></span> Telegram
             </label>
-            <input type="url" class="form-control form-control-sm"
-                   value="https://t.me/mycompany" placeholder="https://t.me/...">
-          </div>
-          <hr class="my-0">
-
-          <div class="py-2">
-            <label class="form-label text-muted mb-1 d-flex align-items-center gap-2" style="font-size:.8rem;">
-              <span class="bi bi-whatsapp" style="color:#25d366;"></span> WhatsApp
-            </label>
-            <input type="url" class="form-control form-control-sm"
-                   value="https://wa.me/74951234567" placeholder="https://wa.me/...">
+            <input type="url" name="telegram_url" value="{{ settings_data.telegram_url|default:'' }}"
+                   class="form-control form-control-sm border-0 bg-light" placeholder="https://t.me/...">
           </div>
           <hr class="my-0">
 
@@ -53,51 +25,19 @@
             <label class="form-label text-muted mb-1 d-flex align-items-center gap-2" style="font-size:.8rem;">
               <span class="bi bi-youtube" style="color:#ff0000;"></span> YouTube
             </label>
-            <input type="url" class="form-control form-control-sm"
-                   value="" placeholder="https://youtube.com/...">
+            <input type="url" name="youtube_url" value="{{ settings_data.youtube_url|default:'' }}"
+                   class="form-control form-control-sm border-0 bg-light" placeholder="https://youtube.com/...">
           </div>
           <hr class="my-0">
 
           <div class="py-2">
             <label class="form-label text-muted mb-1 d-flex align-items-center gap-2" style="font-size:.8rem;">
-              <span class="bi bi-linkedin" style="color:#0a66c2;"></span> LinkedIn
+              <span class="bi bi-instagram" style="color:#e1306c;"></span> Instagram
             </label>
-            <input type="url" class="form-control form-control-sm"
-                   value="" placeholder="https://linkedin.com/company/...">
-          </div>
-          <hr class="my-0">
-
-          <div class="py-2">
-            <label class="form-label text-muted mb-1 d-flex align-items-center gap-2" style="font-size:.8rem;">
-              <span class="bi bi-tiktok"></span> TikTok
-            </label>
-            <input type="url" class="form-control form-control-sm"
-                   value="" placeholder="https://tiktok.com/@...">
-          </div>
-          <hr class="my-0">
-
-          <div class="py-2">
-            <label class="form-label text-muted mb-1 d-flex align-items-center gap-2" style="font-size:.8rem;">
-              <span class="bi bi-twitter-x"></span> Twitter / X
-            </label>
-            <input type="url" class="form-control form-control-sm"
-                   value="" placeholder="https://x.com/...">
-          </div>
-          <hr class="my-0">
-
-          <div class="py-2">
-            <label class="form-label text-muted mb-1 d-flex align-items-center gap-2" style="font-size:.8rem;">
-              <span class="bi bi-pinterest" style="color:#e60023;"></span> Pinterest
-            </label>
-            <input type="url" class="form-control form-control-sm"
-                   value="" placeholder="https://pinterest.com/...">
+            <input type="url" name="instagram_url" value="{{ settings_data.instagram_url|default:'' }}"
+                   class="form-control form-control-sm border-0 bg-light" placeholder="https://instagram.com/...">
           </div>
 
-        </div>
-        {% endwith %}
-
-        <div class="d-flex justify-content-end pt-3">
-          <button class="btn btn-primary btn-sm px-4">Сохранить</button>
         </div>
 
       </div>

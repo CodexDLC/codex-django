@@ -1,0 +1,65 @@
+/* =====================================================
+   Cabinet Design Tokens — Library Defaults
+   =====================================================
+   These are the default values for all --cab-* CSS custom
+   properties used throughout cabinet templates.
+
+   Projects override these via theme/tokens.css generated
+   by codex-django-cli, loaded through {% block cabinet_css %}.
+   ===================================================== */
+
+/* ── Staff space (default) ── */
+:root {
+  /* Brand */
+  --cab-primary:            #6366f1;
+  --cab-primary-dark:       #4f46e5;
+  --cab-primary-light:      #818cf8;
+
+  /* Sidebar */
+  --cab-sidebar-bg:         #1e293b;
+  --cab-sidebar-text:       #94a3b8;
+  --cab-sidebar-active:     #ffffff;
+  --cab-sidebar-hover-bg:   #334155;
+  --cab-sidebar-width:      260px;
+  --cab-sidebar-width-sm:   60px;
+
+  /* Topbar */
+  --cab-topbar-height:      56px;
+  --cab-topbar-bg:          #ffffff;
+  --cab-topbar-border:      #e2e8f0;
+
+  /* Content */
+  --cab-content-bg:         #f8fafc;
+  --cab-border:             #e2e8f0;
+
+  /* Text */
+  --cab-text:               #1e293b;
+  --cab-text-muted:         #64748b;
+
+  /* Misc */
+  --cab-radius:             8px;
+  --cab-font:               'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ── Client space — separate override contract ──
+   Projects can set --site-* on <body> or wrapper to theme the client cabinet.
+   Each --cab-* is re-bound so staff & client palettes are independent. */
+.cab-wrapper--client {
+  --cab-primary:            var(--site-primary, #6366f1);
+  --cab-primary-dark:       var(--site-primary-dark, #4f46e5);
+  --cab-primary-light:      var(--site-primary-light, #818cf8);
+
+  --cab-sidebar-bg:         var(--site-sidebar-bg, #1e293b);
+  --cab-sidebar-text:       var(--site-sidebar-text, #94a3b8);
+  --cab-sidebar-active:     var(--site-sidebar-active, #ffffff);
+  --cab-sidebar-hover-bg:   var(--site-sidebar-hover-bg, #334155);
+
+  --cab-topbar-bg:          var(--site-topbar-bg, #ffffff);
+  --cab-topbar-border:      var(--site-topbar-border, #e2e8f0);
+
+  --cab-content-bg:         var(--site-content-bg, #f8fafc);
+  --cab-border:             var(--site-border, #e2e8f0);
+
+  --cab-text:               var(--site-text, #1e293b);
+  --cab-text-muted:         var(--site-text-muted, #64748b);
+}

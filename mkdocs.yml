@@ -74,6 +74,7 @@ nav:
       - Module Guides:
           - Booking: en/guides/booking.md
           - Cabinet: en/guides/cabinet.md
+          - Site Settings: en/guides/cabinet-settings.md
           - Notifications: en/guides/notifications.md
           - System: en/guides/system.md
       - Architecture:
@@ -94,6 +95,7 @@ nav:
       - Гайды по модулям:
           - Booking: ru/guides/booking.md
           - Cabinet: ru/guides/cabinet.md
+          - Site Settings: ru/guides/cabinet-settings.md
           - Notifications: ru/guides/notifications.md
           - System: ru/guides/system.md
       - Архитектура:

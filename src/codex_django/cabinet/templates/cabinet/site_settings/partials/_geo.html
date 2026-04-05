@@ -1,6 +1,6 @@
 {% load i18n %}
 <div class="row g-4">
-  <div class="col-md-7">
+  <div class="col-12">
 
     <div class="card border-0 shadow-sm mb-3">
       <div class="card-header bg-white border-0 pt-3 pb-0">
@@ -10,28 +10,22 @@
 
         <div>
           <label class="form-label text-muted mb-1" style="font-size:.8rem;">Ссылка Google Maps</label>
-          <div class="d-flex align-items-center justify-content-between gap-3">
-            <span class="text-truncate" style="font-size:.9rem; max-width: 340px;">
-              https://maps.google.com/?q=55.7558,37.6173
-            </span>
-            <button class="btn btn-sm btn-outline-secondary flex-shrink-0">Изменить</button>
-          </div>
+          <input type="text" name="geo_google_maps_link" value="{{ settings_data.geo_google_maps_link|default:'' }}"
+                 class="form-control form-control-sm border-0 bg-light" placeholder="https://maps.google.com/?q=...">
         </div>
         <hr class="my-0">
 
         <div class="row g-3">
           <div class="col-6">
             <label class="form-label text-muted mb-1" style="font-size:.8rem;">Широта</label>
-            <div style="font-size:.9rem;">55.755826</div>
+            <input type="number" step="any" name="geo_lat" value="{{ settings_data.geo_lat|default:'' }}"
+                   class="form-control form-control-sm border-0 bg-light" placeholder="55.7558">
           </div>
           <div class="col-6">
             <label class="form-label text-muted mb-1" style="font-size:.8rem;">Долгота</label>
-            <div style="font-size:.9rem;">37.617300</div>
+            <input type="number" step="any" name="geo_lon" value="{{ settings_data.geo_lon|default:'' }}"
+                   class="form-control form-control-sm border-0 bg-light" placeholder="37.6173">
           </div>
-        </div>
-
-        <div class="d-flex justify-content-end pt-1">
-          <button class="btn btn-primary btn-sm px-4">Сохранить</button>
         </div>
 
       </div>

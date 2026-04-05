@@ -1,0 +1,92 @@
+{% load i18n cabinet_tags %}
+<div class="cab-data-table">
+  <div class="cab-data-table__toolbar">
+    {% if table.search_placeholder %}
+    <div class="cab-data-table__search">
+      <div class="input-group input-group-sm">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text"
+               class="form-control border-start-0 ps-0"
+               placeholder="{{ table.search_placeholder }}"
+               disabled>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if table.filters %}
+    <div class="cab-data-table__filters d-flex gap-2 flex-wrap">
+      <span class="btn btn-sm btn-primary disabled">{% trans "Все" %}</span>
+      {% for f in table.filters %}
+      <span class="btn btn-sm btn-outline-secondary disabled">{{ f.label }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          {% for col in table.columns %}
+          <th class="text-{{ col.align }}{% if col.muted %} text-muted{% endif %}"
+              style="font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em;">
+            {{ col.label }}
+          </th>
+          {% endfor %}
+          {% if table.actions %}
+          <th></th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in table.rows %}
+        <tr>
+          {% for col in table.columns %}
+          <td class="text-{{ col.align }}{% if col.muted %} text-muted{% endif %}">
+            {% if col.badge_key %}
+              {% with badge_map=row|get_item:col.badge_key badge_value=row|get_item:col.key status_key=row|get_item:'status' %}
+              <span class="badge bg-{{ badge_map|get_item:status_key|default:'secondary' }}">{{ badge_value }}</span>
+              {% endwith %}
+            {% elif col.bold %}
+              <strong>{{ row|get_item:col.key }}</strong>
+            {% else %}
+              {{ row|get_item:col.key }}
+            {% endif %}
+          </td>
+          {% endfor %}
+          {% if table.actions %}
+          <td class="text-end">
+            <div class="d-flex gap-1 justify-content-end">
+              {% for action in table.actions %}
+              {% with url_val=row|get_item:action.url_key %}
+              {% if action.style == "link" %}
+              <a href="{{ url_val }}" class="btn btn-sm btn-link p-0 text-decoration-none">
+                {% if action.icon %}<i class="bi {{ action.icon }}"></i>{% endif %}
+                {{ action.label }}
+              </a>
+              {% else %}
+              <a href="{{ url_val }}" class="btn btn-sm {{ action.style }}">
+                {% if action.icon %}<i class="bi {{ action.icon }}"></i>{% endif %}
+                {{ action.label }}
+              </a>
+              {% endif %}
+              {% endwith %}
+              {% endfor %}
+            </div>
+          </td>
+          {% endif %}
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="{{ table.columns|length|add:1 }}" class="text-center text-muted py-4">
+            <i class="bi bi-inbox fs-4 d-block mb-1"></i>
+            {{ table.empty_message }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

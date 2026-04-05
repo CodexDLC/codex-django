@@ -31,16 +31,11 @@ Subclass this in your project and add send_* methods for your events::
 from __future__ import annotations
 
 import uuid
-from typing import Any, Protocol
+from typing import Any
 
 from .builder import NotificationPayloadBuilder
-
-
-class QueueAdapterProtocol(Protocol):
-    """Minimal queue adapter contract required by the notification engine."""
-
-    def enqueue(self, task_name: str, payload: dict[str, Any]) -> str | None: ...
-    async def aenqueue(self, task_name: str, payload: dict[str, Any]) -> str | None: ...
+from .contracts import NotificationDispatchSpec, QueueAdapterProtocol
+from .registry import notification_event_registry
 
 
 class BaseNotificationEngine:
@@ -91,6 +86,7 @@ class BaseNotificationEngine:
         channels: list[str],
         language: str = "de",
         subject_key: str,
+        subject: str = "",
         mode: str | None = None,
         # Mode 2 only:
         html_content: str = "",
@@ -108,6 +104,8 @@ class BaseNotificationEngine:
             channels: Delivery channels to request from the worker.
             language: Language code used for subject lookup and payload metadata.
             subject_key: Content key used to resolve the localized subject.
+            subject: Optional explicit subject override. When provided, the
+                selector lookup is skipped.
             mode: Optional per-call override for ``template`` or ``rendered`` mode.
             html_content: Pre-rendered HTML body for ``rendered`` mode.
             text_content: Optional plain-text fallback for ``rendered`` mode.
@@ -118,7 +116,7 @@ class BaseNotificationEngine:
         """
         effective_mode = mode or self.mode
 
-        subject = self._selector.get(subject_key, language) or ""
+        resolved_subject = subject or self._selector.get(subject_key, language) or ""
         notification_id = str(uuid.uuid4())
 
         if effective_mode == "template":
@@ -128,7 +126,7 @@ class BaseNotificationEngine:
                 recipient_phone=recipient_phone,
                 client_name=client_name,
                 template_name=template_name,
-                subject=subject,
+                subject=resolved_subject,
                 event_type=event_type,
                 context_data=context,
                 channels=channels,
@@ -142,13 +140,37 @@ class BaseNotificationEngine:
                 client_name=client_name,
                 html_content=html_content,
                 text_content=text_content,
-                subject=subject,
+                subject=resolved_subject,
                 event_type=event_type,
                 channels=channels,
                 language=language,
+                context_data=context,
             )
 
         return self._queue.enqueue(self.task_name, payload)
+
+    def dispatch_spec(self, spec: NotificationDispatchSpec) -> str | None:
+        """Dispatch one prebuilt spec produced by a domain handler."""
+        return self.dispatch(
+            recipient_email=spec.recipient_email,
+            recipient_phone=spec.recipient_phone,
+            client_name=spec.client_name,
+            template_name=spec.template_name,
+            event_type=spec.event_type,
+            channels=spec.channels,
+            language=spec.language,
+            subject_key=spec.subject_key,
+            subject=spec.subject,
+            mode=spec.mode,
+            html_content=spec.html_content,
+            text_content=spec.text_content,
+            **spec.context,
+        )
+
+    def dispatch_event(self, event_type: str, *args: Any, **kwargs: Any) -> list[str | None]:
+        """Resolve registered handlers for an event and dispatch every resulting spec."""
+        specs = notification_event_registry.build_specs(event_type, *args, **kwargs)
+        return [self.dispatch_spec(spec) for spec in specs]
 
     async def adispatch(
         self,
@@ -161,6 +183,7 @@ class BaseNotificationEngine:
         channels: list[str],
         language: str = "de",
         subject_key: str,
+        subject: str = "",
         mode: str | None = None,
         html_content: str = "",
         text_content: str = "",
@@ -177,6 +200,8 @@ class BaseNotificationEngine:
             channels: Delivery channels to request from the worker.
             language: Language code used for subject lookup and payload metadata.
             subject_key: Content key used to resolve the localized subject.
+            subject: Optional explicit subject override. When provided, the
+                selector lookup is skipped.
             mode: Optional per-call override for ``template`` or ``rendered`` mode.
             html_content: Pre-rendered HTML body for ``rendered`` mode.
             text_content: Optional plain-text fallback for ``rendered`` mode.
@@ -187,7 +212,7 @@ class BaseNotificationEngine:
         """
         effective_mode = mode or self.mode
 
-        subject = self._selector.get(subject_key, language) or ""
+        resolved_subject = subject or self._selector.get(subject_key, language) or ""
         notification_id = str(uuid.uuid4())
 
         if effective_mode == "template":
@@ -197,7 +222,7 @@ class BaseNotificationEngine:
                 recipient_phone=recipient_phone,
                 client_name=client_name,
                 template_name=template_name,
-                subject=subject,
+                subject=resolved_subject,
                 event_type=event_type,
                 context_data=context,
                 channels=channels,
@@ -211,13 +236,40 @@ class BaseNotificationEngine:
                 client_name=client_name,
                 html_content=html_content,
                 text_content=text_content,
-                subject=subject,
+                subject=resolved_subject,
                 event_type=event_type,
                 channels=channels,
                 language=language,
+                context_data=context,
             )
 
         return await self._queue.aenqueue(self.task_name, payload)
+
+    async def adispatch_spec(self, spec: NotificationDispatchSpec) -> str | None:
+        """Async counterpart to :meth:`dispatch_spec`."""
+        return await self.adispatch(
+            recipient_email=spec.recipient_email,
+            recipient_phone=spec.recipient_phone,
+            client_name=spec.client_name,
+            template_name=spec.template_name,
+            event_type=spec.event_type,
+            channels=spec.channels,
+            language=spec.language,
+            subject_key=spec.subject_key,
+            subject=spec.subject,
+            mode=spec.mode,
+            html_content=spec.html_content,
+            text_content=spec.text_content,
+            **spec.context,
+        )
+
+    async def adispatch_event(self, event_type: str, *args: Any, **kwargs: Any) -> list[str | None]:
+        """Async counterpart to :meth:`dispatch_event`."""
+        specs = notification_event_registry.build_specs(event_type, *args, **kwargs)
+        results: list[str | None] = []
+        for spec in specs:
+            results.append(await self.adispatch_spec(spec))
+        return results
 
 
 def _get_builder() -> NotificationPayloadBuilder:

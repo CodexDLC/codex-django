@@ -1,0 +1,66 @@
+{% load i18n %}
+{#
+  split_panel.html — two-column layout: list on left, detail on right via HTMX.
+
+  Context:
+    panel — SplitPanelData instance (codex_django.cabinet.types.SplitPanelData)
+
+  Clicking a list item loads detail via hx-get="{{ panel.detail_url }}/<item.id }"
+  into #split-panel-detail. On mobile panels stack vertically.
+
+  Place _modal_base.html on the page if detail content opens modals.
+
+  Usage:
+    {% include "cabinet/components/split_panel.html" with panel=panel %}
+#}
+<div class="cab-split-panel">
+
+  {# Left: list #}
+  <div class="cab-split-panel__list">
+    {% for item in panel.items %}
+    <a class="cab-split-panel__item {% if item.id == panel.active_id %}cab-split-panel__item--active{% endif %}"
+       href="{% if panel.detail_url %}{{ panel.detail_url }}/{{ item.id }}{% else %}{{ item.url }}{% endif %}"
+       {% if panel.detail_url %}
+       hx-get="{{ panel.detail_url }}/{{ item.id }}"
+       hx-target="#split-panel-detail"
+       hx-swap="innerHTML"
+       hx-push-url="false"
+       {% endif %}
+    >
+      {% if item.avatar %}
+      {% include "cabinet/includes/_avatar.html" with initials=item.avatar size="36" %}
+      {% endif %}
+
+      <div class="cab-split-panel__item-body">
+        <div class="cab-split-panel__item-primary">{{ item.primary }}</div>
+        {% if item.secondary %}
+        <div class="cab-split-panel__item-secondary">{{ item.secondary }}</div>
+        {% endif %}
+      </div>
+
+      {% if item.meta %}
+      <div class="cab-split-panel__item-meta">{{ item.meta }}</div>
+      {% endif %}
+    </a>
+    {% empty %}
+    <div class="text-center text-muted p-4">
+      <i class="bi bi-inbox d-block mb-1"></i>
+      {{ panel.empty_message }}
+    </div>
+    {% endfor %}
+  </div>
+
+  {# Right: detail #}
+  <div class="cab-split-panel__detail" id="split-panel-detail">
+    {% if panel.active_id %}
+      {# If active_id set — content loaded by initial view render #}
+      {% block panel_detail %}{% endblock %}
+    {% else %}
+    <div class="cab-split-panel__empty">
+      <i class="bi bi-arrow-left-circle fs-3 mb-2 d-block"></i>
+      {{ panel.empty_message }}
+    </div>
+    {% endif %}
+  </div>
+
+</div>

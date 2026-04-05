@@ -30,46 +30,51 @@ def test_dashboard_view_renders_selector_context():
 
     assert response.status_code == 200
     mock_ctx.assert_called_once_with(request)
-    mock_render.assert_called_once_with(request, "cabinet/dashboard/index.html", {"kpi": 7})
+    mock_render.assert_called_once_with(
+        request, "cabinet/dashboard/index.html", {"dashboard_data": {"kpi": 7}, "kpi": 7}
+    )
 
 
 def test_site_settings_view_defaults_to_contact_tab():
     request = _authenticated_request("/cabinet/site/settings/")
 
-    with patch("codex_django.cabinet.views.site_settings.render", return_value=HttpResponse("ok")) as mock_render:
+    with (
+        patch(
+            "codex_django.cabinet.views.site_settings.SiteSettingsService.get_context", return_value={"mock": "data"}
+        ),
+        patch("codex_django.cabinet.views.site_settings.render", return_value=HttpResponse("ok")) as mock_render,
+    ):
         response = site_settings_view(request)
 
     assert response.status_code == 200
     mock_render.assert_called_once_with(
         request,
         "cabinet/site_settings/index.html",
-        {"active_tab": "contact"},
+        {"mock": "data"},
     )
 
 
 def test_site_settings_tab_view_uses_partial_for_htmx_request():
     request = _authenticated_request("/cabinet/site/settings/geo/", HTTP_HX_REQUEST="true")
 
-    with patch("codex_django.cabinet.views.site_settings.render", return_value=HttpResponse("ok")) as mock_render:
+    with patch(
+        "codex_django.cabinet.views.site_settings.reverse", return_value="/cabinet/site/settings/"
+    ) as mock_reverse:
         response = site_settings_tab_view(request, "geo")
 
-    assert response.status_code == 200
-    mock_render.assert_called_once_with(
-        request,
-        "cabinet/site_settings/partials/_geo.html",
-        {"active_tab": "geo"},
-    )
+    assert response.status_code == 302
+    assert response.url == "/cabinet/site/settings/#geo"
+    mock_reverse.assert_called_once_with("cabinet:site_settings")
 
 
 def test_site_settings_tab_view_falls_back_to_contact_for_unknown_tab():
     request = _authenticated_request("/cabinet/site/settings/oops/")
 
-    with patch("codex_django.cabinet.views.site_settings.render", return_value=HttpResponse("ok")) as mock_render:
+    with patch(
+        "codex_django.cabinet.views.site_settings.reverse", return_value="/cabinet/site/settings/"
+    ) as mock_reverse:
         response = site_settings_tab_view(request, "oops")
 
-    assert response.status_code == 200
-    mock_render.assert_called_once_with(
-        request,
-        "cabinet/site_settings/index.html",
-        {"active_tab": "contact"},
-    )
+    assert response.status_code == 302
+    assert response.url == "/cabinet/site/settings/#oops"
+    mock_reverse.assert_called_once_with("cabinet:site_settings")

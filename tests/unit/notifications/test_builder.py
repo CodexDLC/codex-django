@@ -145,7 +145,6 @@ class TestNotificationPayloadBuilderRendered:
             channels=[],
         )
         assert "template_name" not in payload
-        assert "context_data" not in payload
 
     def test_default_text_content_empty_string(self, builder):
         payload = builder.build_rendered(

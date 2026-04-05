@@ -1,0 +1,233 @@
+/* =====================================================
+   Cabinet Layout — BEM Structure
+   =====================================================
+   Core layout rules for the cabinet shell. Uses --cab-*
+   tokens defined in cab_tokens.css.
+   ===================================================== */
+
+/* ── Wrapper ── */
+.cab-wrapper {
+  display: flex;
+  min-height: 100vh;
+  font-family: var(--cab-font);
+  background: var(--cab-content-bg);
+  color: var(--cab-text);
+}
+
+/* ── Sidebar ── */
+.cab-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--cab-sidebar-width);
+  background: var(--cab-sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  z-index: 1040;
+  transition: width 0.2s ease;
+  overflow: hidden;
+}
+
+.cab-sidebar--collapsed {
+  width: var(--cab-sidebar-width-sm);
+}
+
+/* Logo area */
+.cab-sidebar__logo {
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  height: var(--cab-topbar-height);
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cab-sidebar__logo-icon {
+  font-size: 1.25rem;
+  color: var(--cab-primary);
+  flex-shrink: 0;
+}
+
+.cab-sidebar__logo-name {
+  margin-left: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* Nav container */
+.cab-sidebar__nav {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.5rem 0;
+}
+
+.cab-nav {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Single nav item */
+.cab-nav__item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  margin: 0.125rem 0.5rem;
+  border-radius: var(--cab-radius);
+  color: var(--cab-sidebar-text);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  font-size: 0.875rem;
+}
+
+.cab-nav__item:hover {
+  background: var(--cab-sidebar-hover-bg);
+  color: var(--cab-sidebar-active);
+  text-decoration: none;
+}
+
+.cab-nav__item--active,
+.cab-nav__item.active {
+  background: var(--cab-sidebar-hover-bg);
+  color: var(--cab-sidebar-active);
+}
+
+.cab-nav__icon {
+  font-size: 1.15rem;
+  width: 20px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.cab-nav__label {
+  margin-left: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.cab-nav__badge {
+  margin-left: auto;
+  font-size: 0.7rem;
+  padding: 0.15em 0.5em;
+  border-radius: 10px;
+  background: var(--cab-primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Collapse labels when sidebar is collapsed */
+.cab-sidebar--collapsed .cab-nav__label,
+.cab-sidebar--collapsed .cab-sidebar__logo-name,
+.cab-sidebar--collapsed .cab-nav__badge {
+  display: none;
+}
+
+.cab-sidebar--collapsed .cab-nav__item {
+  justify-content: center;
+  padding: 0.5rem;
+  margin: 0.125rem 0.25rem;
+}
+
+/* Footer */
+.cab-sidebar__footer {
+  flex-shrink: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.5rem;
+}
+
+.cab-sidebar__collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border: none;
+  border-radius: var(--cab-radius);
+  background: var(--cab-sidebar-hover-bg);
+  color: var(--cab-sidebar-text);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.cab-sidebar__collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ── Main area ── */
+.cab-main {
+  margin-left: var(--cab-sidebar-width);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: margin-left 0.2s ease;
+}
+
+.cab-sidebar--collapsed ~ .cab-main,
+.cab-wrapper:has(.cab-sidebar--collapsed) .cab-main {
+  margin-left: var(--cab-sidebar-width-sm);
+}
+
+/* ── Topbar ── */
+.cab-topbar {
+  display: flex;
+  align-items: center;
+  height: var(--cab-topbar-height);
+  padding: 0 1.5rem;
+  background: var(--cab-topbar-bg);
+  border-bottom: 1px solid var(--cab-topbar-border);
+  flex-shrink: 0;
+  gap: 0.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
+/* ── Content ── */
+.cab-content {
+  flex: 1;
+  padding: 1.5rem;
+  background: var(--cab-content-bg);
+}
+
+/* ── Responsive: sidebar behavior ── */
+@media (max-width: 991.98px) {
+  /* On tablets/small laptops, we don't hide it, just let it be narrow if needed.
+     But the user wants it to be a narrow strip by default or toggleable. */
+  
+  .cab-main {
+    margin-left: var(--cab-sidebar-width-sm);
+  }
+
+  .cab-sidebar {
+    width: var(--cab-sidebar-width-sm);
+    transform: none; /* Don't hide it */
+  }
+
+  /* If explicitly opened (e.g. via toggle if we keep it), it expands */
+  .cab-sidebar--open {
+    width: var(--cab-sidebar-width);
+    z-index: 1040;
+  }
+}
+
+/* Only hide completely on very small mobile if requested, but for now we follow "min 768" rule */
+@media (max-width: 575.98px) {
+  .cab-sidebar {
+    transform: translateX(-100%);
+  }
+  .cab-sidebar--open {
+    transform: translateX(0);
+    width: var(--cab-sidebar-width);
+  }
+  .cab-main {
+    margin-left: 0;
+  }
+}

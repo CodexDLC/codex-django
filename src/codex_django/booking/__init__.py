@@ -4,7 +4,8 @@ codex_django.booking
 Django adapter layer for the codex-services booking engine.
 
 Provides composable model mixins, a Redis cache manager for busy slots,
-an availability adapter bridging Django ORM ↔ ChainFinder, and
+an availability adapter bridging Django ORM ↔ ChainFinder, stable
+resource-slot booking contracts for cabinet/scaffold integrations, and
 pure-function selectors for views.
 
 Quick start::
@@ -25,6 +26,28 @@ Quick start::
 """
 
 from codex_django.booking.adapters import BookingCacheAdapter, DjangoAvailabilityAdapter
+from codex_django.booking.contracts import (
+    BookingActionResult,
+    BookingBridge,
+    BookingCalendarPrefillState,
+    BookingChainPreviewItemState,
+    BookingChainPreviewState,
+    BookingEngineGateway,
+    BookingFeatureModels,
+    BookingFormFieldState,
+    BookingFormState,
+    BookingModalActionState,
+    BookingModalState,
+    BookingProfileState,
+    BookingProjectDataProvider,
+    BookingQuickCreateClientOptionState,
+    BookingQuickCreateServiceOptionState,
+    BookingQuickCreateState,
+    BookingSlotOptionState,
+    BookingSlotPickerState,
+    BookingSummaryItemState,
+    BookingWorkflowService,
+)
 from codex_django.booking.mixins import (
     AbstractBookableAppointment,
     AbstractBookableMaster,
@@ -38,6 +61,27 @@ __all__ = [
     # Adapters
     "DjangoAvailabilityAdapter",
     "BookingCacheAdapter",
+    # Resource-slot booking contracts
+    "BookingActionResult",
+    "BookingBridge",
+    "BookingCalendarPrefillState",
+    "BookingChainPreviewItemState",
+    "BookingChainPreviewState",
+    "BookingEngineGateway",
+    "BookingFeatureModels",
+    "BookingFormFieldState",
+    "BookingFormState",
+    "BookingModalActionState",
+    "BookingModalState",
+    "BookingProfileState",
+    "BookingProjectDataProvider",
+    "BookingQuickCreateClientOptionState",
+    "BookingQuickCreateServiceOptionState",
+    "BookingQuickCreateState",
+    "BookingSlotOptionState",
+    "BookingSlotPickerState",
+    "BookingSummaryItemState",
+    "BookingWorkflowService",
     # Mixins — abstract models
     "AbstractBookableMaster",
     "AbstractBookableService",

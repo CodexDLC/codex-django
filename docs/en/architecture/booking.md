@@ -4,7 +4,7 @@
 
 ## Purpose
 
-`codex_django.booking` is the Django adapter layer for the booking engine that lives in `codex-services`.
+`codex_django.booking` is the Django adapter layer for the resource-slot booking engine that lives in `codex-services`.
 Its job is not to reimplement scheduling logic.
 Its job is to bridge Django project models and transaction semantics to the engine's provider-oriented interface.
 
@@ -14,7 +14,7 @@ This module gives a Django project three things at once:
 - ORM-based adapters that convert project data into engine input
 - selector functions that expose booking operations in a view-friendly form
 
-So `booking` is best understood as an integration layer between domain data in Django and scheduling intelligence in `codex-services`.
+So `booking` is best understood as an integration layer between Django domain data and resource-slot scheduling intelligence in `codex-services`.
 
 ## Architectural Boundary
 

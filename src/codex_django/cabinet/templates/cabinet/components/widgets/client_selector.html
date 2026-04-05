@@ -1,0 +1,123 @@
+{% load i18n %}
+
+{% comment %}
+  Widget: Client Selector for New Booking
+{% endcomment %}
+<div class="cab-widget cab-client-selector p-4 bg-white border rounded-3 mb-4" 
+     x-data="cabinetClientLookup({
+        clients: {{ obj.clients|safe }},
+        minSearchLength: 3
+     })"
+     @client-selected.window="hydrateFromExternal($event.detail)">
+    
+    <!-- Step Header -->
+    <div class="d-flex align-items-center mb-3">
+        <span class="badge rounded-circle bg-primary-subtle text-primary me-2 d-flex align-items-center justify-content-center" 
+              style="width: 24px; height: 24px; font-size: 0.75rem;">4</span>
+        <h6 class="mb-0 fw-semibold text-dark">{% trans "Client" %}</h6>
+    </div>
+
+    <!-- Search Input -->
+    <div class="position-relative mb-3">
+        <span class="bi bi-search position-absolute top-50 translate-middle-y text-muted" 
+              style="left: 12px; pointer-events: none;"></span>
+        <input type="text" 
+               class="form-control ps-5" 
+               placeholder="{{ obj.search_placeholder|default:'Search by name or phone...' }}"
+               x-model="search"
+               @input="if (selectedId && search !== selectedName) { 
+                   selectedId = null; 
+                   $dispatch('client-selected', null);
+               }"
+               style="border-radius: 8px; border-color: #e2e8f0;">
+        <!-- Quick Add Button -->
+        <button type="button" 
+                class="btn btn-link btn-sm position-absolute top-50 end-0 translate-middle-y text-primary me-2"
+                x-show="search.trim().length > 0 && selectedId === null"
+                x-cloak
+                title="{% trans 'Quick add as new client' %}"
+                @click="quickAdd()">
+            <span class="bi bi-plus-circle-fill" style="font-size: 1.2rem;"></span>
+        </button>
+        <!-- Clear Selection Button -->
+        <button type="button" 
+                class="btn btn-link btn-sm position-absolute top-50 end-0 translate-middle-y text-danger me-2"
+                x-show="selectedId !== null"
+                x-cloak
+                @click="selectedId = null; $dispatch('client-selected', null); clientFName = ''; clientLName = ''; clientPhone = ''; clientEmail = ''; search = ''; syncToParent()">
+            <span class="bi bi-x-circle" style="font-size: 1.2rem;"></span>
+        </button>
+    </div>
+
+    <!-- Filtered Client List -->
+        <div class="cab-client-list mb-4" x-show="search.trim().length >= minSearchLength" x-cloak>
+        <template x-for="client in filteredClients" :key="client.id">
+            <div class="d-flex align-items-center p-3 mb-2 border rounded-3 bg-white hover-light transition-all"
+                 style="cursor: pointer;"
+                 @click="selectClient(client)">
+                <!-- Avatar -->
+                <div class="avatar-circle me-3 d-flex align-items-center justify-content-center text-white fw-bold"
+                     :style="'background: #6366f1; width: 40px; height: 40px; border-radius: 50%; font-size: 0.85rem;'"
+                     x-text="client.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)">
+                </div>
+                
+                <!-- Info -->
+                <div class="flex-grow-1">
+                    <div class="fw-semibold text-dark" style="font-size: 0.9rem;" x-text="client.name"></div>
+                    <div class="text-muted" style="font-size: 0.75rem;">
+                        <span x-text="client.phone"></span>
+                        <span class="mx-1">·</span>
+                        <span x-text="(client.visits || 0) + ' {% trans 'visits' %}'"></span>
+                    </div>
+                </div>
+            </div>
+        </template>
+        
+        <!-- Empty Results -->
+        <div class="text-center py-3 text-muted" x-show="filteredClients.length === 0" style="font-size: 0.85rem;">
+            {% trans "No clients found matching your search." %}
+        </div>
+    </div>
+
+    <!-- Or Create New -->
+    <div x-show="selectedId === null" x-cloak>
+        <div class="separator-text d-flex align-items-center my-4 text-muted" style="font-size: 0.75rem;">
+            <div class="flex-grow-1 border-bottom me-2"></div>
+            <span class="text-nowrap">{% trans "or create new" %}</span>
+            <div class="flex-grow-1 border-bottom ms-2"></div>
+        </div>
+    
+        <!-- New Client Form -->
+        <div class="row g-3">
+            <div class="col-md-6">
+                <input type="text" name="first_name" x-model="clientFName" @input="syncToParent()" class="form-control form-control-sm py-2" placeholder="{% trans 'First Name' %}" style="border-radius: 8px; border-color: #cbd5e1;">
+            </div>
+            <div class="col-md-6">
+                <input type="text" name="last_name" x-model="clientLName" @input="syncToParent()" class="form-control form-control-sm py-2" placeholder="{% trans 'Last Name' %}" style="border-radius: 8px; border-color: #cbd5e1;">
+            </div>
+            <div class="col-md-6">
+                <input type="text" name="phone" x-model="clientPhone" @input="syncToParent()" class="form-control form-control-sm py-2" placeholder="{% trans 'Phone' %}" style="border-radius: 8px; border-color: #cbd5e1;">
+            </div>
+            <div class="col-md-6">
+                <input type="email" name="email" x-model="clientEmail" @input="syncToParent()" class="form-control form-control-sm py-2" placeholder="{% trans 'Email' %}" style="border-radius: 8px; border-color: #cbd5e1;">
+            </div>
+            <div class="col-12 mt-3 d-flex justify-content-end">
+                <button type="button" class="btn btn-outline-primary btn-sm px-4" 
+                        :disabled="!clientFName.trim()"
+                        @click="confirmNewClient()">
+                    <span class="bi bi-person-plus me-1"></span> {% trans "Use this client" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-light:hover {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+}
+.transition-all {
+    transition: all 0.2s ease-in-out;
+}
+</style>

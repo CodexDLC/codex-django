@@ -2,59 +2,43 @@
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'ru' }}">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Cabinet{% endblock %}</title>
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}Cabinet{% endblock %} — {{ SITE_NAME|default:'App' }}</title>
   {% include "cabinet/includes/_head.html" %}
-  {% block extra_css %}{% endblock %}
+  <style>
+    [x-cloak] { display: none !important; }
+  </style>
+
+  <script src="{% static 'cabinet/js/vendor/htmx.min.js' %}"></script>
+  <script src="{% static 'cabinet/js/app/cabinet.js' %}" defer></script>
+  <script src="{% static 'cabinet/js/vendor/alpine.min.js' %}" defer></script>
+  <script src="{% static 'cabinet/js/vendor/bootstrap.bundle.min.js' %}" defer></script>
 </head>
 <body>
 
   <div class="cab-wrapper"
-       x-data="{ sidebarCollapsed: JSON.parse(localStorage.getItem('cab_sidebar') ?? 'true') }"
+       x-data="{
+         sidebarCollapsed: JSON.parse(localStorage.getItem('cab_sidebar') ?? 'true'),
+         sidebarMobileOpen: false
+       }"
        x-effect="localStorage.setItem('cab_sidebar', sidebarCollapsed)">
 
-    {# Staff sidebar #}
-    <aside class="cab-sidebar" :class="{ 'cab-sidebar--collapsed': sidebarCollapsed }">
-
-      <div class="cab-sidebar__logo d-flex align-items-center px-3"
-           style="height: var(--cab-topbar-height); flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
-        {% block sidebar_title %}
-        <span class="bi bi-grid-3x3-gap-fill fs-5" style="color: var(--cab-primary);"></span>
-        <span class="cab-sidebar__title ms-2 fw-semibold text-white" style="font-size: 1rem; white-space: nowrap;">
-          {{ SITE_NAME|default:'App' }}
-        </span>
-        {% endblock %}
-      </div>
-
-      <nav class="cab-nav flex-grow-1 py-2">
-        <ul class="list-unstyled mb-0">
-          {% block sidebar_nav %}{% endblock %}
-        </ul>
-      </nav>
-
-      <div style="border-top: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;">
-        <a href="{% url 'cabinet:site_settings' %}"
-           hx-get="{% url 'cabinet:site_settings' %}"
-           hx-target="#cab-content"
-           hx-push-url="true"
-           class="cab-nav__item d-flex align-items-center px-3 py-2 mx-2 rounded"
-           style="color: var(--cab-sidebar-text); transition: background 0.15s;">
-          <span class="bi bi-gear fs-5 flex-shrink-0"></span>
-          <span class="cab-nav__label ms-3" style="white-space: nowrap;">Настройки</span>
-        </a>
-        <div class="px-3 py-2">
-          <button @click="sidebarCollapsed = !sidebarCollapsed"
-                  class="btn btn-sm d-flex align-items-center justify-content-center w-100"
-                  style="background: var(--cab-sidebar-hover-bg); color: var(--cab-sidebar-text); border: none;">
-            <span class="bi" :class="sidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></span>
-            <span class="cab-nav__label ms-2" style="white-space: nowrap; font-size: 0.8rem;">Collapse</span>
-          </button>
-        </div>
-      </div>
-
+    {# ─── Staff sidebar (from include, populated by context processor) ─── #}
+    <aside class="cab-sidebar"
+           :class="{ 'cab-sidebar--collapsed': sidebarCollapsed, 'cab-sidebar--open': sidebarMobileOpen }">
+      {% block sidebar %}
+        {% include "cabinet/includes/_sidebar_staff.html" %}
+      {% endblock %}
     </aside>
 
+    {# Mobile backdrop #}
+    <div class="cab-backdrop d-lg-none"
+         x-show="sidebarMobileOpen"
+         x-transition.opacity
+         @click="sidebarMobileOpen = false"
+         style="position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1035;"></div>
+
+    {# ─── Main area ─── #}
     <div class="cab-main">
       {% include "cabinet/includes/_topbar.html" %}
 
@@ -62,13 +46,10 @@
         {% block cabinet_content %}{% endblock %}
       </main>
     </div>
-
   </div>
 
-  <script src="{% static 'cabinet/js/vendor/htmx.min.js' %}"></script>
-  <script src="{% static 'cabinet/js/vendor/alpine.min.js' %}"></script>
-  <script src="{% static 'cabinet/js/vendor/bootstrap.bundle.min.js' %}"></script>
-  <script src="{% static 'cabinet/js/app_cabinet.js' %}"></script>
+  {% include "cabinet/includes/_modal_base.html" %}
+
   {% block extra_js %}{% endblock %}
 
 </body>

@@ -1,28 +1,83 @@
-"""Public cabinet integration API.
+"""Public cabinet integration API."""
 
-The :mod:`codex_django.cabinet` package exposes the registration contracts
-that feature apps use to contribute navigation sections and dashboard widgets
-to the cabinet UI.
-
-Examples:
-    Register a feature section from ``booking/cabinet.py``::
-
-        from codex_django.cabinet import CabinetSection, declare
-
-        declare(
-            module="booking",
-            section=CabinetSection(label="Bookings", icon="calendar", url="/cabinet/bookings/"),
-        )
-"""
-
-from .registry import cabinet_registry, declare
-from .types import CabinetSection, ListItem, NavAction, TableColumn
+from .notifications import notification_registry
+from .quick_access import (
+    build_candidate_key,
+    get_enabled_staff_quick_access,
+    get_staff_quick_access_candidates,
+    parse_selected_keys,
+)
+from .registry import cabinet_registry, configure_space, declare
+from .types import (
+    ActionSection,
+    CabinetSection,
+    CalendarGridData,
+    CalendarSlot,
+    CardGridData,
+    CardItem,
+    DashboardWidget,
+    DataTableData,
+    FormField,
+    FormSection,
+    KeyValueItem,
+    ListItem,
+    ListRow,
+    ListViewData,
+    ListWidgetData,
+    MetricWidgetData,
+    ModalAction,
+    ModalContentData,
+    ModalSection,
+    NavAction,
+    ProfileSection,
+    Shortcut,
+    SidebarItem,
+    SplitPanelData,
+    SummarySection,
+    TableAction,
+    TableColumn,
+    TableFilter,
+    TableWidgetData,
+    TopbarEntry,
+)
 
 __all__ = [
     "declare",
+    "configure_space",
     "cabinet_registry",
-    "CabinetSection",
-    "NavAction",
+    "notification_registry",
+    "build_candidate_key",
+    "parse_selected_keys",
+    "get_staff_quick_access_candidates",
+    "get_enabled_staff_quick_access",
+    "TopbarEntry",
+    "SidebarItem",
+    "Shortcut",
     "TableColumn",
     "ListItem",
+    "MetricWidgetData",
+    "TableWidgetData",
+    "ListWidgetData",
+    "TableFilter",
+    "TableAction",
+    "DataTableData",
+    "CalendarSlot",
+    "CalendarGridData",
+    "CardItem",
+    "CardGridData",
+    "ListRow",
+    "ListViewData",
+    "SplitPanelData",
+    "ModalSection",
+    "ProfileSection",
+    "KeyValueItem",
+    "SummarySection",
+    "FormField",
+    "FormSection",
+    "ModalAction",
+    "ActionSection",
+    "ModalContentData",
+    "CabinetSection",
+    "NavAction",
+    "DashboardWidget",
 ]

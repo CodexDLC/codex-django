@@ -2,53 +2,29 @@
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.urls import reverse
 
-_VALID_TABS = frozenset({"contact", "geo", "social", "marketing", "technical", "email", "legal"})
+from ..services.site_settings import SiteSettingsService
 
 
 @login_required
 def site_settings_view(request: HttpRequest) -> HttpResponse:
-    """Render the site-settings page with the default tab selected.
+    """Отображает единую страницу всех настроек сайта и обрабатывает сохранение."""
+    from django.contrib import messages
 
-    Args:
-        request: Authenticated Django request for the settings page.
+    if request.method == "POST":
+        success, msg = SiteSettingsService.save_context(request)
+        if success:
+            messages.success(request, msg)
+        else:
+            messages.error(request, msg)
 
-    Returns:
-        Full page response with the `contact` tab active by default.
-    """
-    return render(
-        request,
-        "cabinet/site_settings/index.html",
-        {"active_tab": "contact"},
-    )
+    context = SiteSettingsService.get_context(request)
+    return render(request, "cabinet/site_settings/index.html", context)
 
 
 @login_required
-def site_settings_tab_view(request: HttpRequest, tab: str) -> HttpResponse:
-    """HTMX partial for a settings tab — returns partials/_{tab}.html.
-
-    Renders the full page if the request is not an HTMX request,
-    so direct URL navigation works correctly.
-
-    Args:
-        request: Authenticated Django request, optionally carrying the
-            ``HX-Request`` header.
-        tab: Requested settings tab slug.
-
-    Returns:
-        An HTMX partial response for valid HTMX requests, otherwise the full
-        site-settings page.
-    """
-    if tab not in _VALID_TABS:
-        tab = "contact"
-
-    if request.headers.get("HX-Request"):
-        template = f"cabinet/site_settings/partials/_{tab}.html"
-        return render(request, template, {"active_tab": tab})
-
-    return render(
-        request,
-        "cabinet/site_settings/index.html",
-        {"active_tab": tab},
-    )
+def site_settings_tab_view(request: HttpRequest, tab_slug: str) -> HttpResponse:
+    """Устаревшая вьюха для вкладок, теперь просто редиректит на общий корень по якорю."""
+    return redirect(f"{reverse('cabinet:site_settings')}#{tab_slug}")

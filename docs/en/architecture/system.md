@@ -32,7 +32,6 @@ Instead of forcing one monolithic settings model, `system` offers a composable f
 - marketing and analytics identifiers
 - technical toggles and script injections
 - email infrastructure settings
-- legal HTML documents
 
 Projects combine the mixins they need into one concrete site settings model that inherits from `AbstractSiteSettings`.
 
@@ -131,7 +130,7 @@ flowchart TD
 It is the place where projects store and operate the data that defines how the site behaves at runtime:
 
 - what public text fragments exist
-- what legal and contact information is shown
+- what contact information is shown
 - what integration keys are configured
 - what fixtures have already been imported
 

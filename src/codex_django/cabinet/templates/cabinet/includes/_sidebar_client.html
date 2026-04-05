@@ -1,6 +1,6 @@
-{# [LIBRARY] codex_django/cabinet/templates/cabinet/includes/_sidebar_client.html #}
-{# Default sidebar for client layout. Include or override in project. #}
-{% load static i18n %}
+{# [LIBRARY] Client sidebar — navigation from context variable cabinet_sidebar #}
+{# DO NOT use {% block %} here — this is an {% include %}, blocks are ignored. #}
+{% load i18n %}
 
 {# ─── LOGO ─── #}
 <div class="cab-sidebar__logo">
@@ -8,20 +8,12 @@
   <span class="cab-sidebar__logo-name">{{ SITE_NAME|default:'App' }}</span>
 </div>
 
-{# ─── NAV ─── #}
+{# ─── NAV (populated by context_processors → cabinet_sidebar) ─── #}
 <nav class="cab-sidebar__nav">
   <ul class="cab-nav">
-    {% block sidebar_nav %}
-    {# Override this block in project templates to add nav items.
-       Example:
-       <li>
-         <a href="{% url 'cabinet:profile' %}" class="cab-nav__item">
-           <i class="bi bi-person cab-nav__icon"></i>
-           <span class="cab-nav__label">Profile</span>
-         </a>
-       </li>
-    #}
-    {% endblock %}
+    {% for item in cabinet_sidebar %}
+      {% include "cabinet/includes/_nav_item.html" with item=item %}
+    {% endfor %}
   </ul>
 </nav>
 

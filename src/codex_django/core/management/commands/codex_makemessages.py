@@ -55,7 +55,7 @@ class Command(BaseCommand):
             *args: Positional arguments forwarded by Django's command runner.
             **options: Parsed command-line options.
         """
-        base_dir = Path(cast(str, settings.BASE_DIR))  # type: ignore[misc]
+        base_dir = Path(cast(str, settings.BASE_DIR))
         languages = [lang[0] for lang in settings.LANGUAGES]
         dry_run = cast(bool, options["dry_run"])
 

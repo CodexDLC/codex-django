@@ -1,0 +1,208 @@
+{% load i18n %}
+{% comment %}
+  calendar_grid.html — CSS Grid-based scheduling calendar.
+
+  Context:
+    calendar — CalendarGridData instance (codex_django.cabinet.types.CalendarGridData)
+
+  Layout:
+    Columns = calendar.cols  (masters, rooms, days — anything)
+    Rows    = calendar.rows  (time slots — "8:00", "8:30", ...)
+    Events  = calendar.events (CalendarSlot: col, row, span, title, color, url)
+
+  Backend computes col/row/span; template only renders.
+  Click on empty slot → HTMX GET new_event_url?col=N&row=N → opens modal.
+  Click on event → HTMX GET event.url → opens modal.
+
+  Usage:
+    {% include "cabinet/components/calendar_grid.html" with calendar=calendar %}
+    {% include "cabinet/includes/_modal_base.html" %}
+{% endcomment %}
+
+{% with col_count=calendar.cols|length row_count=calendar.rows|length %}
+
+<div class="cab-calendar">
+
+  {# Header: Navigation Controls #}
+  <div class="cab-calendar__header d-flex align-items-center gap-2 px-4 py-3 bg-white border-bottom" style="height: 57px; flex-shrink: 0;">
+    
+    <div class="d-flex align-items-center gap-1">
+      {% if calendar.prev_url %}
+      <a href="{{ calendar.prev_url }}" 
+         class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center" 
+         style="width: 34px; height: 34px; padding: 0;">
+        <span class="bi bi-chevron-left" style="font-size: .8rem;"></span>
+      </a>
+      {% endif %}
+
+      <div class="position-relative">
+        <button class="btn btn-outline-secondary fw-semibold d-flex align-items-center gap-2" 
+                style="font-size: .875rem; min-width: 180px; height: 34px;">
+          <span class="bi bi-calendar3 opacity-50" style="font-size: .8rem;"></span>
+          {{ calendar.current_date|date:"F j, Y"|default:calendar.current_date|default:calendar.title }}
+        </button>
+      </div>
+
+      {% if calendar.next_url %}
+      <a href="{{ calendar.next_url }}" 
+         class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center" 
+         style="width: 34px; height: 34px; padding: 0;">
+        <span class="bi bi-chevron-right" style="font-size: .8rem;"></span>
+      </a>
+      {% endif %}
+
+      {% if calendar.today_url %}
+      <a href="{{ calendar.today_url }}" 
+         class="btn btn-sm btn-outline-secondary ms-1" 
+         style="height: 34px; font-size: .82rem;">{% trans "Today" %}</a>
+      {% endif %}
+    </div>
+
+    <div class="ms-auto d-flex align-items-center gap-3">
+      {% block calendar_controls %}{% endblock %}
+      {% if calendar.new_event_url %}
+      <a href="{{ calendar.new_event_url }}" 
+         class="btn btn-primary btn-sm d-flex align-items-center gap-1 px-3" 
+         style="height: 34px; font-size: .82rem;"
+         hx-get="{{ calendar.new_event_url }}"
+         hx-target="#modal-body"
+         hx-swap="innerHTML"
+         @click.prevent="$dispatch('open-modal', { url: '{{ calendar.new_event_url }}' })">
+        <span class="bi bi-plus-lg"></span> {% trans "New booking" %}
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  {# Column headers #}
+  <div class="cab-calendar__col-headers"
+       style="display: grid; grid-template-columns: {{ calendar.time_col_width }} repeat({{ col_count }}, {{ calendar.col_width }}); border-bottom: 2px solid #e2e8f0;">
+    <div class="cab-calendar__time-gutter" style="background: #f8fafc;"></div>
+    {% for col in calendar.cols %}
+    <div class="cab-calendar__col-header" style="background: #f8fafc; border-left: 2px solid #e2e8f0; height: 52px; padding: 0 12px; display: flex; align-items: center;">
+      {% if col.name %}
+        <div class="d-flex align-items-center gap-2 text-start w-100">
+          {% if col.avatar %}
+          <div class="avatar-sm rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0" 
+               style="width: 32px; height: 32px; font-size: 11px; font-weight: bold; background-color: {{ col.color|default:'var(--cab-primary)' }};">
+            {% if "/" in col.avatar %}<img src="{{ col.avatar }}" class="rounded-circle w-100">{% else %}{{ col.avatar }}{% endif %}
+          </div>
+          {% endif %}
+          <div class="text-truncate" style="line-height: 1.2;">
+            <div class="fw-bold" style="font-size: .84rem; color: #1e293b;">{{ col.name }}</div>
+            {% if col.info %}<div class="text-muted" style="font-size: .7rem;">{{ col.info }}</div>{% endif %}
+          </div>
+        </div>
+      {% else %}
+        <span class="fw-bold small text-muted">{{ col }}</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  {# Scrollable area #}
+  <div class="cab-calendar__scroll">
+
+    <div class="cab-calendar__grid"
+         style="
+           grid-template-columns: {{ calendar.time_col_width }} repeat({{ col_count }}, {{ calendar.col_width }});
+           grid-template-rows: repeat({{ row_count }}, {{ calendar.slot_height }});
+         ">
+
+      {# Background cells: time labels + empty slot cells #}
+      {% for slot in calendar.rows %}
+      <div class="cab-calendar__time-label d-flex align-items-start px-1 pt-1"
+           style="grid-column: 1; grid-row: {{ forloop.counter }}; position: relative; border-right: 1px solid #e2e8f0;">
+        {% if slot.hour %}
+            {% if slot.min == "00" or not slot.min %}
+                <span class="cab-time-hour" style="font-size:.75rem;font-weight:700;color:#1e293b;line-height:1;margin-top:2px;">{{ slot.hour }}</span>
+            {% else %}
+                <span class="cab-time-min" style="font-size:.65rem;font-weight:600;color:#94a3b8;line-height:1;margin-left:auto;margin-top:3px;">{{ slot.min }}</span>
+            {% endif %}
+        {% else %}
+            <span class="small text-muted">{{ slot }}</span>
+        {% endif %}
+      </div>
+      
+      {% for col in calendar.cols %}
+      {% with col_idx=forloop.counter row_idx=forloop.parentloop.counter %}
+      <div class="cab-calendar__slot"
+           style="grid-column: {{ col_idx|add:1 }}; grid-row: {{ row_idx }}; border-left: 2px solid #e2e8f0; border-bottom: {% if row_idx|divisibleby:2 %}2px solid #e2e8f0{% else %}1px dashed #f1f5f9{% endif %};"
+           {% if calendar.new_event_url %}
+           hx-get="{{ calendar.new_event_url }}{% if '?' in calendar.new_event_url %}&{% else %}?{% endif %}col={{ col_idx|add:-1 }}&row={{ row_idx|add:-1 }}"
+           hx-target="#modal-body"
+           hx-swap="innerHTML"
+           @click="$dispatch('open-modal', { url: '{{ calendar.new_event_url }}{% if '?' in calendar.new_event_url %}&{% else %}?{% endif %}col={{ col_idx|add:-1 }}&row={{ row_idx|add:-1 }}' })"
+           {% endif %}
+      ></div>
+      {% endwith %}
+      {% endfor %}
+      {% endfor %}
+
+      {# Events overlay #}
+      {% for event in calendar.events %}
+      <div class="cab-calendar__event d-flex flex-column"
+           style="
+             grid-column: {{ event.col|add:2 }};
+             grid-row: {{ event.row|add:1 }} / span {{ event.span }};
+             background-color: {{ event.color|default:'rgba(99,102,241,0.1)' }};
+             border-left: 4px solid {{ event.left_border|default:event.color|default:'var(--cab-primary)' }};
+             {% if 'dashed' in event.badge_style %}border-left-style: dashed;{% endif %}
+             padding: 6px 8px;
+             font-size: 11px;
+             border-radius: 6px;
+             margin: 2px 4px;
+             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+             position: relative;
+             z-index: 10;
+             cursor: pointer;
+             {{ event.style }}
+           "
+           hx-get="{{ event.url }}"
+           hx-target="#modal-body"
+           hx-swap="innerHTML"
+           @click="$dispatch('open-modal', { url: '{{ event.url }}' })"
+      >
+        <div class="cab-cal-slot__header" style="flex-shrink: 0;">
+            <div class="fw-bold text-dark text-truncate" style="font-size: .75rem;">{{ event.title }}</div>
+            <div class="text-muted text-truncate" style="font-size: .68rem;">{{ event.subtitle }}</div>
+        </div>
+
+        <div class="cab-cal-slot__body" style="flex-grow: 1; overflow-y: auto; margin-top: 4px; min-height: 0;">
+            {% if event.note %}
+            <div class="text-muted small mb-1" style="font-size: 0.65rem; font-style: italic; line-height: 1.1;">
+                "{{ event.note|truncatechars:100 }}"
+            </div>
+            {% endif %}
+
+            {% for tag in event.details %}
+            <span class="badge bg-light text-dark border me-1 mb-1" style="font-size: 0.6rem; font-weight: 500;">
+                {{ tag.text }}
+            </span>
+            {% endfor %}
+        </div>
+
+        <div class="cab-cal-slot__footer d-flex justify-content-between align-items-center mt-auto pt-1 border-top" style="flex-shrink: 0; border-top-color: rgba(0,0,0,0.05) !important;">
+            <div class="d-flex gap-1 align-items-center">
+                {% if event.note %}
+                <i class="bi bi-chat-left-text text-primary" style="font-size: 0.7rem;" title="{{ event.note }}"></i>
+                {% endif %}
+                {% for icon in event.indicators %}
+                <i class="bi {{ icon }}" style="font-size: 0.7rem;"></i>
+                {% endfor %}
+            </div>
+            {% if event.price %}
+            <div class="fw-bold" style="font-size: .68rem; color: {{ event.left_border|default:event.color|default:'var(--cab-primary)' }};">
+                {{ event.price }}
+            </div>
+            {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+
+    </div>{# /.cab-calendar__grid #}
+  </div>{# /.cab-calendar__scroll #}
+
+</div>{# /.cab-calendar #}
+
+{% endwith %}

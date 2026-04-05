@@ -23,3 +23,5 @@ Examples:
             "codex_django.core.context_processors.seo_settings"
         )
 """
+
+default_app_config = "codex_django.core.apps.CoreConfig"

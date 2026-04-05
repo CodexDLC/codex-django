@@ -1,9 +1,14 @@
+{# [LIBRARY] Single sidebar navigation item. Accepts: item (SidebarItem) — OR — individual vars: url, icon, label, badge, active, disabled #}
 <li>
-  <a href="{% if disabled %}#{% else %}{{ url }}{% endif %}"
-     class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2{% if active %} cab-nav__item--active{% endif %}"
-     style="color:var(--cab-sidebar-text);transition:background .15s;{% if disabled %}opacity:.45;cursor:not-allowed;pointer-events:none;{% endif %}">
-    <span class="bi {{ icon }} fs-5 flex-shrink-0"></span>
-    <span class="cab-nav__label ms-3" style="white-space:nowrap;">{{ label }}</span>
-    {% if badge %}<span class="badge rounded-pill ms-auto" style="font-size:.65rem;background:rgba(255,255,255,.2);">{{ badge }}</span>{% endif %}
+  <a href="{% if item %}{{ item.url }}{% elif disabled %}#{% else %}{{ url }}{% endif %}"
+     class="cab-nav__item{% if active or item.active %} cab-nav__item--active{% endif %}"
+     {% if disabled or item.disabled %}style="opacity:.45;cursor:not-allowed;pointer-events:none;"{% endif %}>
+    <i class="bi {% if item %}{{ item.icon }}{% else %}{{ icon }}{% endif %} cab-nav__icon"></i>
+    <span class="cab-nav__label">{% if item %}{{ item.label }}{% else %}{{ label }}{% endif %}</span>
+    {% if badge %}
+      <span class="cab-nav__badge">{{ badge }}</span>
+    {% elif item.badge %}
+      <span class="cab-nav__badge">{{ item.badge }}</span>
+    {% endif %}
   </a>
 </li>

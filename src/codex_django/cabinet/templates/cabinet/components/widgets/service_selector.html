@@ -1,0 +1,55 @@
+{% comment %}
+  Widget: Service Selector
+  Expected context: `selector` (ServiceSelectorData)
+{% endcomment %}
+
+<div class="cab-step-card p-4 mb-3 cab-step-card--active">
+  <div class="d-flex align-items-center gap-2 mb-3">
+    <div class="cab-step-num">1</div>
+    <span class="fw-semibold" style="font-size: .92rem;">{% if title %}{{ title }}{% else %}Select Services{% endif %}</span>
+    <span x-show="selectedServices.length" x-cloak class="badge rounded-pill ms-1" style="background: #eef2ff; color: var(--cab-primary); font-size: .7rem;" x-text="selectedServices.length + ' selected'"></span>
+  </div>
+
+  {% if selector.categories %}
+  <div class="d-flex gap-2 flex-wrap mb-3">
+    <button class="btn btn-sm" 
+            :class="activeCategory === 'all' ? 'btn-dark' : 'btn-outline-secondary'"
+            @click="activeCategory = 'all'"
+            style="font-size: .75rem; border-radius: 20px;">All</button>
+    {% for cat in selector.categories %}
+    <button class="btn btn-sm" 
+            :class="activeCategory === '{{ cat.0 }}' ? 'btn-dark' : 'btn-outline-secondary'"
+            @click="activeCategory = '{{ cat.0 }}'"
+            style="font-size: .75rem; border-radius: 20px;">{{ cat.1 }}</button>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="row g-2">
+    {% for item in selector.items %}
+    <div class="col-md-6" x-show="activeCategory === 'all' || activeCategory === '{{ item.category }}'">
+      <div class="cab-service-item" 
+           :class="{ 'cab-service-item--selected': hasService('{{ item.id }}') }" 
+           @click="toggleService(
+             '{{ item.id }}',
+             '{{ item.title|escapejs }}',
+             {{ item.price }},
+             {{ item.duration }},
+             [{% for master_id in item.master_ids %}{{ master_id }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+             '{{ item.exclusive_group|escapejs }}',
+             [{% for conflict_id in item.conflicts_with %}'{{ conflict_id|escapejs }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+             '{{ item.replacement_mode|escapejs }}'
+           )">
+        <div class="d-flex justify-content-between align-items-start">
+          <div class="fw-semibold" style="font-size: .83rem; line-height: 1.3;">{{ item.title }}</div>
+          <span x-show="hasService('{{ item.id }}')" x-cloak class="bi bi-check-circle-fill text-primary ms-2 flex-shrink-0" style="font-size: .9rem;"></span>
+        </div>
+        <div class="d-flex justify-content-between mt-1">
+          <span class="text-muted" style="font-size: .72rem;"><span class="bi bi-clock me-1"></span>{{ item.duration }} min</span>
+          <span class="fw-semibold" style="font-size: .8rem;">${{ item.price }}</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>

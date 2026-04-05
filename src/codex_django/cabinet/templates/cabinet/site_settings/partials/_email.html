@@ -1,8 +1,8 @@
 {% load i18n %}
 <div class="row g-4">
-  <div class="col-md-7">
+  <div class="col-12">
 
-    <div class="card border-0 shadow-sm mb-3">
+    <div class="card border-0 shadow-sm mb-4">
       <div class="card-header bg-white border-0 pt-3 pb-0">
         <h6 class="fw-semibold mb-0">SMTP-сервер</h6>
       </div>
@@ -11,47 +11,53 @@
         <div class="row g-3">
           <div class="col-8">
             <label class="form-label text-muted mb-1" style="font-size:.8rem;">SMTP Host</label>
-            <input type="text" class="form-control form-control-sm" value="smtp.gmail.com" placeholder="smtp.example.com">
+            <input type="text" name="smtp_host" value="{{ settings_data.smtp_host|default:'' }}"
+                   class="form-control form-control-sm border-0 bg-light" placeholder="smtp.example.com">
           </div>
           <div class="col-4">
             <label class="form-label text-muted mb-1" style="font-size:.8rem;">Порт</label>
-            <input type="number" class="form-control form-control-sm" value="587" placeholder="587">
+            <input type="number" name="smtp_port" value="{{ settings_data.smtp_port|default:'587' }}"
+                   class="form-control form-control-sm border-0 bg-light">
           </div>
         </div>
 
         <div class="row g-3">
           <div class="col-6">
             <label class="form-label text-muted mb-1" style="font-size:.8rem;">Пользователь</label>
-            <input type="text" class="form-control form-control-sm" value="noreply@mycompany.ru" placeholder="user@example.com">
+            <input type="text" name="smtp_user" value="{{ settings_data.smtp_user|default:'' }}"
+                   class="form-control form-control-sm border-0 bg-light" placeholder="user@example.com">
           </div>
           <div class="col-6">
             <label class="form-label text-muted mb-1" style="font-size:.8rem;">Пароль</label>
-            <input type="password" class="form-control form-control-sm" value="••••••••••••">
+            <input type="password" name="smtp_password" value="{{ settings_data.smtp_password|default:'' }}"
+                   class="form-control form-control-sm border-0 bg-light">
           </div>
         </div>
 
         <div>
           <label class="form-label text-muted mb-1" style="font-size:.8rem;">From Email</label>
-          <input type="email" class="form-control form-control-sm" value="Мой Бизнес &lt;noreply@mycompany.ru&gt;" placeholder="Name &lt;email@example.com&gt;">
+          <input type="email" name="smtp_from_email" value="{{ settings_data.smtp_from_email|default:'' }}"
+                   class="form-control form-control-sm border-0 bg-light" placeholder="noreply@example.com">
         </div>
-        <hr class="my-0">
 
-        <div class="d-flex align-items-center gap-4">
+        <div class="d-flex align-items-center gap-4 py-1">
           <div class="form-check d-flex align-items-center gap-2 mb-0">
-            <input class="form-check-input mt-0" type="checkbox" id="use_tls" checked>
+            <input class="form-check-input mt-0" type="checkbox" name="smtp_use_tls" id="use_tls"
+                   {% if settings_data.smtp_use_tls %}checked{% endif %}>
             <label class="form-check-label" for="use_tls" style="font-size:.85rem;">Use TLS</label>
           </div>
           <div class="form-check d-flex align-items-center gap-2 mb-0">
-            <input class="form-check-input mt-0" type="checkbox" id="use_ssl">
+            <input class="form-check-input mt-0" type="checkbox" name="smtp_use_ssl" id="use_ssl"
+                   {% if settings_data.smtp_use_ssl %}checked{% endif %}>
             <label class="form-check-label" for="use_ssl" style="font-size:.85rem;">Use SSL</label>
           </div>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center pt-1">
-          <button class="btn btn-sm btn-outline-secondary">
-            <span class="bi bi-send me-1"></span>Тест соединения
+        <div class="pt-2 border-top">
+          <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1">
+            <span class="bi bi-send"></span>
+            Тест соединения
           </button>
-          <button class="btn btn-primary btn-sm px-4">Сохранить</button>
         </div>
 
       </div>
@@ -66,14 +72,11 @@
 
         <div>
           <label class="form-label text-muted mb-1" style="font-size:.8rem;">SendGrid API Key</label>
-          <input type="password" class="form-control form-control-sm" value="" placeholder="SG.xxxxxxxxx">
+          <input type="password" name="sendgrid_api_key" value="{{ settings_data.sendgrid_api_key|default:'' }}"
+                 class="form-control form-control-sm border-0 bg-light" placeholder="SG.xxxxxxxxx">
           <div class="text-muted mt-1" style="font-size:.75rem;">
             Если заполнен — используется SendGrid вместо SMTP.
           </div>
-        </div>
-
-        <div class="d-flex justify-content-end">
-          <button class="btn btn-primary btn-sm px-4">Сохранить</button>
         </div>
 
       </div>

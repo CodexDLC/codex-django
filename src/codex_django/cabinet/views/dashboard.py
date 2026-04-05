@@ -18,4 +18,4 @@ def dashboard_view(request: HttpRequest) -> HttpResponse:
         Rendered dashboard response using the registered selector providers.
     """
     context = DashboardSelector.get_context(request)
-    return render(request, "cabinet/dashboard/index.html", context)
+    return render(request, "cabinet/dashboard/index.html", {"dashboard_data": context, **context})

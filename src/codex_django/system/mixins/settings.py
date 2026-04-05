@@ -266,32 +266,6 @@ class SiteEmailSettingsMixin(models.Model):
         abstract = True
 
 
-class SiteLegalSettingsMixin(models.Model):
-    """Add HTML fields for legal and compliance documents.
-
-    Notes:
-        Projects commonly render these fields into privacy, terms, cookie,
-        and imprint pages managed through Django admin.
-
-    Admin:
-        fieldsets: (
-            _("Legal Documents"),
-            {
-                "fields": ("impressum_html", "privacy_html", "terms_html", "cookie_policy_html"),
-                "classes": ("collapse",),
-            },
-        )
-    """
-
-    impressum_html = models.TextField(_("Impressum HTML"), blank=True)
-    privacy_html = models.TextField(_("Privacy Policy HTML"), blank=True)
-    terms_html = models.TextField(_("Terms of Service HTML"), blank=True)
-    cookie_policy_html = models.TextField(_("Cookie Policy HTML"), blank=True)
-
-    class Meta:
-        abstract = True
-
-
 class AbstractSiteSettings(SiteSettingsSyncMixin, models.Model):
     """Base abstract site settings model with Redis synchronization only.
 

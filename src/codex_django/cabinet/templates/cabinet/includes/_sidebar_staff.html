@@ -1,26 +1,32 @@
-{# [LIBRARY] codex_django/cabinet/templates/cabinet/includes/_sidebar_staff.html #}
-{# Sidebar для staff/owner режима. Суб-навигация заполняется через {% block sidebar_nav %} в каждой странице. #}
-{% load static i18n %}
+{# [LIBRARY] Staff sidebar — navigation from context variable cabinet_sidebar #}
+{# DO NOT use {% block %} here — this is an {% include %}, blocks are ignored. #}
+{% load i18n cabinet_tags %}
 
-{# ─── LOGO ─── #}
+{# ─── LOGO (Dynamic based on active topbar entry) ─── #}
 <div class="cab-sidebar__logo">
-  <span class="cab-sidebar__logo-icon bi bi-grid-3x3-gap-fill"></span>
-  <span class="cab-sidebar__logo-name">{{ SITE_NAME|default:'App' }}</span>
+  <span class="cab-sidebar__logo-icon bi {% firstof cabinet_active_topbar.icon cabinet_branding.icon 'bi-grid-3x3-gap-fill' %}"></span>
+  <span class="cab-sidebar__logo-name">{% firstof cabinet_active_topbar.label cabinet_branding.label SITE_NAME "App" %}</span>
 </div>
 
-{# ─── NAV ─── #}
+{# ─── NAV (populated by context_processors → cabinet_sidebar) ─── #}
 <nav class="cab-sidebar__nav">
-  <ul class="cab-nav">
-    {% block sidebar_nav %}{% endblock %}
-  </ul>
+  <div class="flex-grow-1 overflow-auto py-2">
+    {% for item in cabinet_sidebar %}
+      {% sidebar_badge item.badge_key as badge_val %}
+      {% include "cabinet/includes/_nav_item.html" with item=item badge=badge_val %}
+    {% endfor %}
+  </div>
 </nav>
 
 {# ─── FOOTER ─── #}
 <div class="cab-sidebar__footer">
+  {% if cabinet_settings_url %}
+    {% include "cabinet/includes/_nav_item.html" with url=cabinet_settings_url icon="bi-gear" label=_("Settings") %}
+  {% endif %}
   <button class="cab-sidebar__collapse-btn"
           @click="sidebarCollapsed = !sidebarCollapsed"
-          :title="sidebarCollapsed ? '{% trans 'Expand' %}' : '{% trans 'Collapse' %}'">
+          :title="sidebarCollapsed ? '{% trans 'Развернуть' %}' : '{% trans 'Свернуть' %}'">
     <i class="bi cab-nav__icon" :class="sidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
-    <span class="cab-nav__label">{% trans "Collapse" %}</span>
+    <span class="cab-nav__label">{% trans "Свернуть" %}</span>
   </button>
 </div>

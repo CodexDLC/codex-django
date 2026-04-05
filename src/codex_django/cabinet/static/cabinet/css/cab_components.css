@@ -1,0 +1,707 @@
+/*
+ * cab_components.css — Content component styles for codex_django cabinet.
+ *
+ * Covers: calendar grid, data table, split panel, card grid, list view.
+ * Uses var(--cab-*) tokens from cab_tokens.css.
+ * Bootstrap 5 utility classes are used where possible;
+ * custom CSS only where Bootstrap cannot cover the layout.
+ *
+ * Load order (see _head.html):
+ *   1. cab_tokens.css
+ *   2. cab_layout.css
+ *   3. cab_components.css   ← this file
+ *   4. codex_cabinet.css    (Bootstrap 5)
+ *   5. {% block cabinet_css %} (project overrides)
+ */
+
+/* ==========================================================================
+   Calendar Grid
+   ========================================================================== */
+
+.cab-calendar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fff;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.cab-calendar__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--cab-border-color, #e2e8f0);
+  background: var(--cab-card-bg, #fff);
+  flex-shrink: 0;
+}
+
+.cab-calendar__header-title {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--cab-text, #1e293b);
+  flex: 1;
+}
+
+/* Grid body: sticky col headers + scrollable rows */
+.cab-calendar__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Column headers row */
+.cab-calendar__col-headers {
+  display: grid;
+  /* columns set inline via style="grid-template-columns: ..." */
+  border-bottom: 1px solid var(--cab-border-color, #e2e8f0);
+  flex-shrink: 0;
+}
+
+.cab-calendar__time-gutter {
+  width: 56px;
+  flex-shrink: 0;
+}
+
+.cab-calendar__col-header {
+  padding: 0.375rem 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--cab-text-muted, #64748b);
+  text-align: center;
+  border-left: 1px solid var(--cab-border-color, #e2e8f0);
+  background: var(--cab-sidebar-bg, #f8fafc);
+}
+
+/* Scrollable grid area */
+.cab-calendar__scroll {
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* CSS Grid: the actual time × col matrix */
+.cab-calendar__grid {
+  display: grid;
+  /* grid-template-columns and grid-template-rows set inline */
+  position: relative;
+}
+
+/* Individual time slot cell (background) */
+.cab-calendar__slot {
+  border-right: 1px solid var(--cab-border-color, #e2e8f0);
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.cab-calendar__slot:hover {
+  background: var(--cab-sidebar-hover-bg, #f1f5f9);
+}
+
+/* Time label column */
+.cab-calendar__time-label {
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+  color: var(--cab-text-muted, #94a3b8);
+  text-align: right;
+  line-height: 1;
+  padding-top: 2px;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  background: var(--cab-card-bg, #fff);
+  user-select: none;
+}
+
+/* Event card placed on the grid */
+.cab-calendar__event {
+  position: relative;
+  margin: 1px 2px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--event-color, var(--cab-primary, #6366f1));
+  color: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  transition: opacity 0.15s, box-shadow 0.15s;
+  /* grid placement set inline: grid-column, grid-row, grid-row-end */
+}
+
+.cab-calendar__event:hover {
+  opacity: 0.9;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.cab-calendar__event-title {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cab-calendar__event-subtitle {
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   Data Table
+   ========================================================================== */
+
+.cab-data-table {
+  width: 100%;
+}
+
+.cab-data-table__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.cab-data-table__search {
+  flex: 1;
+  min-width: 180px;
+  max-width: 320px;
+}
+
+.cab-data-table__filters {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   Split Panel
+   ========================================================================== */
+
+.cab-split-panel {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 0;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cab-split-panel__list {
+  border-right: 1px solid var(--cab-border-color, #e2e8f0);
+  overflow-y: auto;
+  background: var(--cab-card-bg, #fff);
+}
+
+.cab-split-panel__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--cab-border-color, #e2e8f0);
+  cursor: pointer;
+  transition: background 0.12s;
+  text-decoration: none;
+  color: inherit;
+}
+
+.cab-split-panel__item:hover,
+.cab-split-panel__item--active {
+  background: var(--cab-sidebar-hover-bg, #f1f5f9);
+}
+
+.cab-split-panel__item--active {
+  border-left: 3px solid var(--cab-primary, #6366f1);
+}
+
+.cab-split-panel__item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.cab-split-panel__item-primary {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--cab-text, #1e293b);
+}
+
+.cab-split-panel__item-secondary {
+  font-size: 0.8125rem;
+  color: var(--cab-text-muted, #64748b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cab-split-panel__item-meta {
+  font-size: 0.75rem;
+  color: var(--cab-text-muted, #94a3b8);
+  white-space: nowrap;
+}
+
+.cab-split-panel__detail {
+  overflow-y: auto;
+  background: var(--cab-bg, #f8fafc);
+}
+
+.cab-split-panel__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--cab-text-muted, #94a3b8);
+  font-size: 0.9375rem;
+}
+
+/* Mobile: stack panels */
+@media (max-width: 767px) {
+  .cab-split-panel {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .cab-split-panel__list {
+    border-right: none;
+    border-bottom: 1px solid var(--cab-border-color, #e2e8f0);
+    max-height: 40vh;
+  }
+}
+
+/* ==========================================================================
+   Card Grid
+   ========================================================================== */
+
+.cab-card-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.cab-card-grid__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.cab-card-grid__search {
+  flex: 1;
+  min-width: 180px;
+  max-width: 320px;
+}
+
+.cab-card {
+  background: var(--cab-slot-bg, #fff);
+  border: 1px solid var(--cab-slot-border, #e2e8f0);
+  border-radius: 4px;
+  padding: 4px 6px;
+  box-sizing: border-box;
+  font-size: 0.75rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.cab-cal-slot:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+
+.cab-cal-slot__header {
+  flex-shrink: 0;
+  margin-bottom: 2px;
+}
+
+.cab-cal-slot__title {
+  font-weight: 700;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.cab-cal-slot__subtitle {
+  font-size: 0.7rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.cab-calendar__event {
+  transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.1s ease;
+  will-change: transform, box-shadow;
+}
+
+.cab-calendar__event:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+  z-index: 100 !important;
+  border-color: rgba(0,0,0,0.15) !important;
+}
+
+.cab-cal-slot__body {
+  flex-grow: 1;
+  overflow-y: auto;
+  margin-top: 4px;
+  min-height: 0;
+  padding-right: 4px;
+  overscroll-behavior: contain; /* Prevents scroll bubbling to parent */
+}
+
+/* Scrollbar styling for cards */
+.cab-cal-slot__body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.cab-cal-slot__body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cab-cal-slot__body::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.05);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.cab-calendar__event:hover .cab-cal-slot__body::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.2);
+}
+
+.cab-cal-slot__body {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.1) transparent;
+}
+
+.cab-cal-slot__body::-webkit-scrollbar {
+  width: 3px;
+}
+
+.cab-cal-slot__body::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.1);
+  border-radius: 10px;
+}
+
+.cab-cal-slot__footer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.7rem;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  padding-top: 4px;
+  margin-top: auto;
+}
+
+.cab-cal-slot__indicators {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.cab-cal-slot__tag {
+  display: inline-block;
+  background: rgba(0,0,0,0.05);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.65rem;
+  margin-right: 2px;
+  margin-bottom: 2px;
+}
+
+.cab-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cab-card__title {
+  font-weight: 600;
+  color: var(--cab-text, #1e293b);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cab-card__subtitle {
+  font-size: 0.8125rem;
+  color: var(--cab-text-muted, #64748b);
+}
+
+.cab-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem 1rem;
+  font-size: 0.8125rem;
+  color: var(--cab-text-muted, #64748b);
+}
+
+.cab-card__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* List mode row */
+.cab-card--list {
+  flex-direction: row;
+  align-items: center;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  border-bottom: 1px solid var(--cab-border-color, #e2e8f0);
+}
+
+.cab-card--list:hover {
+  transform: none;
+}
+
+/* ==========================================================================
+   List View
+   ========================================================================== */
+
+.cab-list-view {
+  background: var(--cab-card-bg, #fff);
+}
+
+.cab-list-view__toolbar {
+  margin-bottom: 0.75rem;
+}
+
+.cab-list-view__row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid var(--cab-border-color, #e2e8f0);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.12s;
+}
+
+.cab-list-view__row:hover {
+  background: var(--cab-sidebar-hover-bg, #f1f5f9);
+}
+
+.cab-list-view__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.cab-list-view__primary {
+  font-weight: 500;
+  color: var(--cab-text, #1e293b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cab-list-view__secondary {
+  font-size: 0.8125rem;
+  color: var(--cab-text-muted, #64748b);
+}
+
+.cab-list-view__meta {
+  font-size: 0.75rem;
+  color: var(--cab-text-muted, #94a3b8);
+  white-space: nowrap;
+}
+
+.cab-list-view__actions {
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.cab-list-view__row:hover .cab-list-view__actions {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   Booking & Multi-step form Widgets
+   ========================================================================== */
+
+.cab-step-card {
+  background: var(--cab-card-bg, #fff);
+  border: 2px solid var(--cab-border-color, #e2e8f0);
+  border-radius: 0.75rem;
+  transition: border-color 0.15s;
+}
+
+.cab-step-card--active {
+  border-color: var(--cab-primary, #6366f1);
+}
+
+.cab-step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #e0e7ff;
+  color: var(--cab-primary, #6366f1);
+  flex-shrink: 0;
+}
+
+.cab-service-item {
+  border: 1.5px solid var(--cab-border-color, #e2e8f0);
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.cab-service-item:hover {
+  border-color: var(--cab-primary);
+  background: #f5f3ff;
+}
+
+.cab-service-item--selected {
+  border-color: var(--cab-primary);
+  background: #eef2ff;
+}
+
+.cab-cal-day {
+  width: 36px;
+  height: 36px;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.cab-cal-day:hover {
+  background: #e0e7ff;
+}
+
+.cab-cal-day--today {
+  background: var(--cab-primary);
+  color: #fff;
+  font-weight: 700;
+}
+
+.cab-cal-day--other {
+  color: #cbd5e1;
+}
+
+.cab-time-slot {
+  border: 1.5px solid var(--cab-border-color, #e2e8f0);
+  border-radius: 0.375rem;
+  padding: 0.3125rem 0.625rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.1s;
+  text-align: center;
+}
+
+.cab-time-slot:hover {
+  border-color: var(--cab-primary);
+  color: var(--cab-primary);
+}
+
+.cab-time-slot--selected {
+  background: var(--cab-primary);
+  border-color: var(--cab-primary);
+  color: #fff;
+}
+
+.cab-time-slot--busy {
+  background: #f8fafc;
+  color: #cbd5e1;
+  pointer-events: none;
+  text-decoration: line-through;
+}
+
+.cab-summary-card {
+  position: sticky;
+  top: 80px;
+  z-index: 10;
+  border: 2px solid var(--cab-border-color, #e2e8f0);
+  border-radius: 0.75rem;
+  background: var(--cab-card-bg, #fff);
+}
+
+/* ==========================================================================
+   Modular Modal System
+   ========================================================================== */
+
+.cab-modal-root {
+  display: contents;
+}
+
+.cab-modal-composer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 150px;
+}
+
+.cab-modal-section--profile {
+  background: var(--cab-content-bg, #f8fafc);
+}
+
+.cab-modal-section--actions {
+  background: var(--cab-content-bg, #f8fafc);
+}
+
+.cab-avatar--lg {
+  font-size: 1.1rem;
+}
+
+.cab-input {
+  border: 1px solid var(--cab-border, #e2e8f0);
+  border-radius: 6px;
+  padding: 0.625rem 0.875rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-size: 0.875rem;
+  width: 100%;
+}
+
+.cab-input:focus {
+  border-color: var(--cab-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  outline: none;
+}
+
+.cab-btn-shadow {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.last-child-mb-0:last-child {
+  margin-bottom: 0 !important;
+}
+
+.shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--cab-text) 0%, #475569 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

@@ -1,0 +1,78 @@
+{% load i18n %}
+{#
+  list_view.html — searchable list with optional row actions.
+
+  Context:
+    list — ListViewData instance (codex_django.cabinet.types.ListViewData)
+
+  Usage:
+    {% include "cabinet/components/list_view.html" with list=list_data %}
+#}
+<div class="cab-list-view" x-data="{ search: '' }">
+
+  {% if list.search_placeholder %}
+  <div class="cab-list-view__toolbar">
+    <div class="input-group input-group-sm" style="max-width: 320px;">
+      <span class="input-group-text bg-white border-end-0">
+        <i class="bi bi-search text-muted"></i>
+      </span>
+      <input type="text"
+             class="form-control border-start-0 ps-0"
+             placeholder="{{ list.search_placeholder }}"
+             x-model="search">
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="border rounded overflow-hidden">
+    {% for row in list.rows %}
+    <div class="cab-list-view__row"
+         x-show="search === '' || '{{ row.primary|lower }}'.includes(search.toLowerCase())"
+         {% if row.url %}
+         hx-get="{{ row.url }}"
+         hx-target="#modal-body"
+         hx-swap="innerHTML"
+         @click="$dispatch('open-modal', { url: '{{ row.url }}' })"
+         style="cursor: pointer;"
+         {% endif %}>
+
+      {% if row.avatar %}
+      {% include "cabinet/includes/_avatar.html" with initials=row.avatar size="36" %}
+      {% endif %}
+
+      <div class="cab-list-view__body">
+        <div class="cab-list-view__primary">{{ row.primary }}</div>
+        {% if row.secondary %}
+        <div class="cab-list-view__secondary">{{ row.secondary }}</div>
+        {% endif %}
+      </div>
+
+      {% if row.meta %}
+      <div class="cab-list-view__meta">{{ row.meta }}</div>
+      {% endif %}
+
+      {% if row.actions %}
+      <div class="cab-list-view__actions">
+        {% for action in row.actions %}
+        {% with url_val=row.url %}
+        <a href="{{ url_val }}"
+           class="btn btn-sm {% if action.style == 'link' %}btn-link p-0{% else %}{{ action.style }}{% endif %}"
+           @click.stop>
+          {% if action.icon %}<i class="bi {{ action.icon }}"></i>{% endif %}
+          {{ action.label }}
+        </a>
+        {% endwith %}
+        {% endfor %}
+      </div>
+      {% endif %}
+
+    </div>
+    {% empty %}
+    <div class="text-center text-muted py-5">
+      <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+      {{ list.empty_message }}
+    </div>
+    {% endfor %}
+  </div>
+
+</div>

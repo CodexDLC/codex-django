@@ -19,7 +19,6 @@ from .settings import (
     SiteContactSettingsMixin,
     SiteEmailSettingsMixin,
     SiteGeoSettingsMixin,
-    SiteLegalSettingsMixin,
     SiteMarketingSettingsMixin,
     SiteSettingsSyncMixin,
     SiteSocialSettingsMixin,
@@ -38,7 +37,6 @@ __all__ = [
     "SiteTechnicalSettingsMixin",
     "SiteMarketingSettingsMixin",
     "SiteEmailSettingsMixin",
-    "SiteLegalSettingsMixin",
     # SEO
     "AbstractStaticPageSeo",
     # Translations

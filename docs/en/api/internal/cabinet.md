@@ -8,9 +8,21 @@ This section contains the lower-level cabinet registry, dashboard providers, Red
 
 ::: codex_django.cabinet.registry
 
-## Types
+## Types — Navigation
 
-::: codex_django.cabinet.types
+::: codex_django.cabinet.types.nav
+
+## Types — Widgets
+
+::: codex_django.cabinet.types.widgets
+
+## Types — Page Components
+
+::: codex_django.cabinet.types.components
+
+## Types — Registry
+
+::: codex_django.cabinet.types.registry
 
 ## Context processors
 

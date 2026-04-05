@@ -1,23 +1,28 @@
 <div class="card border-0 shadow-sm h-100">
   <div class="card-body">
     <div class="d-flex align-items-start justify-content-between mb-2">
-      <div class="text-muted" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;">{{ title }}</div>
-      {% if icon %}
-      <span class="bi {{ icon }}" style="color:var(--cab-primary);font-size:1.1rem;"></span>
+      <div class="text-muted" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;">{{ data.label }}</div>
+      {% if data.icon %}
+      <span class="bi {{ data.icon }}" style="color:var(--cab-primary);font-size:1.1rem;"></span>
       {% endif %}
     </div>
-    <div class="fw-bold mb-1" style="font-size:1.9rem;line-height:1.1;">{{ value }}</div>
-    {% if trend %}
+    <div class="fw-bold mb-1" style="font-size:1.9rem;line-height:1.1;">{{ data.value }}{% if data.unit %} {{ data.unit }}{% endif %}</div>
+    {% if data.trend_value %}
     <div class="d-flex align-items-center gap-1 mt-1" style="font-size:.8rem;">
-      {% if trend|first == "+" %}
-        <span style="color:#16a34a;">↑ {{ trend }}</span>
+      {% if data.trend_direction == "up" %}
+        <span style="color:#16a34a;">↑ {{ data.trend_value }}</span>
+      {% elif data.trend_direction == "down" %}
+        <span style="color:#dc2626;">↓ {{ data.trend_value }}</span>
       {% else %}
-        <span style="color:#dc2626;">↓ {{ trend }}</span>
+        <span class="text-muted">{{ data.trend_value }}</span>
       {% endif %}
-      {% if trend_label %}
-        <span class="text-muted">{{ trend_label }}</span>
+      {% if data.trend_label %}
+        <span class="text-muted">{{ data.trend_label }}</span>
       {% endif %}
     </div>
+    {% endif %}
+    {% if data.url %}
+    <a href="{{ data.url }}" class="stretched-link"></a>
     {% endif %}
   </div>
 </div>

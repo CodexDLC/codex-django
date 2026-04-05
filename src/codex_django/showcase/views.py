@@ -112,7 +112,7 @@ def site_settings_view(request: HttpRequest) -> HttpResponse:
 
 @debug_only
 def site_settings_tab_view(request: HttpRequest, tab: str) -> HttpResponse:
-    VALID_TABS = {"contact", "geo", "social", "marketing", "technical", "email", "legal", "topbar"}
+    VALID_TABS = {"contact", "geo", "social", "marketing", "technical", "email", "topbar"}
     if tab not in VALID_TABS:
         tab = "contact"
     if request.headers.get("HX-Request"):
