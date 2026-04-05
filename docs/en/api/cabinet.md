@@ -127,8 +127,8 @@ def appointments_view(request):
 {# booking/appointments.html #}
 {% extends "cabinet/base_cabinet.html" %}
 {% block content %}
-  {% include "cabinet/components/data_table.html" with table=table %}
-  {% include "cabinet/includes/_modal_base.html" %}
+  {% templatetag openblock %} include "cabinet/components/data_table.html" with table=table {% templatetag closeblock %}
+  {% templatetag openblock %} include "cabinet/includes/_modal_base.html" {% templatetag closeblock %}
 {% endblock %}
 ```
 
@@ -152,8 +152,8 @@ return render(request, "booking/schedule.html", {"calendar": calendar})
 ```
 
 ```django
-{% include "cabinet/components/calendar_grid.html" with calendar=calendar %}
-{% include "cabinet/includes/_modal_base.html" %}
+{% templatetag openblock %} include "cabinet/components/calendar_grid.html" with calendar=calendar {% templatetag closeblock %}
+{% templatetag openblock %} include "cabinet/includes/_modal_base.html" {% templatetag closeblock %}
 ```
 
 For registry internals, dashboard selectors, Redis managers, and cabinet views,

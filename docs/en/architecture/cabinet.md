@@ -151,12 +151,12 @@ Cabinet ships five reusable template components in `cabinet/templates/cabinet/co
 | `list_view.html` | `ListViewData` | Alpine search, HTMX row click |
 | `split_panel.html` | `SplitPanelData` | HTMX detail panel loading |
 
-Each component receives a single typed contract object via Django's `{% include ... with obj=obj %}`.
+Each component receives a single typed contract object when the page template renders the component include with `obj=obj`.
 The backend computes all values; templates contain no business logic.
 
 **Modal dispatch pattern:** components do not embed modals.
 Instead they dispatch `$dispatch('open-modal', {url: '...'})`.
-The page-level `{% include "cabinet/includes/_modal_base.html" %}` listens and loads content via HTMX.
+The page-level `cabinet/includes/_modal_base.html` include listens and loads content via HTMX.
 
 **CSS:** standard Bootstrap 5 is used where possible.
 Custom CSS in `cab_components.css` covers calendar grid (CSS Grid layout) and split panel (two-column grid).

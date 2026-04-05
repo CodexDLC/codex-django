@@ -109,8 +109,8 @@ def appointments_view(request):
 {# booking/appointments.html #}
 {% extends "cabinet/base_cabinet.html" %}
 {% block content %}
-  {% include "cabinet/components/data_table.html" with table=table %}
-  {% include "cabinet/includes/_modal_base.html" %}
+  {% templatetag openblock %} include "cabinet/components/data_table.html" with table=table {% templatetag closeblock %}
+  {% templatetag openblock %} include "cabinet/includes/_modal_base.html" {% templatetag closeblock %}
 {% endblock %}
 ```
 
@@ -144,8 +144,8 @@ return render(request, "booking/schedule.html", {"calendar": calendar})
 ```django
 {% extends "cabinet/base_cabinet.html" %}
 {% block content %}
-  {% include "cabinet/components/calendar_grid.html" with calendar=calendar %}
-  {% include "cabinet/includes/_modal_base.html" %}
+  {% templatetag openblock %} include "cabinet/components/calendar_grid.html" with calendar=calendar {% templatetag closeblock %}
+  {% templatetag openblock %} include "cabinet/includes/_modal_base.html" {% templatetag closeblock %}
 {% endblock %}
 ```
 
@@ -171,7 +171,7 @@ cards = CardGridData(
 ```
 
 ```django
-{% include "cabinet/components/card_grid.html" with cards=cards %}
+{% templatetag openblock %} include "cabinet/components/card_grid.html" with cards=cards {% templatetag closeblock %}
 ```
 
 ### Split Panel
@@ -190,7 +190,7 @@ panel = SplitPanelData(
 ```
 
 ```django
-{% include "cabinet/components/split_panel.html" with panel=panel %}
+{% templatetag openblock %} include "cabinet/components/split_panel.html" with panel=panel {% templatetag closeblock %}
 ```
 
 ## Client Space
@@ -212,7 +212,7 @@ declare(
 {# my_appointments.html #}
 {% extends "cabinet/base_client.html" %}
 {% block content %}
-  {% include "cabinet/components/data_table.html" with table=table %}
+  {% templatetag openblock %} include "cabinet/components/data_table.html" with table=table {% templatetag closeblock %}
 {% endblock %}
 ```
 
