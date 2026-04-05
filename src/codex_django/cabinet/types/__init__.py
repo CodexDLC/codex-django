@@ -13,7 +13,15 @@ from .components import (
     TableFilter,
 )
 from .forms import FormField, FormSection
-from .modal import ActionSection, KeyValueItem, ModalAction, ModalContentData, ModalSection, ProfileSection, SummarySection
+from .modal import (
+    ActionSection,
+    KeyValueItem,
+    ModalAction,
+    ModalContentData,
+    ModalSection,
+    ProfileSection,
+    SummarySection,
+)
 from .nav import Shortcut, SidebarItem, TopbarEntry
 from .registry import CabinetSection, DashboardWidget, NavAction
 from .widgets import ListItem, ListWidgetData, MetricWidgetData, TableColumn, TableWidgetData

@@ -43,6 +43,6 @@ class ContentSelectorProtocol(Protocol):
 class NotificationEventHandler(Protocol):
     """Decorator-friendly handler that yields one or more dispatch specs."""
 
-    def __call__(self, *args: Any, **kwargs: Any) -> (
-        NotificationDispatchSpec | Iterable[NotificationDispatchSpec] | None
-    ): ...
+    def __call__(
+        self, *args: Any, **kwargs: Any
+    ) -> NotificationDispatchSpec | Iterable[NotificationDispatchSpec] | None: ...

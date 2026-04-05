@@ -18,7 +18,7 @@ def build_candidate_key(module: str, order: int, position: int) -> str:
 
 
 def parse_selected_keys(raw_value: object) -> set[str]:
-    if isinstance(raw_value, (list, tuple, set)):
+    if isinstance(raw_value, list | tuple | set):
         return {str(item) for item in raw_value if str(item)}
     if not raw_value:
         return set()

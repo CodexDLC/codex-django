@@ -37,7 +37,7 @@ class NotificationEventRegistry:
             if isinstance(result, NotificationDispatchSpec):
                 specs.append(result)
                 continue
-            if isinstance(result, Iterable) and not isinstance(result, (str, bytes, dict)):
+            if isinstance(result, Iterable) and not isinstance(result, str | bytes | dict):
                 for item in result:
                     if item is None:
                         continue

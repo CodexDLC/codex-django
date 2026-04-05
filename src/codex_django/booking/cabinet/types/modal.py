@@ -77,7 +77,9 @@ class BookingChainPreviewData:
 
 @dataclass
 class SlotPickerSection(ModalSection):
-    data: BookingSlotPickerData = field(default_factory=lambda: BookingSlotPickerData(selected_date="", selected_date_label=""))
+    data: BookingSlotPickerData = field(
+        default_factory=lambda: BookingSlotPickerData(selected_date="", selected_date_label="")
+    )
     type: str = "slot_picker"
 
 

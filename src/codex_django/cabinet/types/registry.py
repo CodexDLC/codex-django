@@ -85,8 +85,7 @@ class DashboardWidget:
 
         if self.nav_group not in ("admin", "services", "client"):
             raise ImproperlyConfigured(
-                f"DashboardWidget.nav_group must be 'admin', 'services' or 'client', "
-                f"got '{self.nav_group}'"
+                f"DashboardWidget.nav_group must be 'admin', 'services' or 'client', got '{self.nav_group}'"
             )
 
 
@@ -190,6 +189,5 @@ class CabinetSection:
 
         if self.nav_group not in ("admin", "services", "client"):
             raise ImproperlyConfigured(
-                f"CabinetSection.nav_group must be 'admin', 'services' or 'client', "
-                f"got '{self.nav_group}'"
+                f"CabinetSection.nav_group must be 'admin', 'services' or 'client', got '{self.nav_group}'"
             )

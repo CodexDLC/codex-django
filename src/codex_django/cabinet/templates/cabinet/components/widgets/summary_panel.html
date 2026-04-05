@@ -23,11 +23,11 @@
           </div>
           <span class="fw-semibold ms-2 flex-shrink-0" style="font-size: .82rem;" x-text="svc.price + ' $'"></span>
         </div>
-        
+
         <!-- Per-service Master Selection -->
         <div class="mt-2">
           <label class="text-muted mb-1" style="font-size: .65rem; text-transform: uppercase; letter-spacing: .05em;">{% trans "Master" %}</label>
-          <select class="form-select form-select-sm" 
+          <select class="form-select form-select-sm"
                   style="font-size: .72rem; padding: 2px 8px; border-radius: 4px;"
                   x-model="svc.masterId">
             <option value="">{% trans "Any available" %}</option>
@@ -83,7 +83,7 @@
            x-text="selectedClient ? selectedClient.name.split(' ').map(n=>n[0]).join('') : (clientFName[0] || '?')">
       </div>
       <div>
-        <div class="fw-semibold text-dark" style="font-size: .82rem; line-height: 1.2;" 
+        <div class="fw-semibold text-dark" style="font-size: .82rem; line-height: 1.2;"
              x-text="selectedClient ? selectedClient.name : (clientFName + ' ' + clientLName).trim()"></div>
         <div class="text-muted" style="font-size: .7rem;" x-text="selectedClient ? selectedClient.phone : clientPhone"></div>
       </div>
@@ -93,13 +93,13 @@
   <form method="POST" :action="'{{ summary.confirm_url }}'">
     {% csrf_token %}
     <input type="hidden" name="data" :value="JSON.stringify({client: selectedClient || {name: clientFName + ' ' + clientLName, phone: clientPhone, email: clientEmail}, services: selectedServices, date: selectedDate, time: selectedTime})">
-    <button type="submit" class="btn btn-primary w-100" 
+    <button type="submit" class="btn btn-primary w-100"
             :disabled="selectedServices.length === 0 || !selectedDate || !selectedTime || (!selectedClient && !clientFName)"
             style="font-size: .86rem; padding: 10px;">
       <span class="bi bi-check-lg me-1"></span> {% trans "Confirm booking" %}
     </button>
   </form>
-  
+
   <button class="btn btn-light w-100 mt-2" style="font-size: .82rem;" @click="resetAll()">
     Reset
   </button>

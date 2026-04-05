@@ -103,9 +103,7 @@ class TopbarEntry:
         from django.core.exceptions import ImproperlyConfigured
 
         if self.group not in ("admin", "services"):
-            raise ImproperlyConfigured(
-                f"TopbarEntry.group must be 'admin' or 'services', got '{self.group}'"
-            )
+            raise ImproperlyConfigured(f"TopbarEntry.group must be 'admin' or 'services', got '{self.group}'")
 
 
 @dataclass(frozen=True)

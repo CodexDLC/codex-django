@@ -1,13 +1,17 @@
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
-from codex_django.core.redis.managers.settings import SettingsProxy, DjangoSiteSettingsManager
+
 from codex_django.core.redis.managers.booking import BookingCacheManager
 from codex_django.core.redis.managers.notifications import NotificationsCacheManager
+from codex_django.core.redis.managers.settings import DjangoSiteSettingsManager, SettingsProxy
+
 
 @pytest.fixture
 def base_mock():
     with patch("codex_django.core.redis.managers.base.Redis.from_url") as m:
         yield m
+
 
 @pytest.mark.unit
 def test_settings_proxy():
@@ -15,6 +19,7 @@ def test_settings_proxy():
     assert proxy.a == 1
     assert proxy["a"] == 1
     assert proxy.b == ""
+
 
 @pytest.mark.unit
 def test_manager_settings_save_sync(base_mock):
@@ -25,6 +30,7 @@ def test_manager_settings_save_sync(base_mock):
         m.save_instance(MagicMock())
         assert mock_asave.called
 
+
 @pytest.mark.unit
 def test_manager_booking_save_sync(base_mock):
     m = BookingCacheManager()
@@ -32,12 +38,14 @@ def test_manager_booking_save_sync(base_mock):
         m.set_busy("m1", "2024-01-01", [])
         assert mock_aset.called
 
+
 @pytest.mark.unit
 def test_manager_notification_save_sync(base_mock):
     m = NotificationsCacheManager()
     with patch.object(m, "aset", new_callable=AsyncMock) as mock_aset:
         m.set("k", "v")
         assert mock_aset.called
+
 
 @pytest.mark.asyncio
 @pytest.mark.unit

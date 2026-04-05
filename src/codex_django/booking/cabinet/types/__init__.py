@@ -1,4 +1,9 @@
-from .aggregate import AppointmentAggregateAction, AppointmentAggregateData, AppointmentAggregateHeader, AppointmentAggregateItem
+from .aggregate import (
+    AppointmentAggregateAction,
+    AppointmentAggregateData,
+    AppointmentAggregateHeader,
+    AppointmentAggregateItem,
+)
 from .appointment import AppointmentDisplayData
 from .builder import BookingSummaryData, ClientSelectorData, DateTimePickerData, ServiceItem, ServiceSelectorData
 from .modal import (

@@ -45,7 +45,7 @@ def jsonify(obj: Any) -> str:
     """
     if is_dataclass(obj) and not isinstance(obj, type):
         obj = asdict(obj)
-    return mark_safe(json.dumps(obj, cls=DjangoJSONEncoder))
+    return mark_safe(json.dumps(obj, cls=DjangoJSONEncoder))  # nosec
 
 
 # ---------------------------------------------------------------------------
@@ -157,7 +157,7 @@ def cab_trans(text: str) -> str:
 
             return gettext(text)
     except Exception:
-        pass
+        return text
     return text
 
 

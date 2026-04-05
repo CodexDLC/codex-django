@@ -813,7 +813,9 @@ class ActionSection(ModalSection):
 class SlotPickerSection(ModalSection):
     """Booking-native date navigator and slot picker for modal workflows."""
 
-    data: BookingSlotPickerData = field(default_factory=lambda: BookingSlotPickerData(selected_date="", selected_date_label=""))
+    data: BookingSlotPickerData = field(
+        default_factory=lambda: BookingSlotPickerData(selected_date="", selected_date_label="")
+    )
     type: str = "slot_picker"
 
 

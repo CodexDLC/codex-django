@@ -58,8 +58,8 @@
                         <div class="mb-3 last-child-mb-0">
                             <label class="form-label small fw-bold text-secondary">{{ field.label }}</label>
                             {% if field.field_type == 'textarea' %}
-                                <textarea name="{{ field.name }}" 
-                                          class="form-control cab-input" 
+                                <textarea name="{{ field.name }}"
+                                          class="form-control cab-input"
                                           placeholder="{{ field.placeholder }}"
                                           rows="3">{{ field.value }}</textarea>
                             {% elif field.field_type == 'select' %}
@@ -69,10 +69,10 @@
                                     {% endfor %}
                                 </select>
                             {% else %}
-                                <input type="{{ field.field_type }}" 
-                                       name="{{ field.name }}" 
-                                       class="form-control cab-input" 
-                                       value="{{ field.value }}" 
+                                <input type="{{ field.field_type }}"
+                                       name="{{ field.name }}"
+                                       class="form-control cab-input"
+                                       value="{{ field.value }}"
                                        placeholder="{{ field.placeholder }}">
                             {% endif %}
                         </div>
@@ -315,10 +315,10 @@
             {% elif section.type == 'actions' %}
                 <div class="cab-modal-section cab-modal-section--actions p-4 d-flex gap-2 justify-content-end bg-light-subtle">
                     {% for action in section.actions %}
-                        <button 
+                        <button
                             type="button"
                             class="btn {{ action.style }} cab-btn-shadow px-4"
-                            {% if action.method == 'CLOSE' %} 
+                            {% if action.method == 'CLOSE' %}
                                 @click="$dispatch('close-modal')"
                             {% elif action.url %}
                                 hx-{{ action.method|lower }}="{{ action.url }}"

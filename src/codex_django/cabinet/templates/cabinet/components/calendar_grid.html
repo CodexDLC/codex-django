@@ -25,18 +25,18 @@
 
   {# Header: Navigation Controls #}
   <div class="cab-calendar__header d-flex align-items-center gap-2 px-4 py-3 bg-white border-bottom" style="height: 57px; flex-shrink: 0;">
-    
+
     <div class="d-flex align-items-center gap-1">
       {% if calendar.prev_url %}
-      <a href="{{ calendar.prev_url }}" 
-         class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center" 
+      <a href="{{ calendar.prev_url }}"
+         class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center"
          style="width: 34px; height: 34px; padding: 0;">
         <span class="bi bi-chevron-left" style="font-size: .8rem;"></span>
       </a>
       {% endif %}
 
       <div class="position-relative">
-        <button class="btn btn-outline-secondary fw-semibold d-flex align-items-center gap-2" 
+        <button class="btn btn-outline-secondary fw-semibold d-flex align-items-center gap-2"
                 style="font-size: .875rem; min-width: 180px; height: 34px;">
           <span class="bi bi-calendar3 opacity-50" style="font-size: .8rem;"></span>
           {{ calendar.current_date|date:"F j, Y"|default:calendar.current_date|default:calendar.title }}
@@ -44,16 +44,16 @@
       </div>
 
       {% if calendar.next_url %}
-      <a href="{{ calendar.next_url }}" 
-         class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center" 
+      <a href="{{ calendar.next_url }}"
+         class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center"
          style="width: 34px; height: 34px; padding: 0;">
         <span class="bi bi-chevron-right" style="font-size: .8rem;"></span>
       </a>
       {% endif %}
 
       {% if calendar.today_url %}
-      <a href="{{ calendar.today_url }}" 
-         class="btn btn-sm btn-outline-secondary ms-1" 
+      <a href="{{ calendar.today_url }}"
+         class="btn btn-sm btn-outline-secondary ms-1"
          style="height: 34px; font-size: .82rem;">{% trans "Today" %}</a>
       {% endif %}
     </div>
@@ -61,8 +61,8 @@
     <div class="ms-auto d-flex align-items-center gap-3">
       {% block calendar_controls %}{% endblock %}
       {% if calendar.new_event_url %}
-      <a href="{{ calendar.new_event_url }}" 
-         class="btn btn-primary btn-sm d-flex align-items-center gap-1 px-3" 
+      <a href="{{ calendar.new_event_url }}"
+         class="btn btn-primary btn-sm d-flex align-items-center gap-1 px-3"
          style="height: 34px; font-size: .82rem;"
          hx-get="{{ calendar.new_event_url }}"
          hx-target="#modal-body"
@@ -83,7 +83,7 @@
       {% if col.name %}
         <div class="d-flex align-items-center gap-2 text-start w-100">
           {% if col.avatar %}
-          <div class="avatar-sm rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0" 
+          <div class="avatar-sm rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0"
                style="width: 32px; height: 32px; font-size: 11px; font-weight: bold; background-color: {{ col.color|default:'var(--cab-primary)' }};">
             {% if "/" in col.avatar %}<img src="{{ col.avatar }}" class="rounded-circle w-100">{% else %}{{ col.avatar }}{% endif %}
           </div>
@@ -123,7 +123,7 @@
             <span class="small text-muted">{{ slot }}</span>
         {% endif %}
       </div>
-      
+
       {% for col in calendar.cols %}
       {% with col_idx=forloop.counter row_idx=forloop.parentloop.counter %}
       <div class="cab-calendar__slot"

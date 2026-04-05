@@ -12,12 +12,12 @@
 
   {% if selector.categories %}
   <div class="d-flex gap-2 flex-wrap mb-3">
-    <button class="btn btn-sm" 
+    <button class="btn btn-sm"
             :class="activeCategory === 'all' ? 'btn-dark' : 'btn-outline-secondary'"
             @click="activeCategory = 'all'"
             style="font-size: .75rem; border-radius: 20px;">All</button>
     {% for cat in selector.categories %}
-    <button class="btn btn-sm" 
+    <button class="btn btn-sm"
             :class="activeCategory === '{{ cat.0 }}' ? 'btn-dark' : 'btn-outline-secondary'"
             @click="activeCategory = '{{ cat.0 }}'"
             style="font-size: .75rem; border-radius: 20px;">{{ cat.1 }}</button>
@@ -28,8 +28,8 @@
   <div class="row g-2">
     {% for item in selector.items %}
     <div class="col-md-6" x-show="activeCategory === 'all' || activeCategory === '{{ item.category }}'">
-      <div class="cab-service-item" 
-           :class="{ 'cab-service-item--selected': hasService('{{ item.id }}') }" 
+      <div class="cab-service-item"
+           :class="{ 'cab-service-item--selected': hasService('{{ item.id }}') }"
            @click="toggleService(
              '{{ item.id }}',
              '{{ item.title|escapejs }}',

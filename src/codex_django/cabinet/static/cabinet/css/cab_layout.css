@@ -201,7 +201,7 @@
 @media (max-width: 991.98px) {
   /* On tablets/small laptops, we don't hide it, just let it be narrow if needed.
      But the user wants it to be a narrow strip by default or toggleable. */
-  
+
   .cab-main {
     margin-left: var(--cab-sidebar-width-sm);
   }
