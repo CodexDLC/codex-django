@@ -73,6 +73,19 @@ Feature apps публикуют свои cabinet-вклады через `cabine
 Этот дизайн делает feature-модули явными.
 Проекту не нужно хрупкое introspection-поведение или неявная convention-only магия, чтобы встроиться в dashboard.
 
+### Runtime Extension Seams
+
+Cabinet-pass `0.3.1` убрал необходимость лезть в private registry state или копировать view setup в проектах.
+Публичный runtime layer теперь дает:
+
+- `configure_space()` и `CabinetSpaceConfig` для staff/client defaults
+- `CabinetRuntimeResolver` и `CabinetRequestContext` для request-scoped определения module/space
+- filtered registry readers для topbar, sidebar, shortcuts и dashboard widgets
+- `CabinetModuleMixin`, `CabinetTemplateView`, `StaffRequiredMixin` и `OwnerRequiredMixin` для переиспользуемой сборки views
+- `ModalPresenter` и `present_modal_state()` для преобразования modal state в типизированные cabinet sections
+
+Так проектная policy остается в проекте, а повторяемая cabinet-механика живет в библиотеке.
+
 ### Неизменяемые Контракты — Пакет Types
 
 Все контракты регистрации и данных определены как frozen dataclass-структуры, организованные в пакете `cabinet/types/`:
@@ -176,6 +189,10 @@ Cabinet проектировался так, чтобы:
 - selectors поставляли данные
 - templates собирали UI из переиспользуемых компонентов
 - проекты могли переопределять или расширять страницы стандартными Django-механизмами
+
+Site settings следуют тому же правилу.
+`SiteSettingsService` дает hooks для выбора settings model, обнаружения tabs, подготовки save context, проверки save permission и сохранения изменений.
+Проекты могут заменять policy-части без копирования built-in settings view flow.
 
 ## Runtime Flow
 

@@ -129,13 +129,29 @@ Constraints:
 ### 2. Cabinet
 
 Status:
-- [ ] Not started
-- [ ] Domain audit done
-- [ ] Universal vs project-specific rules separated
-- [ ] Library extension seams designed
-- [ ] Library code refactored
-- [ ] Backward compatibility checked
-- [ ] Lily cleanup checklist written
+- [x] Not started
+- [x] Domain audit done
+- [x] Universal vs project-specific rules separated
+- [x] Library extension seams designed
+- [x] Library code refactored
+- [x] Backward compatibility checked
+- [x] Lily cleanup checklist written
+
+Cabinet stage tracker:
+- [x] Stage 1 done — public registry/runtime read APIs (`configure_space`, `get_space_config`, filtered registry readers)
+- [x] Stage 2 done — view customization seams (`CabinetModuleMixin`, `CabinetTemplateView`, staff/owner access mixins)
+- [x] Stage 3 done — modal presentation seam (`ModalPresenter`, `present_modal_state`)
+- [x] Stage 4 done — site settings hooks for service/model/tab/save/permission customization
+- [x] Stage 5 done — component/template knobs for card grids, avatars, client topbar, charts, and date-time labels
+- [x] Stage 6 done — booking-cabinet helper seams for availability normalization and workflow payload assembly
+
+Final Lily cleanup checklist:
+- [x] project quick-access style UIs can use public registry readers instead of `cabinet_registry._sidebar`
+- [x] project cabinet views can inherit library mixins instead of repeating module/template/access setup
+- [x] project modal builders can delegate generic section conversion to `ModalPresenter`
+- [x] project site-settings flows can override service hooks instead of copying the built-in view/service flow
+- [x] project booking cabinet services can use library presenters/workflow helpers for slot payloads and quick-create context
+- [x] targeted cabinet and booking-cabinet seam tests are covered in the library
 
 Recommended model:
 - `GPT-5.4`
@@ -505,8 +521,8 @@ Constraint:
 
 ## Suggested Execution Order
 
-- [ ] Booking
-- [ ] Cabinet
+- [x] Booking
+- [x] Cabinet
 - [ ] Tracking candidate
 - [ ] Core
 - [ ] System

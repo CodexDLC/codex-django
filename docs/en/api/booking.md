@@ -25,4 +25,14 @@ from codex_django.booking import (
 2. Use `DjangoAvailabilityAdapter` to bridge ORM data into the engine.
 3. Call selector functions from the internal booking layer in your views or services.
 
+## Public naming policy (`>=0.3.0`)
+
+Public selector and gateway contracts use neutral resource naming:
+
+- `resource_id`
+- `resource_selections`
+- `locked_resource_id`
+
+Legacy `master_*` argument names are not part of the public runtime API starting from `0.3.0`.
+
 The full selector, adapter, and mixin-level documentation lives in [Booking internals](internal/booking.md).
