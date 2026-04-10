@@ -14,6 +14,7 @@ from __future__ import annotations
 from typing import Any
 
 from .types import (
+    CabinetModuleConfig,
     CabinetSection,
     DashboardWidget,
     NavAction,
@@ -44,6 +45,7 @@ class CabinetRegistry:
         self._settings_urls: dict[tuple[str, str], str] = {}
         self._branding: dict[str, dict[str, Any]] = {}
         self._module_topbar: dict[str, TopbarEntry] = {}
+        self._module_spaces: dict[str, set[str]] = {}
 
     # ------------------------------------------------------------------
     # Branding & Meta
@@ -80,6 +82,8 @@ class CabinetRegistry:
         settings_url: str | None = None,
     ) -> None:
         """Register cabinet contributions for the new two-space model."""
+        self._module_spaces.setdefault(module, set()).add(space)
+
         if topbar:
             self._module_topbar[module] = topbar
             group = topbar.group
@@ -127,6 +131,63 @@ class CabinetRegistry:
     def get_module_topbar(self, module: str) -> TopbarEntry | None:
         """Return the TopbarEntry associated with a specific module."""
         return self._module_topbar.get(module)
+
+    def iter_modules(self, space: str | None = None) -> list[str]:
+        """Return registered module names without exposing private storage.
+
+        Args:
+            space: Optional cabinet space filter. When omitted, modules from
+                all spaces are returned.
+        """
+        modules: set[str] = set()
+        for storage in (self._sidebar, self._shortcuts, self._settings_urls):
+            for registered_space, module in storage:
+                if space is None or registered_space == space:
+                    modules.add(module)
+
+        for module, spaces in self._module_spaces.items():
+            if space is None or space in spaces:
+                modules.add(module)
+
+        return sorted(modules)
+
+    def iter_sidebar(self, space: str | None = None) -> list[tuple[str, str, list[SidebarItem]]]:
+        """Return sidebar registrations as ``(space, module, items)`` tuples."""
+        entries = [
+            (registered_space, module, list(items))
+            for (registered_space, module), items in self._sidebar.items()
+            if space is None or registered_space == space
+        ]
+        return sorted(entries, key=lambda entry: (entry[0], entry[1]))
+
+    def get_default_module(self, space: str, group: str | None = None) -> str | None:
+        """Return the first registered module for a cabinet space.
+
+        The selection is deterministic and prefers topbar order when a module
+        has a topbar declaration. ``None`` is returned when the registry has no
+        module for the requested space.
+        """
+        candidates: list[tuple[int, str, str]] = []
+        for module in self.iter_modules(space):
+            topbar = self.get_module_topbar(module)
+            if group is not None and (topbar is None or topbar.group != group):
+                continue
+            candidates.append((topbar.order if topbar else 999, str(topbar.label) if topbar else module, module))
+
+        if not candidates:
+            return None
+        return sorted(candidates)[0][2]
+
+    def get_module_config(self, space: str, module: str) -> CabinetModuleConfig:
+        """Return a read-only snapshot for ``space``/``module``."""
+        return CabinetModuleConfig(
+            space=space,
+            module=module,
+            topbar=self.get_module_topbar(module),
+            sidebar=list(self.get_sidebar(space, module)),
+            shortcuts=list(self.get_shortcuts(space, module)),
+            settings_url=self.get_settings_url(space, module),
+        )
 
     # ------------------------------------------------------------------
     # V1 API — legacy (backward compatible)

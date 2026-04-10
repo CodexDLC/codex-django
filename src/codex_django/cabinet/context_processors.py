@@ -1,6 +1,5 @@
 """Template context helpers for the cabinet UI shell."""
 
-import contextlib
 from typing import Any
 
 from django.http import HttpRequest
@@ -9,26 +8,18 @@ from .notifications import notification_registry
 from .quick_access import get_enabled_staff_quick_access, parse_selected_keys
 from .redis.managers.settings import CabinetSettingsRedisManager
 from .registry import cabinet_registry
+from .runtime import CabinetRuntimeResolver
 
 _settings_manager = CabinetSettingsRedisManager()
-_CABINET_PREFIX = "/cabinet/"
-_CLIENT_PREFIX = "/cabinet/my/"
 
 
 def _detect_space(request: HttpRequest) -> str:
-    if request.path.startswith(_CLIENT_PREFIX):
-        return "client"
-    return "staff"
+    return CabinetRuntimeResolver(cabinet_registry).detect_space(request)
 
 
 def _detect_module(request: HttpRequest) -> str:
-    explicit: str | None = getattr(request, "cabinet_module", None)
-    if explicit:
-        return str(explicit)
-    match = getattr(request, "resolver_match", None)
-    if match and match.app_name and match.app_name != "cabinet":
-        return str(match.app_name)
-    return "admin"
+    space = _detect_space(request)
+    return CabinetRuntimeResolver(cabinet_registry).detect_module(request, space)
 
 
 def cabinet(request: HttpRequest) -> dict[str, Any]:
@@ -48,16 +39,17 @@ def cabinet(request: HttpRequest) -> dict[str, Any]:
             "cabinet_settings_url": None,
         }
 
-    space = _detect_space(request)
-    module = _detect_module(request)
+    resolved = CabinetRuntimeResolver(cabinet_registry).get_context(request)
+    space = resolved.space
+    module = resolved.module
     sidebar_items = [
         item
-        for item in cabinet_registry.get_sidebar(space, module)
+        for item in resolved.sidebar
         if not item.permissions or any(request.user.has_perm(p) for p in item.permissions)
     ]
-    shortcuts = cabinet_registry.get_shortcuts(space, module)
-    topbar_entries = cabinet_registry.get_topbar_entries()
-    nav_group = getattr(request, "cabinet_nav_group", None)
+    shortcuts = resolved.shortcuts
+    topbar_entries = resolved.topbar_entries
+    nav_group = resolved.nav_group
     visible_sections = sorted(
         (
             section
@@ -73,30 +65,15 @@ def cabinet(request: HttpRequest) -> dict[str, Any]:
     ]
     settings_data = _settings_manager.get()
 
-    settings_url = None
-    if space == "staff":
-        from django.urls import NoReverseMatch, reverse
-
-        custom_url = cabinet_registry.get_settings_url(space, module)
-        if custom_url:
-            try:
-                settings_url = reverse(custom_url)
-            except NoReverseMatch:
-                settings_url = custom_url
-
-        if not settings_url:
-            with contextlib.suppress(NoReverseMatch):
-                settings_url = reverse("cabinet:site_settings")
-
     return {
         "cabinet_sidebar": sidebar_items,
         "cabinet_shortcuts": shortcuts,
         "cabinet_topbar_entries": topbar_entries,
         "cabinet_space": space,
         "cabinet_active_module": module,
-        "cabinet_branding": cabinet_registry.get_branding(space),
-        "cabinet_active_topbar": cabinet_registry.get_module_topbar(module),
-        "cabinet_settings_url": settings_url,
+        "cabinet_branding": resolved.branding,
+        "cabinet_active_topbar": resolved.active_topbar,
+        "cabinet_settings_url": resolved.settings_url,
         "cabinet_nav": visible_sections,
         "cabinet_topbar_actions": cabinet_registry.topbar_actions,
         "cabinet_dashboard_widgets": visible_widgets,

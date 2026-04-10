@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-04-10
+
+### Added
+
+- Added cabinet runtime extension seams: request context resolver, public registry read API, generic view mixins, and modal presenters.
+- Added generic booking cabinet helpers for modal presentation, availability normalization, and workflow payload assembly.
+- Added component knobs for cabinet card grids, avatars, client topbar hooks, chart widget options, and date-time picker labels.
+
+### Changed
+
+- Updated cabinet context processing and quick-access helpers to use public registry/runtime APIs while preserving existing context keys and template names.
+- Made cabinet site settings configurable through service/model/tab/save/permission hooks with default-compatible behavior.
+
+### Fixed
+
+- Removed the need for project code to inspect `cabinet_registry._sidebar` for quick-access-like UIs.
+
 ## [0.3.0] - 2026-04-10
 
 ### Added

@@ -16,7 +16,7 @@
   {# Toolbar #}
   <div class="cab-card-grid__toolbar d-flex align-items-center gap-2">
 
-    {% if cards.search_placeholder %}
+    {% if cards.search_placeholder or cards.always_show_search %}
     <div class="cab-card-grid__search">
       <div class="input-group input-group-sm">
         <span class="input-group-text bg-white border-end-0">
@@ -50,14 +50,14 @@
   {# Grid view #}
   <div x-show="viewMode === 'grid'">
     {% if cards.items %}
-    <div class="row g-3">
+    <div class="row {{ cards.grid_gap|default:'g-3' }}">
       {% for item in cards.items %}
-      <div class="col-sm-6 col-md-4 col-lg-3"
+      <div class="{{ cards.grid_col|default:'col-sm-6 col-md-4 col-lg-3' }}"
            x-show="search === '' || '{{ item.title|lower }}'.includes(search.toLowerCase())">
         <a href="{{ item.url|default:'#' }}" class="cab-card d-block h-100 text-decoration-none">
           <div class="cab-card__header">
             {% if item.avatar %}
-            {% include "cabinet/includes/_avatar.html" with initials=item.avatar size="36" %}
+            {% include "cabinet/includes/_avatar.html" with initials=item.avatar size=cards.avatar_size %}
             {% endif %}
             <div class="cab-card__title">{{ item.title }}</div>
             {% if item.badge %}
@@ -97,7 +97,7 @@
          class="cab-card cab-card--list text-decoration-none"
          x-show="search === '' || '{{ item.title|lower }}'.includes(search.toLowerCase())">
         {% if item.avatar %}
-        {% include "cabinet/includes/_avatar.html" with initials=item.avatar size="36" %}
+        {% include "cabinet/includes/_avatar.html" with initials=item.avatar size=cards.avatar_size %}
         {% endif %}
         <div class="flex-grow-1 min-width-0">
           <div class="cab-card__title">{{ item.title }}</div>

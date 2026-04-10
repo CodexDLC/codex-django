@@ -6,7 +6,7 @@ import pytest
 from django.core.exceptions import ImproperlyConfigured
 
 from codex_django.cabinet.registry import CabinetRegistry, declare
-from codex_django.cabinet.types import CabinetSection, DashboardWidget, NavAction
+from codex_django.cabinet.types import CabinetSection, DashboardWidget, NavAction, SidebarItem, TopbarEntry
 
 
 @pytest.mark.unit
@@ -91,6 +91,33 @@ class TestCabinetRegistry:
         actions = [NavAction(label="Export", url="booking:export")]
         self.registry.register("booking", actions=actions)
         assert len(self.registry.global_actions) == 1
+
+    def test_public_read_api_returns_module_config(self):
+        self.registry.register_v2(
+            module="booking",
+            space="staff",
+            topbar=TopbarEntry(group="services", label="Booking", icon="bi-calendar", url="/cabinet/booking/"),
+            sidebar=[SidebarItem(label="Schedule", url="booking:schedule")],
+        )
+
+        assert self.registry.iter_modules(space="staff") == ["booking"]
+        assert self.registry.get_default_module("staff") == "booking"
+
+        config = self.registry.get_module_config("staff", "booking")
+        assert config.module == "booking"
+        assert config.space == "staff"
+        assert config.topbar is not None
+        assert config.sidebar[0].label == "Schedule"
+
+    def test_iter_sidebar_returns_copy_without_private_access(self):
+        item = SidebarItem(label="Schedule", url="booking:schedule")
+        self.registry.register_v2(module="booking", space="staff", sidebar=[item])
+
+        entries = self.registry.iter_sidebar(space="staff")
+
+        assert entries == [("staff", "booking", [item])]
+        entries[0][2].clear()
+        assert self.registry.get_sidebar("staff", "booking") == [item]
 
 
 @pytest.mark.unit

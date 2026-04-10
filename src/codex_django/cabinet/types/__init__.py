@@ -23,7 +23,7 @@ from .modal import (
     SummarySection,
 )
 from .nav import Shortcut, SidebarItem, TopbarEntry
-from .registry import CabinetSection, DashboardWidget, NavAction
+from .registry import CabinetModuleConfig, CabinetSection, DashboardWidget, NavAction
 from .widgets import ListItem, ListWidgetData, MetricWidgetData, TableColumn, TableWidgetData
 
 __all__ = [
@@ -55,6 +55,7 @@ __all__ = [
     "ActionSection",
     "ModalContentData",
     "DashboardWidget",
+    "CabinetModuleConfig",
     "NavAction",
     "CabinetSection",
 ]
