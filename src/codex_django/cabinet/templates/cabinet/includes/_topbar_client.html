@@ -2,8 +2,18 @@
 <header class="cab-topbar">
   <div class="me-auto">
     <h6 class="mb-0 fw-semibold" style="color: var(--cab-text);">
-      {% block page_title %}{% trans "My Account" %}{% endblock %}
+      {% block page_title %}{% firstof cabinet_client_title client_page_title %}{% if not cabinet_client_title and not client_page_title %}{% trans "My Account" %}{% endif %}{% endblock %}
     </h6>
+    {% if cabinet_tabs %}
+    <nav class="d-flex gap-2 mt-2" aria-label="{% trans 'Client navigation' %}">
+      {% for tab in cabinet_tabs %}
+      <a class="btn btn-sm {% if tab.active %}btn-secondary{% else %}btn-outline-secondary{% endif %}"
+         href="{{ tab.url|default:'#' }}">
+        {% if tab.icon %}<span class="bi {{ tab.icon }} me-1"></span>{% endif %}{{ tab.label }}
+      </a>
+      {% endfor %}
+    </nav>
+    {% endif %}
   </div>
 
   <div class="d-flex align-items-center gap-2">
@@ -47,6 +57,22 @@
         <span>{{ request.user.get_full_name|default:request.user.username }}</span>
       </button>
       <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+        {% if cabinet_client_dropdown_items %}
+          {% for item in cabinet_client_dropdown_items %}
+          <li>
+            <a class="dropdown-item" href="{{ item.url|default:'#' }}">
+              {% if item.icon %}<span class="bi {{ item.icon }} me-2"></span>{% endif %}{{ item.label }}
+            </a>
+          </li>
+          {% endfor %}
+        {% endif %}
+        {% if cabinet_staff_switch_url %}
+        <li>
+          <a class="dropdown-item" href="{{ cabinet_staff_switch_url }}">
+            <span class="bi bi-speedometer2 me-2"></span>{% trans "Staff area" %}
+          </a>
+        </li>
+        {% endif %}
         {% block user_dropdown_items %}{% endblock %}
         <li><hr class="dropdown-divider"></li>
         <li>

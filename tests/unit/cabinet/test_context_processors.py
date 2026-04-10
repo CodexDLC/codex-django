@@ -5,10 +5,10 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.test import RequestFactory
+from django.test import RequestFactory, override_settings
 
 from codex_django.cabinet.registry import CabinetRegistry
-from codex_django.cabinet.types import CabinetSection
+from codex_django.cabinet.types import CabinetSection, SidebarItem, TopbarEntry
 
 
 def _make_anon_request():
@@ -18,9 +18,9 @@ def _make_anon_request():
     return request
 
 
-def _make_auth_request(perms: tuple = ()):
+def _make_auth_request(perms: tuple = (), path: str = "/cabinet/"):
     factory = RequestFactory()
-    request = factory.get("/cabinet/")
+    request = factory.get(path)
     user = MagicMock(is_authenticated=True)
     user.has_perm = lambda p: p in perms
     request.user = user
@@ -49,7 +49,7 @@ class TestCabinetContextProcessorAnonymous:
 
 @pytest.mark.unit
 class TestCabinetContextProcessorAuthenticated:
-    def _call(self, registry: CabinetRegistry, perms: tuple = ()):
+    def _call(self, registry: CabinetRegistry, perms: tuple = (), path: str = "/cabinet/"):
         from codex_django.cabinet.context_processors import cabinet
 
         with (
@@ -57,7 +57,7 @@ class TestCabinetContextProcessorAuthenticated:
             patch("codex_django.cabinet.context_processors._settings_manager") as mock_mgr,
         ):
             mock_mgr.get.return_value = {"cabinet_name": "Test"}
-            return cabinet(_make_auth_request(perms=perms))
+            return cabinet(_make_auth_request(perms=perms, path=path))
 
     def test_authenticated_gets_open_sections(self):
         registry = CabinetRegistry()
@@ -117,3 +117,27 @@ class TestCabinetContextProcessorAuthenticated:
         result = self._call(registry)
         labels = [s.label for s in result["cabinet_nav"]]
         assert labels == ["A", "M", "Z"]
+
+    def test_runtime_resolver_uses_registered_default_module(self):
+        registry = CabinetRegistry()
+        registry.register_v2(
+            "booking",
+            space="staff",
+            topbar=TopbarEntry(group="services", label="Booking", icon="bi-calendar", url="/cabinet/booking/"),
+            sidebar=[SidebarItem(label="Schedule", url="booking:schedule")],
+        )
+
+        result = self._call(registry)
+
+        assert result["cabinet_active_module"] == "booking"
+        assert result["cabinet_sidebar"][0].label == "Schedule"
+
+    @override_settings(
+        CODEX_CABINET_SPACES={"client": {"prefixes": ("/account/",), "default_module": "portal", "nav_group": "client"}}
+    )
+    def test_runtime_resolver_accepts_custom_client_prefix(self):
+        registry = CabinetRegistry()
+        result = self._call(registry, path="/account/")
+
+        assert result["cabinet_space"] == "client"
+        assert result["cabinet_active_module"] == "portal"

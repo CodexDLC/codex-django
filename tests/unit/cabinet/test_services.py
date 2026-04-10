@@ -20,6 +20,26 @@ def test_get_context():
 
 
 @pytest.mark.unit
+def test_site_settings_permission_hook_defaults_to_authenticated_user():
+    user = MagicMock(is_authenticated=True)
+    assert SiteSettingsService.user_can_access(user) is True
+
+
+@pytest.mark.unit
+def test_site_settings_hooks_are_overridable():
+    class CustomService(SiteSettingsService):
+        model_setting_name = "CUSTOM_SITE_SETTINGS_MODEL"
+        excluded_post_fields = ("csrfmiddlewaretoken", "ignore-me")
+
+        @classmethod
+        def iter_tab_template_dirs(cls):
+            return []
+
+    assert CustomService.get_excluded_post_fields() == ("csrfmiddlewaretoken", "ignore-me")
+    assert CustomService.get_tabs() == []
+
+
+@pytest.mark.unit
 @pytest.mark.django_db
 def test_save_context_success(settings):
     request = MagicMock()

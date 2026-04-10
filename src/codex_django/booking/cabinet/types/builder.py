@@ -38,6 +38,10 @@ class DateTimePickerData:
     current_month: str = ""
     default_date: str = ""
     slot_matrix_json: str = "{}"
+    title: str = ""
+    time_slots_label: str = "Available time"
+    empty_slots_message: str = "Select an available day"
+    weekday_labels: list[str] = field(default_factory=lambda: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
 
 
 @dataclass

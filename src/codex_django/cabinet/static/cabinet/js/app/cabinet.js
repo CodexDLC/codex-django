@@ -66,7 +66,7 @@ document.addEventListener('alpine:init', () => {
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            display: (config.datasets && config.datasets.length > 1),
+                            display: config.show_legend ?? (config.datasets && config.datasets.length > 1),
                             position: 'top',
                             align: 'end',
                             labels: { boxWidth: 10, font: { size: 10 } }
@@ -74,11 +74,13 @@ document.addEventListener('alpine:init', () => {
                     },
                     scales: {
                         y: {
+                            display: config.show_y_axis ?? true,
                             beginAtZero: true,
                             grid: { color: '#f1f5f9' },
                             ticks: { font: { size: 10 }, color: '#64748b' }
                         },
                         x: {
+                            display: config.show_x_axis ?? true,
                             grid: { display: false },
                             ticks: { font: { size: 10 }, color: '#64748b' }
                         }
@@ -127,3 +129,42 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 });
+
+window.CodexCabinetBooking = window.CodexCabinetBooking || {
+    buildDayMap(days) {
+        return Object.fromEntries((days || []).filter(day => day && day.iso).map(day => [day.iso, day]));
+    },
+    buildMonthMap(days) {
+        return (days || []).reduce((acc, day) => {
+            if (!day || !day.month_key) return acc;
+            acc[day.month_key] = acc[day.month_key] || [];
+            acc[day.month_key].push(day);
+            return acc;
+        }, {});
+    },
+    fetchSlots(url, params) {
+        const target = new URL(url, window.location.origin);
+        Object.entries(params || {}).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && String(value) !== '') {
+                target.searchParams.set(key, String(value));
+            }
+        });
+        return fetch(target.toString(), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        }).then(response => response.json());
+    },
+    assignSelectedResource(selections, serviceId, resourceId) {
+        const next = { ...(selections || {}) };
+        if (!resourceId || resourceId === 'any') {
+            delete next[String(serviceId)];
+        } else {
+            next[String(serviceId)] = String(resourceId);
+        }
+        return next;
+    },
+    parseSelectedServices(value) {
+        if (Array.isArray(value)) return value.map(item => String(item)).filter(Boolean);
+        if (!value) return [];
+        return String(value).split(',').map(item => item.trim()).filter(Boolean);
+    }
+};

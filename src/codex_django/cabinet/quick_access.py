@@ -34,8 +34,8 @@ def parse_selected_keys(raw_value: object) -> set[str]:
 def get_staff_quick_access_candidates() -> list[dict[str, Any]]:
     grouped: dict[str, dict[str, Any]] = {}
 
-    for (space, module), items in cabinet_registry._sidebar.items():  # noqa: SLF001
-        if space != "staff" or not items:
+    for _, module, items in cabinet_registry.iter_sidebar(space="staff"):
+        if not items:
             continue
 
         topbar = cabinet_registry.get_module_topbar(module)

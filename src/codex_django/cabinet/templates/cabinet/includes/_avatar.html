@@ -1,1 +1,19 @@
-<div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0" style="width:{{ size|default:'36px' }};height:{{ size|default:'36px' }};font-size:{{ font_size|default:'.75rem' }};background:{{ color }};user-select:none;">{{ initials }}</div>
+{% load cabinet_tags %}
+{% with avatar_size=size|css_size:"36px" %}
+  {% if avatar_url %}
+    <img src="{{ avatar_url }}"
+         alt="{{ alt|default:'' }}"
+         class="rounded-circle object-fit-cover flex-shrink-0"
+         style="width:{{ avatar_size }};height:{{ avatar_size }};">
+  {% elif initials|is_avatar_url %}
+    <img src="{{ initials }}"
+         alt="{{ alt|default:'' }}"
+         class="rounded-circle object-fit-cover flex-shrink-0"
+         style="width:{{ avatar_size }};height:{{ avatar_size }};">
+  {% else %}
+    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
+         style="width:{{ avatar_size }};height:{{ avatar_size }};font-size:{{ font_size|default:'.75rem' }};background:{{ color|default:'var(--cab-primary,#6366f1)' }};user-select:none;">
+      {{ initials }}
+    </div>
+  {% endif %}
+{% endwith %}

@@ -398,6 +398,10 @@ class CardGridData:
     view_mode: str = "grid"  # "grid" | "list"
     search_placeholder: str = ""
     empty_message: str = "Нет элементов"
+    grid_col: str = "col-sm-6 col-md-4 col-lg-3"
+    grid_gap: str = "g-3"
+    avatar_size: str = "36"
+    always_show_search: bool = False
 
 
 # ---------------------------------------------------------------------------
@@ -637,6 +641,10 @@ class DateTimePickerData:
     current_month: str = ""
     default_date: str = ""
     slot_matrix_json: str = "{}"
+    title: str = ""
+    time_slots_label: str = "Available time"
+    empty_slots_message: str = "Select an available day"
+    weekday_labels: list[str] = field(default_factory=lambda: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
 
 
 @dataclass

@@ -1,6 +1,9 @@
 """Public cabinet integration API."""
 
+from typing import Any
+
 from .notifications import notification_registry
+from .presenters import ModalPresenter, present_modal_state
 from .quick_access import (
     build_candidate_key,
     get_enabled_staff_quick_access,
@@ -8,8 +11,10 @@ from .quick_access import (
     parse_selected_keys,
 )
 from .registry import cabinet_registry, configure_space, declare
+from .runtime import CabinetRequestContext, CabinetRuntimeResolver, CabinetSpaceConfig
 from .types import (
     ActionSection,
+    CabinetModuleConfig,
     CabinetSection,
     CalendarGridData,
     CalendarSlot,
@@ -46,11 +51,21 @@ __all__ = [
     "configure_space",
     "cabinet_registry",
     "notification_registry",
+    "CabinetModuleMixin",
+    "CabinetTemplateView",
+    "StaffRequiredMixin",
+    "OwnerRequiredMixin",
+    "CabinetRuntimeResolver",
+    "CabinetRequestContext",
+    "CabinetSpaceConfig",
+    "ModalPresenter",
+    "present_modal_state",
     "build_candidate_key",
     "parse_selected_keys",
     "get_staff_quick_access_candidates",
     "get_enabled_staff_quick_access",
     "TopbarEntry",
+    "CabinetModuleConfig",
     "SidebarItem",
     "Shortcut",
     "TableColumn",
@@ -81,3 +96,11 @@ __all__ = [
     "NavAction",
     "DashboardWidget",
 ]
+
+
+def __getattr__(name: str) -> Any:
+    if name in {"CabinetModuleMixin", "CabinetTemplateView", "StaffRequiredMixin", "OwnerRequiredMixin"}:
+        from . import mixins
+
+        return getattr(mixins, name)
+    raise AttributeError(f"module 'codex_django.cabinet' has no attribute {name!r}")

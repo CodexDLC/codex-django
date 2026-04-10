@@ -15,7 +15,11 @@ Types:
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .nav import Shortcut, SidebarItem, TopbarEntry
 
 
 @dataclass(frozen=True)
@@ -113,6 +117,23 @@ class NavAction:
     label: str
     url: str
     icon: str | None = None
+
+
+@dataclass(frozen=True)
+class CabinetModuleConfig:
+    """Read-only snapshot of a registered cabinet module.
+
+    This is the public alternative to inspecting ``CabinetRegistry`` private
+    storage. Projects can use it to build custom shells, quick access UIs, and
+    module-aware views without depending on internal dict layout.
+    """
+
+    space: str
+    module: str
+    topbar: TopbarEntry | None = None
+    sidebar: list[SidebarItem] = field(default_factory=list)
+    shortcuts: list[Shortcut] = field(default_factory=list)
+    settings_url: str | None = None
 
 
 @dataclass(frozen=True)

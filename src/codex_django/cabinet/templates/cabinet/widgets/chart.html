@@ -33,7 +33,7 @@
         </template>
       </div>
     </template>
-    <div style="flex:1;min-height:180px;position:relative;">
+    <div :style="`flex:1;min-height:${config.height || '180px'};position:relative;`">
       <canvas x-ref="canvas"></canvas>
     </div>
   </div>

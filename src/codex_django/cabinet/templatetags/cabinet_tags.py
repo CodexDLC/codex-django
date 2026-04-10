@@ -119,6 +119,24 @@ def cab_initials(user: object) -> str:
     return username[:2].upper() if username else "?"
 
 
+@register.filter(name="css_size")
+def css_size(value: object, default: str = "36px") -> str:
+    """Normalize numeric template sizes to CSS lengths."""
+    if value is None or value == "":
+        return default
+    raw = str(value).strip()
+    if raw.isdigit():
+        return f"{raw}px"
+    return raw
+
+
+@register.filter(name="is_avatar_url")
+def is_avatar_url(value: object) -> bool:
+    """Return true when an avatar value looks like an image URL/path."""
+    raw = str(value or "").strip()
+    return raw.startswith(("http://", "https://", "/", "data:image/")) or "." in raw
+
+
 # ---------------------------------------------------------------------------
 # Tags
 # ---------------------------------------------------------------------------
