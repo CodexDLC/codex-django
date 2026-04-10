@@ -19,7 +19,7 @@ class NotificationDispatchSpec:
     recipient_phone: str | None = None
     client_name: str = ""
     template_name: str = ""
-    language: str = "de"
+    language: str = ""
     mode: str | None = None
     html_content: str = ""
     text_content: str = ""
@@ -37,7 +37,7 @@ class QueueAdapterProtocol(Protocol):
 class ContentSelectorProtocol(Protocol):
     """Localized content lookup contract used by notification dispatch."""
 
-    def get(self, key: str, language: str = "de") -> str | None: ...
+    def get(self, key: str, language: str = "") -> str | None: ...
 
 
 class NotificationEventHandler(Protocol):

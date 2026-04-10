@@ -44,6 +44,7 @@ class BaseEmailContentSelector:
 
     cache_timeout: int = 3600
     cache_key_prefix: str = ""
+    default_language: str = "de"
 
     def __init__(
         self,
@@ -62,37 +63,41 @@ class BaseEmailContentSelector:
         self._cache = cache_adapter
         self._i18n = i18n_adapter
 
-    def get(self, key: str, language: str = "de") -> str | None:
+    def get(self, key: str, language: str = "") -> str | None:
         """Return the notification text for a key in the requested language.
 
         Args:
             key: Logical content key stored in the backing model.
-            language: Target Django language code used for translation override.
+            language: Target Django language code. Falls back to
+                ``default_language`` when empty.
 
         Returns:
             The resolved text value, or ``None`` when no matching content block
             exists.
         """
-        cache_key = self._cache_key(key, language)
+        lang = language or self.default_language
+        cache_key = self._cache_key(key, lang)
 
         cached = self._cache.get(cache_key)
         if cached is not None:
             return cast(str | None, cached)
 
-        value = self._fetch_from_db(key, language)
+        value = self._fetch_from_db(key, lang)
         if value is not None:
             self._cache.set(cache_key, value, self.cache_timeout)
 
         return value
 
-    def invalidate(self, key: str, language: str) -> None:
+    def invalidate(self, key: str, language: str = "") -> None:
         """Invalidate a single cached notification content entry.
 
         Args:
             key: Logical content key stored in the backing model.
-            language: Language code associated with the cached value.
+            language: Language code associated with the cached value. Falls
+                back to ``default_language`` when empty.
         """
-        self._cache.set(self._cache_key(key, language), "", timeout=0)
+        lang = language or self.default_language
+        self._cache.set(self._cache_key(key, lang), "", timeout=0)
 
     # ------------------------------------------------------------------
     # Internal
@@ -100,7 +105,7 @@ class BaseEmailContentSelector:
 
     def _cache_key(self, key: str, language: str) -> str:
         """Build the cache key used for one localized content entry."""
-        return f"{key}:{language}"
+        return f"{self.cache_key_prefix}{key}:{language}"
 
     def _fetch_from_db(self, key: str, language: str) -> str | None:
         """Fetch a localized content value directly from the database."""
