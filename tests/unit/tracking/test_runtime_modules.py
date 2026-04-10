@@ -66,9 +66,11 @@ def test_tracking_recorder_uses_authenticated_user_pk():
     request = RequestFactory().get("/reports/")
     request.user = SimpleNamespace(is_authenticated=True, pk=42)
 
-    with patch("codex_django.tracking.recorder.timezone.localdate", return_value=date(2026, 4, 10)):
-        with patch("codex_django.tracking.manager.get_tracking_manager") as get_manager:
-            TrackingRecorder.record(request)
+    with (
+        patch("codex_django.tracking.recorder.timezone.localdate", return_value=date(2026, 4, 10)),
+        patch("codex_django.tracking.manager.get_tracking_manager") as get_manager,
+    ):
+        TrackingRecorder.record(request)
 
     get_manager.return_value.record.assert_called_once_with("/reports/", "2026-04-10", "42")
 
@@ -76,9 +78,11 @@ def test_tracking_recorder_uses_authenticated_user_pk():
 def test_tracking_recorder_falls_back_to_root_and_omits_anonymous_user():
     request = SimpleNamespace(path="", user=SimpleNamespace(is_authenticated=False, pk=42))
 
-    with patch("codex_django.tracking.recorder.timezone.localdate", return_value=date(2026, 4, 10)):
-        with patch("codex_django.tracking.manager.get_tracking_manager") as get_manager:
-            TrackingRecorder.record(request)
+    with (
+        patch("codex_django.tracking.recorder.timezone.localdate", return_value=date(2026, 4, 10)),
+        patch("codex_django.tracking.manager.get_tracking_manager") as get_manager,
+    ):
+        TrackingRecorder.record(request)
 
     get_manager.return_value.record.assert_called_once_with("/", "2026-04-10", None)
 
