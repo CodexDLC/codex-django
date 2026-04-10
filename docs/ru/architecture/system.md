@@ -99,6 +99,23 @@ Hash-protected command считает объединенный hash файлов
 Если данные не изменились, импорт пропускается.
 Это делает административные update-команды безопаснее и дешевле при регулярном обслуживании проекта.
 
+Поверх этой базы `JsonFixtureUpsertCommand` закрывает типовой проектный паттерн: Django-style JSON fixture импортируется в модель через `update_or_create`.
+Проект задает путь к фикстуре, модель, hash key и lookup field; библиотека отвечает за loading, validation, counters и обновление hash.
+
+`SingletonFixtureUpdateCommand` закрывает singleton-состояние сайта, например `SiteSettings`.
+Команда читает первую строку фикстуры, обновляет только изменившиеся поля, сохраняет модель только при необходимости и синхронизирует instance через Redis manager site settings.
+
+Агрегирующие команды по-прежнему используют `BaseUpdateAllContentCommand`.
+В base command добавлены optional section hooks, чтобы проекты могли сохранять читаемый вывод без override всего execution loop и без потери forwarding `--force`.
+
+### Action Token State
+
+`system.redis.managers.JsonActionTokenRedisManager` дает generic Redis-хранилище временных tokens для confirmation-like flows.
+Он создает URL-safe tokens, кладет JSON payload с TTL, безопасно декодирует payload и удаляет использованный token.
+
+Manager намеренно не знает форму payload.
+Проекты должны оставлять у себя appointment IDs, action names, proposed slots и URL construction, переиспользуя только библиотечную Redis-механику.
+
 ### Базовый Профиль Пользователя
 
 `system.mixins.user_profile.AbstractUserProfile` это переиспользуемая abstract model для профиля, связанного с `AUTH_USER_MODEL`.
@@ -122,6 +139,9 @@ flowchart TD
     K --> L["FixtureHashManager"]
     M["Base hash-protected commands"] --> K
     M --> L
+    N["JsonFixtureUpsertCommand"] --> M
+    O["SingletonFixtureUpdateCommand"] --> M
+    P["JsonActionTokenRedisManager"] --> Q["Temporary Redis token payloads"]
 ```
 
 ## Роль В Репозитории

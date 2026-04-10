@@ -99,6 +99,23 @@ The hash-protected command computes a combined hash of fixture files and stores 
 If nothing changed, the import is skipped.
 This makes repeated administrative update commands safer and cheaper in routine project maintenance.
 
+On top of that base, `JsonFixtureUpsertCommand` handles the common project pattern where a Django-style JSON fixture is imported into a model with `update_or_create`.
+Projects configure the fixture path, model, hash key, and lookup field; the library owns loading, validation, counters, and hash updates.
+
+`SingletonFixtureUpdateCommand` covers site-wide singleton state such as `SiteSettings`.
+It reads the first fixture row, updates only changed fields, saves only when necessary, and synchronizes through the site settings Redis manager.
+
+Grouped commands can still use `BaseUpdateAllContentCommand`.
+The base now provides optional section hooks so projects can keep readable command output without overriding the execution loop or losing `--force` forwarding.
+
+### Action Token State
+
+`system.redis.managers.JsonActionTokenRedisManager` provides generic temporary token storage for confirmation-like flows.
+It creates URL-safe tokens, stores JSON payloads with a TTL, decodes payloads defensively, and deletes consumed tokens.
+
+The manager is deliberately payload-agnostic.
+Projects should keep appointment IDs, action names, proposed slots, and URL construction in their own service layer while reusing the library Redis mechanics.
+
 ### User Profile Scaffold
 
 `system.mixins.user_profile.AbstractUserProfile` is a reusable abstract model for a user profile bound to `AUTH_USER_MODEL`.
@@ -122,6 +139,9 @@ flowchart TD
     K --> L["FixtureHashManager"]
     M["Base hash-protected commands"] --> K
     M --> L
+    N["JsonFixtureUpsertCommand"] --> M
+    O["SingletonFixtureUpdateCommand"] --> M
+    P["JsonActionTokenRedisManager"] --> Q["Temporary Redis token payloads"]
 ```
 
 ## Role In The Repository

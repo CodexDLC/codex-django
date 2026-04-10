@@ -33,12 +33,13 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from typing import Any, cast
+from typing import Any, TypeVar, cast, overload
 
 from ..redis.managers.dashboard import DashboardRedisManager
 from ..types import ListWidgetData, MetricWidgetData, TableWidgetData
 
 _manager = DashboardRedisManager()
+ProviderFn = Callable[[Any], dict[str, Any]]
 
 
 class DashboardAdapter(ABC):
@@ -52,6 +53,9 @@ class DashboardAdapter(ABC):
     def get_data(self, request: Any) -> dict[str, Any]:
         """Fetch and return widget data as a dictionary payload."""
         pass
+
+
+TProvider = TypeVar("TProvider", ProviderFn, DashboardAdapter)
 
 
 class MetricAdapter(DashboardAdapter):
@@ -101,13 +105,33 @@ class DashboardSelector:
     _providers: list[dict[str, Any]] = []
 
     @classmethod
+    @overload
     def extend(
         cls,
-        fn_or_adapter: Callable[..., Any] | DashboardAdapter | None = None,
+        fn_or_adapter: TProvider,
         *,
         cache_key: str = "",
         cache_ttl: int = 120,
-    ) -> Any:
+    ) -> TProvider: ...
+
+    @classmethod
+    @overload
+    def extend(
+        cls,
+        fn_or_adapter: None = None,
+        *,
+        cache_key: str = "",
+        cache_ttl: int = 120,
+    ) -> Callable[[TProvider], TProvider]: ...
+
+    @classmethod
+    def extend(
+        cls,
+        fn_or_adapter: TProvider | None = None,
+        *,
+        cache_key: str = "",
+        cache_ttl: int = 120,
+    ) -> TProvider | Callable[[TProvider], TProvider]:
         """
         Register a dashboard data provider.
 
@@ -116,7 +140,8 @@ class DashboardSelector:
             cache_ttl:  Seconds to cache. 0 = no cache (real-time).
         """
 
-        def decorator(obj: Callable[..., Any] | DashboardAdapter) -> Any:
+        def decorator(obj: TProvider) -> TProvider:
+            fn: ProviderFn
             if isinstance(obj, DashboardAdapter):
                 fn = obj.get_data
                 name = obj.__class__.__name__.lower()

@@ -16,13 +16,14 @@ Subclass this in your project and add send_* methods for your events::
     )
 
     class NotificationService(BaseNotificationEngine):
+        default_language = "de"  # override per project if needed
+
         def send_booking_confirmed(self, booking):
             self.dispatch(
                 recipient_email=booking.client_email,
                 template_name="emails/booking_confirmed.html",
                 event_type="booking_confirmed",
                 channels=["email"],
-                language="de",
                 subject_key="booking_confirmed_subject",
                 booking=booking,
             )
@@ -49,6 +50,7 @@ class BaseNotificationEngine:
 
     task_name: str = "send_universal_notification_task"
     mode: str = "template"  # default mode for all dispatch() calls
+    default_language: str = "de"
 
     def __init__(
         self,
@@ -84,7 +86,7 @@ class BaseNotificationEngine:
         template_name: str = "",
         event_type: str,
         channels: list[str],
-        language: str = "de",
+        language: str = "",
         subject_key: str,
         subject: str = "",
         mode: str | None = None,
@@ -103,6 +105,7 @@ class BaseNotificationEngine:
             event_type: Logical notification event identifier.
             channels: Delivery channels to request from the worker.
             language: Language code used for subject lookup and payload metadata.
+                Falls back to ``default_language`` when empty.
             subject_key: Content key used to resolve the localized subject.
             subject: Optional explicit subject override. When provided, the
                 selector lookup is skipped.
@@ -115,8 +118,9 @@ class BaseNotificationEngine:
             Queue job ID when the adapter returns one, otherwise ``None``.
         """
         effective_mode = mode or self.mode
+        lang = language or self.default_language
 
-        resolved_subject = subject or self._selector.get(subject_key, language) or ""
+        resolved_subject = subject or self._selector.get(subject_key, lang) or ""
         notification_id = str(uuid.uuid4())
 
         if effective_mode == "template":
@@ -130,7 +134,7 @@ class BaseNotificationEngine:
                 event_type=event_type,
                 context_data=context,
                 channels=channels,
-                language=language,
+                language=lang,
             )
         else:
             payload = self._builder.build_rendered(
@@ -143,7 +147,7 @@ class BaseNotificationEngine:
                 subject=resolved_subject,
                 event_type=event_type,
                 channels=channels,
-                language=language,
+                language=lang,
                 context_data=context,
             )
 
@@ -181,7 +185,7 @@ class BaseNotificationEngine:
         template_name: str = "",
         event_type: str,
         channels: list[str],
-        language: str = "de",
+        language: str = "",
         subject_key: str,
         subject: str = "",
         mode: str | None = None,
@@ -199,6 +203,7 @@ class BaseNotificationEngine:
             event_type: Logical notification event identifier.
             channels: Delivery channels to request from the worker.
             language: Language code used for subject lookup and payload metadata.
+                Falls back to ``default_language`` when empty.
             subject_key: Content key used to resolve the localized subject.
             subject: Optional explicit subject override. When provided, the
                 selector lookup is skipped.
@@ -211,8 +216,9 @@ class BaseNotificationEngine:
             Queue job ID when the adapter returns one, otherwise ``None``.
         """
         effective_mode = mode or self.mode
+        lang = language or self.default_language
 
-        resolved_subject = subject or self._selector.get(subject_key, language) or ""
+        resolved_subject = subject or self._selector.get(subject_key, lang) or ""
         notification_id = str(uuid.uuid4())
 
         if effective_mode == "template":
@@ -226,7 +232,7 @@ class BaseNotificationEngine:
                 event_type=event_type,
                 context_data=context,
                 channels=channels,
-                language=language,
+                language=lang,
             )
         else:
             payload = self._builder.build_rendered(
@@ -239,7 +245,7 @@ class BaseNotificationEngine:
                 subject=resolved_subject,
                 event_type=event_type,
                 channels=channels,
-                language=language,
+                language=lang,
                 context_data=context,
             )
 

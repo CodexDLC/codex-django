@@ -1,0 +1,36 @@
+{% extends "cabinet/base_cabinet.html" %}
+{% load cabinet_tags %}
+
+{% block title %}{% cab_trans "Visits" %}{% endblock %}
+
+{% block cabinet_content %}
+  {% include "cabinet/includes/_page_header.html" with title="Visits" subtitle="Traffic collected by the tracking middleware" icon="bi-graph-up-arrow" %}
+
+  <div class="row g-3 mb-3">
+    <div class="col-md-4">
+      {% include "cabinet/widgets/kpi.html" with data=tracking_total_views %}
+    </div>
+    <div class="col-md-4">
+      {% include "cabinet/widgets/kpi.html" with data=tracking_unique_visitors %}
+    </div>
+    <div class="col-md-4">
+      {% include "cabinet/widgets/kpi.html" with data=tracking_tracked_pages %}
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-8">
+      {% include "cabinet/widgets/chart.html" with data=tracking_views_chart %}
+    </div>
+    <div class="col-lg-4">
+      {% include "cabinet/widgets/list.html" with data=tracking_top_pages %}
+    </div>
+    <div class="col-12">
+      {% include "cabinet/widgets/table.html" with data=tracking_recent_page_views %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+{% endblock %}

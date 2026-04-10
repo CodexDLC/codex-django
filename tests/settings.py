@@ -6,10 +6,15 @@ DEBUG = True
 ALLOWED_HOSTS: list[str] = ["*"]
 
 INSTALLED_APPS = [
+    "django.contrib.admin",
     "django.contrib.contenttypes",
     "django.contrib.auth",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
     "codex_django",
     "codex_django.cabinet",
+    "codex_django.tracking",
 ]
 
 TEMPLATES = [
