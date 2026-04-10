@@ -24,9 +24,24 @@ class ModalPresenter:
     """Map generic domain state into ``ModalContentData``."""
 
     def __init__(self, action_url_resolver: ActionUrlResolver | None = None) -> None:
+        """Initialize the presenter.
+
+        Args:
+            action_url_resolver: Optional callable used to derive action URLs
+                from raw action objects before building ``ModalAction`` values.
+        """
         self.action_url_resolver = action_url_resolver
 
     def present(self, state: Any) -> ModalContentData:
+        """Convert a generic state object into typed modal content.
+
+        Args:
+            state: Mapping-like or attribute-based object describing modal
+                title, profile, summary items, form fields, and actions.
+
+        Returns:
+            A ``ModalContentData`` instance ready for cabinet modal templates.
+        """
         sections: list[ModalSection] = []
 
         profile = _get(state, "profile")
@@ -76,6 +91,14 @@ class ModalPresenter:
         return ModalContentData(title=str(_get(state, "title", "")), sections=sections)
 
     def _present_action(self, action: Any) -> ModalAction:
+        """Convert one raw action object into a typed modal action.
+
+        Args:
+            action: Mapping-like or attribute-based action definition.
+
+        Returns:
+            A normalized ``ModalAction`` object suitable for rendering.
+        """
         kind = str(_get(action, "kind", "")).lower()
         method = str(_get(action, "method", "GET")).upper()
         if kind == "close":
@@ -91,7 +114,16 @@ class ModalPresenter:
 
 
 def present_modal_state(state: Any, action_url_resolver: ActionUrlResolver | None = None) -> ModalContentData:
-    """Present a generic modal state object as cabinet modal content."""
+    """Present a generic modal state object as cabinet modal content.
+
+    Args:
+        state: Mapping-like or attribute-based modal state.
+        action_url_resolver: Optional callable that resolves action URLs from
+            raw action objects.
+
+    Returns:
+        A normalized ``ModalContentData`` value for cabinet templates.
+    """
     return ModalPresenter(action_url_resolver=action_url_resolver).present(state)
 
 

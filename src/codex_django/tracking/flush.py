@@ -6,7 +6,15 @@ from django.utils import timezone
 
 
 def flush_page_views(date_str: str | None = None) -> int:
-    """Upsert one day's Redis page counters into ``PageView`` rows."""
+    """Upsert one day's Redis counters into ``PageView`` snapshots.
+
+    Args:
+        date_str: Optional ISO date string identifying the day to flush.
+            Defaults to the current local day when omitted.
+
+    Returns:
+        The number of path counters written to the database snapshot table.
+    """
 
     from .manager import get_tracking_manager
     from .models import PageView

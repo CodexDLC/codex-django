@@ -41,7 +41,12 @@ class TrackingAnalyticsContext:
     tracking_recent_page_views: TableWidgetData
 
     def as_dict(self) -> dict[str, Any]:
-        """Return the context as template-friendly keys."""
+        """Return the context as template-friendly keys.
+
+        Returns:
+            A plain dictionary keyed the same way cabinet templates and widget
+            providers expect to receive tracking analytics payloads.
+        """
 
         return {
             "tracking_total_views": self.tracking_total_views,
@@ -58,7 +63,16 @@ class TrackingSelector:
 
     @staticmethod
     def daily_counts(date_str: str | None = None) -> dict[str, int]:
-        """Return all path counters for one day, preferring live Redis counters."""
+        """Return path counters for a single day.
+
+        Args:
+            date_str: Optional ISO date string. Defaults to the current local
+                day when omitted.
+
+        Returns:
+            A mapping of request path to total page views. Redis snapshots
+            override ORM snapshot values when both are present.
+        """
         from .models import PageView
 
         day = date_str or timezone.localdate().isoformat()
@@ -70,7 +84,17 @@ class TrackingSelector:
 
     @staticmethod
     def top_pages(date_str: str | None = None, limit: int = 10) -> list[dict[str, Any]]:
-        """Return top pages for one day, preferring live Redis counters."""
+        """Return the highest-traffic pages for one day.
+
+        Args:
+            date_str: Optional ISO date string. Defaults to the current local
+                day when omitted.
+            limit: Maximum number of rows to return.
+
+        Returns:
+            A list of ``{"path": ..., "views": ...}`` dictionaries ordered by
+            descending view count and then by path.
+        """
 
         counts = TrackingSelector.daily_counts(date_str)
         items = sorted(counts.items(), key=lambda item: (-item[1], item[0]))[:limit]
@@ -78,20 +102,46 @@ class TrackingSelector:
 
     @staticmethod
     def unique_visitors(date_str: str | None = None) -> int:
-        """Return approximate unique visitors for one day from live Redis data."""
+        """Return the approximate unique visitor count for one day.
+
+        Args:
+            date_str: Optional ISO date string. Defaults to the current local
+                day when omitted.
+
+        Returns:
+            The HyperLogLog-backed unique visitor estimate stored in Redis for
+            the selected day.
+        """
 
         day = date_str or timezone.localdate().isoformat()
         return get_tracking_manager().get_unique_count(day)
 
     @staticmethod
     def total_views(date_str: str | None = None) -> int:
-        """Return total page views for one day."""
+        """Return total page views for one day.
+
+        Args:
+            date_str: Optional ISO date string. Defaults to the current local
+                day when omitted.
+
+        Returns:
+            The sum of all page views for the selected day.
+        """
 
         return sum(TrackingSelector.daily_counts(date_str).values())
 
     @staticmethod
     def multi_day_totals(days: int | None = None) -> list[dict[str, Any]]:
-        """Return daily totals for the last ``days`` days."""
+        """Return daily total views for a trailing analytics window.
+
+        Args:
+            days: Optional number of days to include. Falls back to
+                ``TrackingSettings.analytics_days`` when omitted.
+
+        Returns:
+            A chronologically ordered list of ``{"date": ..., "views": ...}``
+            dictionaries for each day in the requested window.
+        """
 
         from .models import PageView
 
@@ -117,7 +167,16 @@ class TrackingSelector:
 
     @staticmethod
     def get_analytics_context(days: int | None = None) -> TrackingAnalyticsContext:
-        """Return cabinet dashboard widgets for tracking analytics."""
+        """Build cabinet-ready widget payloads for tracking analytics.
+
+        Args:
+            days: Optional number of trailing days to use for chart
+                aggregation. Falls back to the configured analytics window.
+
+        Returns:
+            A typed ``TrackingAnalyticsContext`` containing KPI, chart, list,
+            and table widgets for cabinet dashboards or analytics pages.
+        """
 
         totals = TrackingSelector.multi_day_totals(days)
         today_total = totals[-1]["views"] if totals else 0

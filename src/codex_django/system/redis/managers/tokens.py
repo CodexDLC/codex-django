@@ -22,6 +22,13 @@ class JsonActionTokenRedisManager(BaseDjangoRedisManager):
     token_bytes = 32
 
     def __init__(self, prefix: str = "auth:action", **kwargs: Any) -> None:
+        """Initialize the token manager.
+
+        Args:
+            prefix: Redis key prefix used for stored token payloads.
+            **kwargs: Additional keyword arguments forwarded to
+                ``BaseDjangoRedisManager``.
+        """
         super().__init__(prefix=prefix, **kwargs)
 
     def make_token(self) -> str:
@@ -42,7 +49,17 @@ class JsonActionTokenRedisManager(BaseDjangoRedisManager):
         ttl_seconds: int | None = None,
         ttl_hours: int | None = None,
     ) -> str:
-        """Create a token and store the payload with a TTL."""
+        """Create a token and store its payload with a TTL.
+
+        Args:
+            payload: Mapping to serialize and store behind the generated token.
+            ttl_seconds: Optional TTL override in seconds.
+            ttl_hours: Optional TTL override in hours. Used only when
+                ``ttl_seconds`` is not provided.
+
+        Returns:
+            The generated URL-safe action token.
+        """
         token = self.make_token()
         if self._is_disabled():
             return token
@@ -57,7 +74,16 @@ class JsonActionTokenRedisManager(BaseDjangoRedisManager):
         return token
 
     async def aget_token_data(self, token: str) -> dict[str, Any] | None:
-        """Return decoded token payload data when present and valid."""
+        """Return decoded token payload data when present and valid.
+
+        Args:
+            token: Action token previously returned by ``acreate_token()`` or
+                ``create_token()``.
+
+        Returns:
+            The decoded JSON payload mapping, or ``None`` when the token is
+            missing, expired, disabled, or contains invalid JSON data.
+        """
         if self._is_disabled():
             return None
         raw_data = await self.string.get(self.make_key(token))
@@ -72,7 +98,11 @@ class JsonActionTokenRedisManager(BaseDjangoRedisManager):
         return data
 
     async def adelete_token(self, token: str) -> None:
-        """Delete a token payload."""
+        """Delete a token payload.
+
+        Args:
+            token: Action token whose stored payload should be removed.
+        """
         if self._is_disabled():
             return
         await self.string.delete(self.make_key(token))
@@ -84,18 +114,48 @@ class JsonActionTokenRedisManager(BaseDjangoRedisManager):
         ttl_seconds: int | None = None,
         ttl_hours: int | None = None,
     ) -> str:
-        """Synchronously create a token and store its payload."""
+        """Synchronously create a token and store its payload.
+
+        Args:
+            payload: Mapping to serialize and store behind the generated token.
+            ttl_seconds: Optional TTL override in seconds.
+            ttl_hours: Optional TTL override in hours. Used only when
+                ``ttl_seconds`` is not provided.
+
+        Returns:
+            The generated URL-safe action token.
+        """
         return async_to_sync(self.acreate_token)(payload, ttl_seconds=ttl_seconds, ttl_hours=ttl_hours)
 
     def get_token_data(self, token: str) -> dict[str, Any] | None:
-        """Synchronously return decoded token payload data."""
+        """Synchronously return decoded token payload data.
+
+        Args:
+            token: Action token previously returned by ``create_token()``.
+
+        Returns:
+            The decoded payload mapping, or ``None`` when the token is
+            missing, expired, disabled, or invalid.
+        """
         return async_to_sync(self.aget_token_data)(token)
 
     def delete_token(self, token: str) -> None:
-        """Synchronously delete token payload data."""
+        """Synchronously delete token payload data.
+
+        Args:
+            token: Action token whose stored payload should be removed.
+        """
         async_to_sync(self.adelete_token)(token)
 
 
 def get_json_action_token_manager(prefix: str = "auth:action") -> JsonActionTokenRedisManager:
-    """Return a JSON action token manager configured from Django settings."""
+    """Return a JSON action token manager.
+
+    Args:
+        prefix: Redis key prefix used for stored token payloads.
+
+    Returns:
+        A ``JsonActionTokenRedisManager`` configured with the requested key
+        prefix.
+    """
     return JsonActionTokenRedisManager(prefix=prefix)

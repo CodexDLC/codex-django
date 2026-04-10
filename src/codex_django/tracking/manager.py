@@ -44,6 +44,13 @@ class TrackingRedisManager:
     """Record and read daily tracking counters from Redis."""
 
     def __init__(self, redis_client: SupportsTrackingRedis | None = None) -> None:
+        """Initialize the tracking manager.
+
+        Args:
+            redis_client: Optional explicit Redis-compatible client for tests
+                or custom integrations. When omitted, the manager resolves a
+                client from tracking settings.
+        """
         self._redis_client = redis_client
 
     def _redis(self) -> SupportsTrackingRedis | None:
@@ -67,7 +74,14 @@ class TrackingRedisManager:
         return f"{get_tracking_settings().key_prefix}:uniq:{date_str}"
 
     def record(self, path: str, date_str: str, user_id: str | None) -> None:
-        """Increment page view and unique visitor counters for a day."""
+        """Increment page view and unique visitor counters for one day.
+
+        Args:
+            path: Normalized request path to increment.
+            date_str: ISO date string identifying the tracking day.
+            user_id: Optional stable visitor identifier for unique-count
+                tracking. Anonymous traffic may omit this value.
+        """
 
         redis = self._redis()
         if redis is None:
@@ -82,7 +96,15 @@ class TrackingRedisManager:
         pipe.execute()
 
     def get_daily(self, date_str: str) -> dict[str, str] | None:
-        """Return path -> views for one date from Redis."""
+        """Return per-path counters for one day from Redis.
+
+        Args:
+            date_str: ISO date string identifying the tracking day.
+
+        Returns:
+            A mapping of path to stringified view counts, or ``None`` when no
+            Redis snapshot is available.
+        """
 
         redis = self._redis()
         if redis is None:
@@ -91,7 +113,14 @@ class TrackingRedisManager:
         return _decode_mapping(raw) if raw else None
 
     def get_unique_count(self, date_str: str) -> int:
-        """Return approximate unique visitor count for one date."""
+        """Return the approximate unique visitor count for one day.
+
+        Args:
+            date_str: ISO date string identifying the tracking day.
+
+        Returns:
+            A HyperLogLog-backed unique visitor estimate for the selected day.
+        """
 
         redis = self._redis()
         if redis is None:
@@ -99,7 +128,15 @@ class TrackingRedisManager:
         return int(redis.pfcount(self._uniq_key(date_str)))
 
     def get_multi_day(self, dates: list[str]) -> list[dict[str, str] | None]:
-        """Return Redis daily snapshots for multiple dates."""
+        """Return Redis daily snapshots for multiple days.
+
+        Args:
+            dates: ISO date strings identifying the days to fetch.
+
+        Returns:
+            One snapshot per requested day, preserving input order. Missing
+            days are returned as ``None``.
+        """
 
         redis = self._redis()
         if redis is None:
@@ -115,6 +152,10 @@ _manager = TrackingRedisManager()
 
 
 def get_tracking_manager() -> TrackingRedisManager:
-    """Return the process-wide tracking Redis manager."""
+    """Return the process-wide tracking Redis manager.
+
+    Returns:
+        The singleton ``TrackingRedisManager`` used by the tracking runtime.
+    """
 
     return _manager
