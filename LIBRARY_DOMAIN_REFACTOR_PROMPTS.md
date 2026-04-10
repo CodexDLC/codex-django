@@ -487,6 +487,7 @@ Focus on:
 - recorder/manager/provider separation
 - tasks/flush flows
 - selector/query layer
+- cabinet analytics dashboard page/widgets for the collected visit data
 - admin integration
 - migration/runtime packaging impact
 
@@ -495,8 +496,9 @@ Output format:
 2. Project-specific parts that must remain overrideable
 3. Proposed runtime module structure
 4. Public extension seams
-5. Migration strategy for lily_backend
-6. Release risk notes
+5. Cabinet analytics page/dashboard contract
+6. Migration strategy for lily_backend
+7. Release risk notes
 
 Constraint:
 - do not assume every project needs the same tracking policy
