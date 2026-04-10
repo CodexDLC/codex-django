@@ -25,6 +25,8 @@ The module is intentionally split into small collaborating roles:
 - an engine that orchestrates subject resolution and dispatch
 - adapters that decide how delivery is triggered
 
+Selectors can also define a `cache_key_prefix`, which lets projects isolate notification content caches by domain or feature without forking the selector logic.
+
 So the module is not "email sending code in one place".
 It is a composable notification pipeline.
 

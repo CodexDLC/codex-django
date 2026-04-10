@@ -17,6 +17,7 @@
 - [Core](./architecture/core.md)
 - [System](./architecture/system.md)
 - [Notifications](./architecture/notifications.md)
+- [Tracking](./architecture/tracking.md)
 - [Booking](./architecture/booking.md)
 - [Cabinet](./architecture/cabinet.md)
 - [Showcase](./architecture/showcase.md)

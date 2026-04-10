@@ -82,6 +82,7 @@ nav:
           - Core: en/architecture/core.md
           - System: en/architecture/system.md
           - Notifications: en/architecture/notifications.md
+          - Tracking: en/architecture/tracking.md
           - Booking: en/architecture/booking.md
           - Cabinet: en/architecture/cabinet.md
           - Showcase: en/architecture/showcase.md
@@ -103,6 +104,7 @@ nav:
           - Core: ru/architecture/core.md
           - System: ru/architecture/system.md
           - Notifications: ru/architecture/notifications.md
+          - Tracking: ru/architecture/tracking.md
           - Booking: ru/architecture/booking.md
           - Cabinet: ru/architecture/cabinet.md
           - Showcase: ru/architecture/showcase.md
@@ -112,12 +114,14 @@ nav:
           - Core: en/api/core.md
           - System: en/api/system.md
           - Notifications: en/api/notifications.md
+          - Tracking: en/api/tracking.md
           - Booking: en/api/booking.md
           - Cabinet: en/api/cabinet.md
       - Internal Modules:
           - Core internals: en/api/internal/core.md
           - System internals: en/api/internal/system.md
           - Notifications internals: en/api/internal/notifications.md
+          - Tracking internals: en/api/internal/tracking.md
           - Booking internals: en/api/internal/booking.md
           - Cabinet internals: en/api/internal/cabinet.md
   - Changelog: changelog.md

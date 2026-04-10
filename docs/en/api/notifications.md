@@ -24,6 +24,7 @@ from codex_django.notifications import (
 
 - Build a project-specific notification service on top of `BaseNotificationEngine`.
 - Store localized subjects and content via `BaseEmailContentMixin` and `BaseEmailContentSelector`.
+- Use `BaseEmailContentSelector.cache_key_prefix` when notification content caches need per-feature or per-domain isolation.
 - Choose queue-based or direct-delivery adapters depending on runtime needs.
 
 For detailed module docstrings, adapter internals, and selector implementation notes, open [Notifications internals](internal/notifications.md).

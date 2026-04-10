@@ -92,6 +92,11 @@
     <p><a href="./en/architecture/notifications/">Architecture</a> · <a href="./en/api/notifications/">API</a></p>
   </div>
   <div class="cdx-card">
+    <h3><code>tracking</code></h3>
+    <p>Reusable page analytics with request middleware, Redis-backed counters, ORM snapshots, and cabinet-ready dashboard widgets.</p>
+    <p><a href="./en/architecture/tracking/">Architecture</a> · <a href="./en/api/tracking/">API</a></p>
+  </div>
+  <div class="cdx-card">
     <h3><code>showcase</code></h3>
     <p>Debug-only reference implementation for demo screens, mock data, and generated project previews.</p>
     <p><a href="./en/architecture/showcase/">Architecture</a></p>
