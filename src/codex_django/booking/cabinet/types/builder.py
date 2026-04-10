@@ -33,6 +33,7 @@ class ClientSelectorData:
 class DateTimePickerData:
     available_days: list[dict[str, Any]]
     time_slots: list[str]
+    calendar_cells: list[dict[str, Any]] = field(default_factory=list)
     busy_slots: list[str] = field(default_factory=list)
     current_month: str = ""
     default_date: str = ""

@@ -39,6 +39,7 @@ window.addEventListener('popstate', syncSidebarLinks);
 // Alpine components for Widgets
 document.addEventListener('alpine:init', () => {
     Alpine.data('chartWidget', (config) => ({
+        config,
         chart: null,
         init() {
             const ctx = this.$refs.canvas;
@@ -48,7 +49,7 @@ document.addEventListener('alpine:init', () => {
                 type: config.type || 'line',
                 data: {
                     labels: config.chart_labels || [],
-                    datasets: [{
+                    datasets: config.datasets || [{
                         label: config.title,
                         data: config.chart_data || [],
                         borderColor: config.color || '#4f46e5',
@@ -63,7 +64,14 @@ document.addEventListener('alpine:init', () => {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    plugins: {
+                        legend: {
+                            display: (config.datasets && config.datasets.length > 1),
+                            position: 'top',
+                            align: 'end',
+                            labels: { boxWidth: 10, font: { size: 10 } }
+                        }
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
@@ -81,6 +89,7 @@ document.addEventListener('alpine:init', () => {
     }));
 
     Alpine.data('donutWidget', (config) => ({
+        config,
         chart: null,
         legend: [],
         init() {

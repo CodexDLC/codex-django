@@ -1,56 +1,48 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'ru' }}">
-<head>
-  <meta name="robots" content="noindex, nofollow">
-  <title>{% block title %}Cabinet{% endblock %} — {{ SITE_NAME|default:'App' }}</title>
-  {% include "cabinet/includes/_head.html" %}
-  <style>
-    [x-cloak] { display: none !important; }
-  </style>
-
-  <script src="{% static 'cabinet/js/vendor/htmx.min.js' %}"></script>
-  <script src="{% static 'cabinet/js/app/cabinet.js' %}" defer></script>
-  <script src="{% static 'cabinet/js/vendor/alpine.min.js' %}" defer></script>
-  <script src="{% static 'cabinet/js/vendor/bootstrap.bundle.min.js' %}" defer></script>
-</head>
-<body>
-
-  <div class="cab-wrapper"
-       x-data="{
-         sidebarCollapsed: JSON.parse(localStorage.getItem('cab_sidebar') ?? 'true'),
-         sidebarMobileOpen: false
-       }"
-       x-effect="localStorage.setItem('cab_sidebar', sidebarCollapsed)">
-
-    {# ─── Staff sidebar (from include, populated by context processor) ─── #}
-    <aside class="cab-sidebar"
-           :class="{ 'cab-sidebar--collapsed': sidebarCollapsed, 'cab-sidebar--open': sidebarMobileOpen }">
-      {% block sidebar %}
-        {% include "cabinet/includes/_sidebar_staff.html" %}
-      {% endblock %}
-    </aside>
-
-    {# Mobile backdrop #}
-    <div class="cab-backdrop d-lg-none"
-         x-show="sidebarMobileOpen"
-         x-transition.opacity
-         @click="sidebarMobileOpen = false"
-         style="position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1035;"></div>
-
-    {# ─── Main area ─── #}
-    <div class="cab-main">
-      {% include "cabinet/includes/_topbar.html" %}
-
-      <main class="cab-content" id="cab-content">
-        {% block cabinet_content %}{% endblock %}
-      </main>
+  <head>
+    <meta name="robots" content="noindex, nofollow">
+    <title>
+      {% block title %}Cabinet{% endblock %}
+    — {{ SITE_NAME|default:'App' }}</title>
+    {% include "cabinet/includes/_head.html" %}
+    <style>[x-cloak] { display: none !important; }</style>
+    <script src="{% static 'cabinet/js/vendor/htmx.min.js' %}" defer></script>
+    <script src="{% static 'cabinet/js/app/cabinet.js' %}?v=2" defer></script>
+    <script src="{% static 'cabinet/js/app/cabinet_local.js' %}?v=2" defer></script>
+    <script src="{% static 'cabinet/js/vendor/alpine.min.js' %}" defer></script>
+    <script src="{% static 'cabinet/js/vendor/bootstrap.bundle.min.js' %}" defer></script>
+  </head>
+  <body>
+    <div class="cab-wrapper"
+         x-data="{ sidebarCollapsed: JSON.parse(localStorage.getItem('cab_sidebar') ?? 'true'), sidebarMobileOpen: false }"
+         x-effect="localStorage.setItem('cab_sidebar', sidebarCollapsed)">
+      {# ─── Staff sidebar (from include, populated by context processor) ─── #}
+      <aside class="cab-sidebar"
+             :class="{ 'cab-sidebar--collapsed': sidebarCollapsed, 'cab-sidebar--open': sidebarMobileOpen }">
+        {% block sidebar %}
+          {% include "cabinet/includes/_sidebar_staff.html" %}
+        {% endblock %}
+      </aside>
+      {# Mobile backdrop #}
+      <div class="cab-backdrop d-lg-none"
+           x-show="sidebarMobileOpen"
+           x-transition.opacity
+           @click="sidebarMobileOpen = false"
+           style="position:fixed;
+                  inset:0;
+                  background:rgba(0,0,0,0.5);
+                  z-index:1035"></div>
+      {# ─── Main area ─── #}
+      <div class="cab-main">
+        {% include "cabinet/includes/_topbar.html" %}
+        <main class="cab-content" id="cab-content">
+          {% block cabinet_content %}{% endblock %}
+        </main>
+      </div>
     </div>
-  </div>
-
-  {% include "cabinet/includes/_modal_base.html" %}
-
-  {% block extra_js %}{% endblock %}
-
-</body>
+    {% include "cabinet/includes/_modal_base.html" %}
+    {% block extra_js %}{% endblock %}
+  </body>
 </html>

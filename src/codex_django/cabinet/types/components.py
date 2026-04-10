@@ -624,6 +624,7 @@ class DateTimePickerData:
 
     Attributes:
         available_days: List of days to show in the mini-calendar.
+        calendar_cells: Full calendar grid cells including blank placeholders.
         time_slots: List of time strings (e.g. "08:00").
         busy_slots: List of time strings that are unavailable.
         current_month: Month label (e.g. "March 2026").
@@ -631,6 +632,7 @@ class DateTimePickerData:
 
     available_days: list[dict[str, Any]]
     time_slots: list[str]
+    calendar_cells: list[dict[str, Any]] = field(default_factory=list)
     busy_slots: list[str] = field(default_factory=list)
     current_month: str = ""
     default_date: str = ""
