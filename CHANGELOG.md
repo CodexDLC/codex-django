@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-04-10
+
 ### Added
 
 - Cabinet redesign groundwork across templates, styles, quick-access flows, notifications, and dashboard/site-settings surfaces.
@@ -15,6 +17,7 @@ All notable changes to this project will be documented in this file.
 - Raised the runtime dependency floor to the refreshed Codex package line: `codex-core` and `codex-platform` now resolve from `>=0.3.0`, while `codex-services` resolves from the published `>=0.1.3`, all with `<1.0.0` headroom.
 - Raised the optional CLI extra to `codex-django-cli>=0.3.0,<0.4.0` so new installs resolve against the current standalone CLI release line.
 - Expanded English and Russian docs around cabinet architecture, guides, and settings.
+- Booking runtime contracts switched to neutral `resource/executor` naming with public seams for prioritization and orchestration.
 
 ### Fixed
 
