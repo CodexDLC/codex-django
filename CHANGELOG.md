@@ -8,10 +8,14 @@ All notable changes to this project will be documented in this file.
 
 - Added public core sitemap seams for alternates, x-default language selection, and settings-backed static page sitemaps.
 - Added a public i18n URL translation helper and a default Redis manager factory/export surface.
+- Added public system management seams for Django-style JSON fixture upserts, singleton fixture updates, and aggregate command section hooks.
+- Added a generic system Redis JSON action-token manager for temporary confirmation/action payloads.
+- Added System domain refactor notes and a Lily post-release cleanup note for replacing project-local fixture import and action-token wrappers.
 
 ### Changed
 
 - Changed static-page SEO selection to support injectable model, lookup field, cache manager, and cache timeout seams while preserving existing defaults.
+- Expanded system documentation around fixture orchestration, singleton settings imports, action-token Redis helpers, and project cleanup boundaries.
 
 ### Fixed
 

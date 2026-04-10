@@ -8,6 +8,7 @@ from codex_django.core.redis.managers.seo import SeoRedisManager
 from codex_django.core.redis.managers.settings import DjangoSiteSettingsManager
 from codex_django.core.redis.managers.static_content import StaticContentManager
 from codex_django.system.redis.managers.fixtures import FixtureHashManager
+from codex_django.system.redis.managers.tokens import JsonActionTokenRedisManager
 
 pytestmark = [pytest.mark.unit, pytest.mark.django_db]
 
@@ -296,3 +297,88 @@ async def test_fixtures_manager_aset_hash(fixtures_manager):
 def test_fixtures_manager_set_hash(fixtures_manager):
     fixtures_manager.set_hash("fix1", "hash123")
     fixtures_manager.string.set.assert_called_once_with(fixtures_manager.make_key("fixture:fix1"), "hash123")
+
+
+@pytest.fixture
+def action_token_manager(mock_redis_from_url):
+    mgr = JsonActionTokenRedisManager()
+    mgr.string = AsyncMock()
+    return mgr
+
+
+@pytest.mark.asyncio
+async def test_action_token_manager_acreate_token(action_token_manager):
+    with patch.object(action_token_manager, "make_token", return_value="token123"):
+        token = await action_token_manager.acreate_token({"appointment_id": 1}, ttl_hours=2)
+
+    assert token == "token123"
+    action_token_manager.string.set.assert_called_once_with(
+        action_token_manager.make_key("token123"),
+        '{"appointment_id": 1}',
+        ttl=7200,
+    )
+
+
+def test_action_token_manager_create_token(action_token_manager):
+    with patch.object(action_token_manager, "make_token", return_value="token123"):
+        token = action_token_manager.create_token({"appointment_id": 1}, ttl_seconds=60)
+
+    assert token == "token123"
+    action_token_manager.string.set.assert_called_once_with(
+        action_token_manager.make_key("token123"),
+        '{"appointment_id": 1}',
+        ttl=60,
+    )
+
+
+@pytest.mark.asyncio
+async def test_action_token_manager_aget_token_data(action_token_manager):
+    action_token_manager.string.get.return_value = '{"appointment_id": 1}'
+
+    assert await action_token_manager.aget_token_data("token123") == {"appointment_id": 1}
+    action_token_manager.string.get.assert_called_once_with(action_token_manager.make_key("token123"))
+
+
+@pytest.mark.asyncio
+async def test_action_token_manager_aget_token_data_returns_none_for_bad_json(action_token_manager):
+    action_token_manager.string.get.return_value = "{"
+
+    assert await action_token_manager.aget_token_data("token123") is None
+
+
+@pytest.mark.asyncio
+async def test_action_token_manager_aget_token_data_returns_none_for_non_mapping(action_token_manager):
+    action_token_manager.string.get.return_value = '["not", "a", "dict"]'
+
+    assert await action_token_manager.aget_token_data("token123") is None
+
+
+def test_action_token_manager_get_token_data(action_token_manager):
+    action_token_manager.string.get.return_value = '{"appointment_id": 1}'
+
+    assert action_token_manager.get_token_data("token123") == {"appointment_id": 1}
+
+
+@pytest.mark.asyncio
+async def test_action_token_manager_adelete_token(action_token_manager):
+    await action_token_manager.adelete_token("token123")
+
+    action_token_manager.string.delete.assert_called_once_with(action_token_manager.make_key("token123"))
+
+
+def test_action_token_manager_delete_token(action_token_manager):
+    action_token_manager.delete_token("token123")
+
+    action_token_manager.string.delete.assert_called_once_with(action_token_manager.make_key("token123"))
+
+
+@pytest.mark.asyncio
+async def test_action_token_manager_disabled_returns_token_without_storing(action_token_manager, settings):
+    settings.DEBUG = True
+    settings.CODEX_REDIS_ENABLED = False
+
+    with patch.object(action_token_manager, "make_token", return_value="token123"):
+        token = await action_token_manager.acreate_token({"appointment_id": 1})
+
+    assert token == "token123"
+    action_token_manager.string.set.assert_not_called()

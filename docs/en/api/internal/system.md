@@ -32,9 +32,17 @@ This section documents the lower-level `system` modules used to compose site set
 
 ::: codex_django.system.management.base_commands
 
+## Public management exports
+
+::: codex_django.system.management
+
 ## Fixture Redis manager
 
 ::: codex_django.system.redis.managers.fixtures
+
+## Action token Redis manager
+
+::: codex_django.system.redis.managers.tokens
 
 ## Fixture hashing helpers
 
