@@ -21,7 +21,7 @@
 Основной алгоритм расчета записи делегирован `ChainFinder` и связанным DTO из `codex-services`.
 `codex_django.booking` фокусируется на Django-специфичных задачах вокруг этого движка:
 
-- как моделируются мастера, услуги, расписания и appointments
+- как моделируются исполнители/ресурсы, услуги, расписания и appointments
 - как ORM-данные преобразуются в `BookingEngineRequest` и `MasterAvailability`
 - как обрабатываются row locking и границы транзакций при создании записи
 - как безопасно инвалидируется busy-slot cache
@@ -53,11 +53,11 @@
 
 Он отвечает за:
 
-- построение engine request по service ids и master selections
-- определение, какие мастера могут выполнять какие услуги
+- построение engine request по service ids и resource selections
+- определение, какие ресурсы могут выполнять какие услуги
 - сбор working hours, break intervals, days off и busy intervals
-- построение `MasterAvailability`
-- блокировку строк мастеров во время создания записи
+- построение availability DTO для движка (`MasterAvailability` как текущее имя класса в `codex-services`)
+- блокировку строк ресурсов во время создания записи
 
 По сути этот adapter выступает переводчиком контракта между Django models и `ChainFinder`.
 
@@ -78,9 +78,9 @@
 `BookingCacheAdapter` это тонкий мост к Redis booking cache manager из `core`.
 Стратегия кэширования здесь намеренно узкая:
 
-- кэшируются busy intervals по мастеру и дате
+- кэшируются busy intervals по ресурсу и дате
 - свободные окна вычисляются динамически на основе этих интервалов
-- после успешного изменения бронирования инвалидируются только затронутые master/date записи
+- после успешного изменения бронирования инвалидируются только затронутые resource/date записи
 
 Это позволяет делать cache invalidation точечной и не хранить производные slot maps как главный источник истины.
 
@@ -102,7 +102,7 @@
 `create_booking()` следует защитному сценарию:
 
 1. открыть транзакцию
-2. заблокировать нужные строки мастеров
+2. заблокировать нужные строки ресурсов
 3. пересчитать availability под блокировкой
 4. проверить, что нужное время все еще доступно
 5. сохранить appointment или multi-service chain
@@ -112,6 +112,17 @@
 
 Для multi-service booking модуль вводит `BookingPersistenceHook` protocol.
 Это оставляет persistence сложных booking chains на стороне конкретного проекта, но сохраняет общую логику locking и revalidation.
+
+## Политика Именования И Совместимости
+
+Начиная с версии `0.3.0`, публичный booking API использует нейтральные имена:
+
+- `resource_id` вместо `master_id`
+- `resource_selections` вместо `master_selections`
+- `lock_resources()` вместо `lock_masters()`
+
+Для runtime-поверхностей `codex_django.booking` это осознанный immediate-break.
+Часть model mixin имен остаётся исторической (`AbstractBookableMaster`, `MasterDayOffMixin`) ради совместимости схем в существующих проектах.
 
 ## Runtime Flow
 
@@ -123,7 +134,7 @@ flowchart TD
     C --> E["BookingCacheAdapter"]
     C --> F["codex-services ChainFinder"]
     B --> F
-    G["create_booking transaction"] --> H["lock masters"]
+    G["create_booking transaction"] --> H["lock resources"]
     H --> I["recompute availability"]
     I --> J["persist appointment or chain"]
     J --> K["invalidate cache on commit"]

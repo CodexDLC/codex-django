@@ -73,6 +73,19 @@ Legacy v1 (`section=CabinetSection(...)`) is still supported for backward compat
 This design keeps feature modules explicit.
 Projects do not need fragile introspection or convention-only discovery to contribute to the dashboard.
 
+### Runtime Extension Seams
+
+The `0.3.1` cabinet pass moved project customization away from private registry access and copied view setup.
+The public runtime layer now exposes:
+
+- `configure_space()` and `CabinetSpaceConfig` for staff/client space defaults
+- `CabinetRuntimeResolver` and `CabinetRequestContext` for request-scoped module/space resolution
+- filtered registry readers for topbar, sidebar, shortcuts, and dashboard widgets
+- `CabinetModuleMixin`, `CabinetTemplateView`, `StaffRequiredMixin`, and `OwnerRequiredMixin` for reusable view assembly
+- `ModalPresenter` and `present_modal_state()` for turning modal state into typed cabinet sections
+
+These seams keep project policy in the project while the repeated cabinet mechanics stay in the library.
+
 ### Immutable Contracts — Types Package
 
 All registration and data contracts are defined as frozen dataclasses organized in the `cabinet/types/` package:
@@ -176,6 +189,10 @@ The cabinet layer is designed so that:
 - selectors provide data
 - templates compose the UI from reusable components
 - projects can override or extend pages through normal Django mechanisms
+
+Site settings follow the same rule.
+`SiteSettingsService` exposes hooks for choosing the settings model, discovering tabs, preparing save context, checking save permission, and persisting changes.
+Projects can replace the policy pieces without copying the built-in settings view flow.
 
 ## Runtime Flow
 

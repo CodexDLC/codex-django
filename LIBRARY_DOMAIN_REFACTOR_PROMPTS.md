@@ -129,13 +129,29 @@ Constraints:
 ### 2. Cabinet
 
 Status:
-- [ ] Not started
-- [ ] Domain audit done
-- [ ] Universal vs project-specific rules separated
-- [ ] Library extension seams designed
-- [ ] Library code refactored
-- [ ] Backward compatibility checked
-- [ ] Lily cleanup checklist written
+- [x] Not started
+- [x] Domain audit done
+- [x] Universal vs project-specific rules separated
+- [x] Library extension seams designed
+- [x] Library code refactored
+- [x] Backward compatibility checked
+- [x] Lily cleanup checklist written
+
+Cabinet stage tracker:
+- [x] Stage 1 done — public registry/runtime read APIs (`configure_space`, `get_space_config`, filtered registry readers)
+- [x] Stage 2 done — view customization seams (`CabinetModuleMixin`, `CabinetTemplateView`, staff/owner access mixins)
+- [x] Stage 3 done — modal presentation seam (`ModalPresenter`, `present_modal_state`)
+- [x] Stage 4 done — site settings hooks for service/model/tab/save/permission customization
+- [x] Stage 5 done — component/template knobs for card grids, avatars, client topbar, charts, and date-time labels
+- [x] Stage 6 done — booking-cabinet helper seams for availability normalization and workflow payload assembly
+
+Final Lily cleanup checklist:
+- [x] project quick-access style UIs can use public registry readers instead of `cabinet_registry._sidebar`
+- [x] project cabinet views can inherit library mixins instead of repeating module/template/access setup
+- [x] project modal builders can delegate generic section conversion to `ModalPresenter`
+- [x] project site-settings flows can override service hooks instead of copying the built-in view/service flow
+- [x] project booking cabinet services can use library presenters/workflow helpers for slot payloads and quick-create context
+- [x] targeted cabinet and booking-cabinet seam tests are covered in the library
 
 Recommended model:
 - `GPT-5.4`
@@ -188,12 +204,26 @@ Keep the scope to cabinet only.
 
 Status:
 - [ ] Not started
-- [ ] Domain audit done
-- [ ] Universal vs project-specific rules separated
-- [ ] Library extension seams designed
-- [ ] Library code refactored
-- [ ] Backward compatibility checked
-- [ ] Lily cleanup checklist written
+- [x] Domain audit done
+- [x] Universal vs project-specific rules separated
+- [x] Library extension seams designed
+- [x] Library code refactored
+- [x] Backward compatibility checked
+- [x] Lily cleanup checklist written
+
+Core stage tracker:
+- [x] Stage 1 done — sitemap alternates now attach to URL entries and x-default is configurable with `SITEMAP_DEFAULT_LANGUAGE`
+- [x] Stage 2 done — `StaticPagesSitemap` provides settings-backed static route sitemap behavior
+- [x] Stage 3 done — public i18n URL translation helper backs the template tag
+- [x] Stage 4 done — top-level Redis exports include all core managers plus a default manager factory
+- [x] Stage 5 done — static-page SEO selector accepts model, lookup field, cache manager, and timeout seams
+
+Final Lily cleanup checklist:
+- [ ] delete the project-side `StaticSitemap.get_urls()` override after consuming the updated library
+- [ ] replace local `core.templatetags.i18n_urls` usage with the library `codex_i18n` tag/helper
+- [ ] replace internal Redis imports/local wrapper with public `codex_django.core.redis` imports or `get_default_redis_manager`
+- [ ] keep Lily-owned sitemap settings local: `SITEMAP_STATIC_PAGES`, `SITEMAP_DEFAULT_LANGUAGE`, and `SITEMAP_LOOKUP_NAMESPACES`
+- [ ] keep `codex_makemessages` extraction deferred unless another project duplicates management-command planning logic
 
 Recommended model:
 - `GPT-5.4`
@@ -235,6 +265,28 @@ Output format:
 4. Proposed extension seams
 5. Refactor candidates
 6. Post-release cleanup list
+```
+
+Follow-up documentation and memory prompt:
+
+```text
+Update documentation and memory for the codex-django core refactor.
+
+Scope:
+- Library only for code and tests: C:\install\projects\codex_tools\codex-django\src\codex_django\core
+- Lily docs only: C:\install\projects\clients\lily_website\docs\en_EN\architecture\backend_django\core\sitemaps.md
+- Do not change Lily Python code.
+- Do not create a release tag or version section.
+- Put changelog notes under CHANGELOG.md [Unreleased].
+
+Documentation tasks:
+- Update LIBRARY_DOMAIN_REFACTOR_PROMPTS.md Core board/status and Lily cleanup checklist.
+- Update the single Lily sitemap md to describe the new library-backed sitemap behavior and the remaining Lily-owned settings.
+- Keep docs concise and avoid moving Lily-specific policy into codex-django docs.
+
+Memory graph tasks:
+- Add/update observations that codex-django core now exposes public sitemap seams, StaticPagesSitemap, i18n URL helper, default Redis manager factory/exports, and configurable static SEO selector seams.
+- Add/update observations that Lily should later remove local StaticSitemap.get_urls, core.templatetags.i18n_urls, and local core.redis wrapper after consuming the updated library.
 ```
 
 ### 4. System
@@ -505,8 +557,8 @@ Constraint:
 
 ## Suggested Execution Order
 
-- [ ] Booking
-- [ ] Cabinet
+- [x] Booking
+- [x] Cabinet
 - [ ] Tracking candidate
 - [ ] Core
 - [ ] System

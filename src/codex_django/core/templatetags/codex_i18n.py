@@ -7,7 +7,8 @@ utilities so templates can stay declarative.
 from typing import Any
 
 from django import template
-from django.urls import translate_url as django_translate_url
+
+from codex_django.core.i18n import translate_current_url
 
 register = template.Library()
 
@@ -24,12 +25,4 @@ def translate_url(context: dict[str, Any], lang_code: str) -> str:
         The translated URL path for the current request, or an empty string
         when the request is unavailable.
     """
-    request = context.get("request")
-    if not request:
-        return ""
-
-    path = request.path
-    if not path:
-        return ""
-
-    return django_translate_url(path, lang_code)
+    return translate_current_url(context, lang_code)

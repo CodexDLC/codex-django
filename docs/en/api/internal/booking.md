@@ -24,6 +24,9 @@ The booking package is built from adapters, selectors, and abstract model mixins
 
 ::: codex_django.booking.mixins.master
 
+> Note: The module keeps historical `master` naming for model-level compatibility.
+> Runtime selector/gateway contracts use `resource_*` naming.
+
 ## Appointment mixins
 
 ::: codex_django.booking.mixins.appointment

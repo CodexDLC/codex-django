@@ -21,7 +21,7 @@ So `booking` is best understood as an integration layer between Django domain da
 The core booking algorithm is delegated to `ChainFinder` and related DTOs from `codex-services`.
 `codex_django.booking` focuses on the Django-specific concerns around that engine:
 
-- how masters, services, schedules, and appointments are modeled
+- how resources/executors, services, schedules, and appointments are modeled
 - how ORM data is converted into `BookingEngineRequest` and `MasterAvailability`
 - how row locking and transaction boundaries are handled during booking creation
 - how busy-slot caching is invalidated safely
@@ -53,11 +53,11 @@ It translates Django ORM state into the provider data structures expected by the
 
 It is responsible for:
 
-- building engine requests from service ids and master selections
-- resolving which masters can perform which services
+- building engine requests from service ids and resource selections
+- resolving which resources can perform which services
 - collecting working hours, breaks, days off, and busy intervals
-- constructing `MasterAvailability` objects
-- locking master rows during booking creation
+- constructing availability DTOs consumed by the engine (`MasterAvailability` class name in current `codex-services`)
+- locking resource rows during booking creation
 
 In effect, this adapter is the contract translator between Django models and `ChainFinder`.
 
@@ -78,9 +78,9 @@ That makes them easier to reuse from views, APIs, commands, and future generated
 `BookingCacheAdapter` is a thin bridge over the Redis booking cache manager from `core`.
 The module's caching strategy is intentionally narrow:
 
-- cache busy intervals per master per date
+- cache busy intervals per resource per date
 - compute free windows dynamically from those intervals
-- invalidate only the affected master/date entries after a successful booking change
+- invalidate only the affected resource/date entries after a successful booking change
 
 This keeps cache invalidation surgical and avoids storing derived slot maps as the primary source of truth.
 
@@ -102,7 +102,7 @@ The most important architectural concern in this module is not slot computation 
 `create_booking()` follows a defensive flow:
 
 1. enter a transaction
-2. lock the relevant master rows
+2. lock the relevant resource rows
 3. recompute availability under lock
 4. verify the requested start time still exists
 5. persist the appointment or the multi-service chain
@@ -112,6 +112,17 @@ This design avoids the classic problem where a slot appears free during initial 
 
 For multi-service booking, the module introduces a `BookingPersistenceHook` protocol.
 That keeps the persistence of complex booking chains project-specific while preserving the shared locking and revalidation logic.
+
+## Naming And Compatibility Policy
+
+Starting from `0.3.0`, the public booking API uses neutral naming:
+
+- `resource_id` instead of `master_id`
+- `resource_selections` instead of `master_selections`
+- `lock_resources()` instead of `lock_masters()`
+
+This change is intentionally immediate-break for runtime surfaces in `codex_django.booking`.
+Some model mixin names remain historical (`AbstractBookableMaster`, `MasterDayOffMixin`) for schema compatibility in existing projects.
 
 ## Runtime Flow
 
@@ -123,7 +134,7 @@ flowchart TD
     C --> E["BookingCacheAdapter"]
     C --> F["codex-services ChainFinder"]
     B --> F
-    G["create_booking transaction"] --> H["lock masters"]
+    G["create_booking transaction"] --> H["lock resources"]
     H --> I["recompute availability"]
     I --> J["persist appointment or chain"]
     J --> K["invalidate cache on commit"]

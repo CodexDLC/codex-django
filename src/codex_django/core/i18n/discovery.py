@@ -10,6 +10,9 @@ Examples:
 """
 
 from pathlib import Path
+from typing import Any
+
+from django.urls import translate_url as django_translate_url
 
 
 def discover_locale_paths(base_dir: Path, include_features: bool = True) -> list[str]:
@@ -58,3 +61,25 @@ def discover_locale_paths(base_dir: Path, include_features: bool = True) -> list
                 paths.append(str(item / "locale"))
 
     return paths
+
+
+def translate_current_url(context: dict[str, Any], lang_code: str) -> str:
+    """Translate the current request path into another active language.
+
+    Args:
+        context: Template context expected to contain the current ``request``.
+        lang_code: Target Django language code.
+
+    Returns:
+        The translated URL path for the current request, or an empty string
+        when the request/path is unavailable.
+    """
+    request = context.get("request")
+    if not request:
+        return ""
+
+    path = getattr(request, "path", "")
+    if not path:
+        return ""
+
+    return django_translate_url(path, lang_code)

@@ -12,10 +12,25 @@ navigation and widgets to the cabinet UI, plus typed data contracts for page com
 ```python
 from codex_django.cabinet import (
     declare,
+    configure_space,
     cabinet_registry,
     TopbarEntry,
     SidebarItem,
     Shortcut,
+)
+```
+
+### Runtime and view seams
+
+```python
+from codex_django.cabinet import (
+    CabinetRuntimeResolver,
+    CabinetRequestContext,
+    CabinetSpaceConfig,
+    CabinetModuleMixin,
+    CabinetTemplateView,
+    StaffRequiredMixin,
+    OwnerRequiredMixin,
 )
 ```
 
@@ -45,6 +60,19 @@ from codex_django.cabinet import (
     TableWidgetData,
     ListWidgetData,
     DashboardWidget,
+)
+```
+
+### Modal presentation and quick access
+
+```python
+from codex_django.cabinet import (
+    ModalPresenter,
+    present_modal_state,
+    get_staff_quick_access_candidates,
+    get_enabled_staff_quick_access,
+    parse_selected_keys,
+    build_candidate_key,
 )
 ```
 

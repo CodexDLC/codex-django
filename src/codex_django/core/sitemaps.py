@@ -35,6 +35,36 @@ class BaseSitemap(Sitemap):  # type: ignore[type-arg]
             return domain.split("://")[-1]
         return domain
 
+    def get_x_default_language(self) -> str:
+        """Return the language used for the sitemap ``x-default`` alternate."""
+        return getattr(settings, "SITEMAP_DEFAULT_LANGUAGE", getattr(settings, "LANGUAGE_CODE", "en"))
+
+    def build_alternates(self, item: Any, domain: str | None = None) -> list[dict[str, str]]:
+        """Build alternate language URLs for a sitemap item.
+
+        Args:
+            item: Sitemap item to resolve for every configured language.
+            domain: Optional already-resolved canonical domain.
+
+        Returns:
+            Alternate URL dictionaries in Django sitemap-compatible shape.
+        """
+        actual_item: Any = item[0] if isinstance(item, list | tuple) else item
+        resolved_domain = domain or self.get_domain()
+        alternates: list[dict[str, str]] = []
+
+        for lang in self.languages:
+            with translation.override(lang):
+                loc = self.location(actual_item)
+            alternates.append({"lang_code": lang, "location": f"https://{resolved_domain}{loc}"})
+
+        with translation.override(self.get_x_default_language()):
+            alternates.append(
+                {"lang_code": "x-default", "location": f"https://{resolved_domain}{self.location(actual_item)}"}
+            )
+
+        return alternates
+
     def get_urls(self, page: int | str = 1, site: Any = None, protocol: str | None = None) -> list[dict[str, Any]]:
         # Force HTTPS and use our canonical domain
         domain = self.get_domain(site)
@@ -42,22 +72,7 @@ class BaseSitemap(Sitemap):  # type: ignore[type-arg]
         urls: list[dict[str, Any]] = super().get_urls(page=page, site=None, protocol="https")
 
         for url_info in urls:
-            item = url_info["item"]
-            # Django passes (item, lang_code) if i18n=True
-            actual_item: Any = item[0] if isinstance(item, list | tuple) else item
-
-            alternates: list[dict[str, str]] = []
-            for lang in self.languages:
-                with translation.override(lang):
-                    loc = self.location(actual_item)
-                alternates.append({"lang_code": lang, "location": f"https://{domain}{loc}"})
-
-            # Add x-default (usually pointing to the first language or a specific one)
-            default_lang = getattr(settings, "LANGUAGE_CODE", "en")
-            with translation.override(default_lang):
-                alternates.append(
-                    {"lang_code": "x-default", "location": f"https://{domain}{self.location(actual_item)}"}
-                )
+            url_info["alternates"] = self.build_alternates(url_info["item"], domain=domain)
 
         return urls
 
@@ -98,3 +113,16 @@ class BaseSitemap(Sitemap):  # type: ignore[type-arg]
 
         # Assuming actual_item has a get_absolute_url method if it's not a string
         return actual_item.get_absolute_url()  # type: ignore[no-any-return]
+
+
+class StaticPagesSitemap(BaseSitemap):
+    """Sitemap for static route-name pages configured through Django settings."""
+
+    priority = 0.8
+    changefreq = "monthly"
+    setting_name = "SITEMAP_STATIC_PAGES"
+    default_items = ("home",)
+
+    def items(self) -> list[str]:
+        """Return configured static page URL names."""
+        return list(getattr(settings, self.setting_name, self.default_items))

@@ -8,6 +8,22 @@ This section contains the lower-level cabinet registry, dashboard providers, Red
 
 ::: codex_django.cabinet.registry
 
+## Runtime resolver
+
+::: codex_django.cabinet.runtime
+
+## View mixins
+
+::: codex_django.cabinet.mixins
+
+## Modal presenters
+
+::: codex_django.cabinet.presenters.modal
+
+## Quick access helpers
+
+::: codex_django.cabinet.quick_access
+
 ## Types — Navigation
 
 ::: codex_django.cabinet.types.nav
