@@ -105,10 +105,17 @@ class TestTranslateUrlTag:
         request.path = "/ru/about/"
 
         with patch(
-            "codex_django.core.templatetags.codex_i18n.django_translate_url",
+            "codex_django.core.i18n.discovery.django_translate_url",
             return_value="/en/about/",
         ) as mock_translate:
             result = self._call_tag({"request": request}, "en")
 
         mock_translate.assert_called_once_with("/ru/about/", "en")
         assert result == "/en/about/"
+
+    def test_template_tag_delegates_to_public_helper(self):
+        with patch("codex_django.core.templatetags.codex_i18n.translate_current_url", return_value="/de/") as helper:
+            result = self._call_tag({"request": MagicMock(path="/en/")}, "de")
+
+        helper.assert_called_once()
+        assert result == "/de/"

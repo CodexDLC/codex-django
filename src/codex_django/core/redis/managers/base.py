@@ -39,3 +39,8 @@ class BaseDjangoRedisManager(BaseRedisManager):  # type: ignore[misc]
     def _is_disabled(self) -> bool:
         """Return ``True`` when Redis-backed behavior is disabled locally."""
         return bool(settings.DEBUG and not getattr(settings, "CODEX_REDIS_ENABLED", False))
+
+
+def get_default_redis_manager(prefix: str = "") -> BaseDjangoRedisManager:
+    """Return a base Redis manager configured from Django settings."""
+    return BaseDjangoRedisManager(prefix=prefix)

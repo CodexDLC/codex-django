@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Added public core sitemap seams for alternates, x-default language selection, and settings-backed static page sitemaps.
+- Added a public i18n URL translation helper and a default Redis manager factory/export surface.
+
+### Changed
+
+- Changed static-page SEO selection to support injectable model, lookup field, cache manager, and cache timeout seams while preserving existing defaults.
+
+### Fixed
+
+- Fixed sitemap alternates being computed but not attached to generated URL entries.
+
 ## [0.3.1] - 2026-04-10
 
 ### Added

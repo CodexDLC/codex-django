@@ -204,12 +204,26 @@ Keep the scope to cabinet only.
 
 Status:
 - [ ] Not started
-- [ ] Domain audit done
-- [ ] Universal vs project-specific rules separated
-- [ ] Library extension seams designed
-- [ ] Library code refactored
-- [ ] Backward compatibility checked
-- [ ] Lily cleanup checklist written
+- [x] Domain audit done
+- [x] Universal vs project-specific rules separated
+- [x] Library extension seams designed
+- [x] Library code refactored
+- [x] Backward compatibility checked
+- [x] Lily cleanup checklist written
+
+Core stage tracker:
+- [x] Stage 1 done — sitemap alternates now attach to URL entries and x-default is configurable with `SITEMAP_DEFAULT_LANGUAGE`
+- [x] Stage 2 done — `StaticPagesSitemap` provides settings-backed static route sitemap behavior
+- [x] Stage 3 done — public i18n URL translation helper backs the template tag
+- [x] Stage 4 done — top-level Redis exports include all core managers plus a default manager factory
+- [x] Stage 5 done — static-page SEO selector accepts model, lookup field, cache manager, and timeout seams
+
+Final Lily cleanup checklist:
+- [ ] delete the project-side `StaticSitemap.get_urls()` override after consuming the updated library
+- [ ] replace local `core.templatetags.i18n_urls` usage with the library `codex_i18n` tag/helper
+- [ ] replace internal Redis imports/local wrapper with public `codex_django.core.redis` imports or `get_default_redis_manager`
+- [ ] keep Lily-owned sitemap settings local: `SITEMAP_STATIC_PAGES`, `SITEMAP_DEFAULT_LANGUAGE`, and `SITEMAP_LOOKUP_NAMESPACES`
+- [ ] keep `codex_makemessages` extraction deferred unless another project duplicates management-command planning logic
 
 Recommended model:
 - `GPT-5.4`
@@ -251,6 +265,28 @@ Output format:
 4. Proposed extension seams
 5. Refactor candidates
 6. Post-release cleanup list
+```
+
+Follow-up documentation and memory prompt:
+
+```text
+Update documentation and memory for the codex-django core refactor.
+
+Scope:
+- Library only for code and tests: C:\install\projects\codex_tools\codex-django\src\codex_django\core
+- Lily docs only: C:\install\projects\clients\lily_website\docs\en_EN\architecture\backend_django\core\sitemaps.md
+- Do not change Lily Python code.
+- Do not create a release tag or version section.
+- Put changelog notes under CHANGELOG.md [Unreleased].
+
+Documentation tasks:
+- Update LIBRARY_DOMAIN_REFACTOR_PROMPTS.md Core board/status and Lily cleanup checklist.
+- Update the single Lily sitemap md to describe the new library-backed sitemap behavior and the remaining Lily-owned settings.
+- Keep docs concise and avoid moving Lily-specific policy into codex-django docs.
+
+Memory graph tasks:
+- Add/update observations that codex-django core now exposes public sitemap seams, StaticPagesSitemap, i18n URL helper, default Redis manager factory/exports, and configurable static SEO selector seams.
+- Add/update observations that Lily should later remove local StaticSitemap.get_urls, core.templatetags.i18n_urls, and local core.redis wrapper after consuming the updated library.
 ```
 
 ### 4. System

@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from codex_django.core.seo.selectors import get_static_page_seo
+from codex_django.core.seo.selectors import get_static_page_seo, serialize_static_page_seo
 
 
 @pytest.mark.unit
@@ -105,3 +105,56 @@ class TestGetStaticPageSeo:
             result = get_static_page_seo("home")
 
         assert result is None
+
+    def test_custom_lookup_field_timeout_and_cache_manager(self):
+        manager = self._make_manager(cached_data=None)
+        fake_obj = MagicMock()
+        fake_obj.to_dict.return_value = {"seo_title": "Home"}
+
+        mock_model = MagicMock()
+        mock_model.objects.filter.return_value.first.return_value = fake_obj
+
+        with patch("codex_django.core.seo.selectors.apps") as mock_apps:
+            mock_apps.get_model.return_value = mock_model
+
+            result = get_static_page_seo(
+                "homepage",
+                model_path="myapp.PageSeo",
+                page_key_field="slug",
+                cache_manager=manager,
+                timeout=123,
+            )
+
+        mock_model.objects.filter.assert_called_once_with(slug="homepage")
+        manager.set_page.assert_called_once_with("homepage", mapping={"seo_title": "Home"}, timeout=123)
+        assert result == {"seo_title": "Home"}
+
+    def test_settings_defaults_for_lookup_field_and_timeout(self):
+        manager = self._make_manager(cached_data=None)
+        fake_obj = MagicMock()
+        fake_obj.to_dict.return_value = {"seo_title": "Home"}
+
+        mock_model = MagicMock()
+        mock_model.objects.filter.return_value.first.return_value = fake_obj
+
+        with (
+            patch("codex_django.core.seo.selectors.get_seo_redis_manager", return_value=manager),
+            patch("codex_django.core.seo.selectors.settings") as mock_settings,
+            patch("codex_django.core.seo.selectors.apps") as mock_apps,
+        ):
+            mock_settings.CODEX_STATIC_PAGE_SEO_MODEL = "myapp.PageSeo"
+            mock_settings.CODEX_STATIC_PAGE_SEO_KEY_FIELD = "slug"
+            mock_settings.CODEX_STATIC_PAGE_SEO_CACHE_TIMEOUT = 456
+            mock_apps.get_model.return_value = mock_model
+
+            result = get_static_page_seo("homepage")
+
+        mock_model.objects.filter.assert_called_once_with(slug="homepage")
+        manager.set_page.assert_called_once_with("homepage", mapping={"seo_title": "Home"}, timeout=456)
+        assert result == {"seo_title": "Home"}
+
+    def test_serialize_static_page_seo_flattens_model_to_dict_values(self):
+        fake_obj = MagicMock()
+        fake_obj.to_dict.return_value = {"title": "Home", "description": None, "order": 3}
+
+        assert serialize_static_page_seo(fake_obj) == {"title": "Home", "description": "", "order": "3"}
