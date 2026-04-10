@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-04-10
+
+### Added
+
+- Added a reusable `tracking` runtime module with models, admin integration, settings, providers, flush helpers, and management commands for page-view analytics.
+- Added analytics cabinet integration with selector support, dashboard widgets, middleware-driven recording, and a dedicated analytics view/template surface.
+- Added comprehensive unit coverage for tracking runtime flows and notification selector behavior.
+
+### Changed
+
+- Enhanced notification content selection to support cache-prefix aware email lookups.
+- Finalized typing and dashboard cleanup around the new tracking and analytics runtime surfaces.
+
+### Fixed
+
+- Fixed runtime test linting issues in the tracking test suite.
+
+## [0.3.2] - 2026-04-10
+
 ### Added
 
 - Added public core sitemap seams for alternates, x-default language selection, and settings-backed static page sitemaps.
