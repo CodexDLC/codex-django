@@ -121,18 +121,15 @@ class TestBaseEmailContentSelectorInvalidate:
 class TestBaseEmailContentSelectorCustomPrefix:
     def test_custom_prefix_in_cache_key(self, mock_model, mock_cache_adapter, mock_i18n_adapter):
         class PrefixedSelector(BaseEmailContentSelector):
-            cache_key_prefix = "notif"
+            cache_key_prefix = "notif:"
 
         sel = PrefixedSelector(
             model=mock_model,
             cache_adapter=mock_cache_adapter,
             i18n_adapter=mock_i18n_adapter,
         )
-        # Default prefix is "" so cache key is just "{key}:{lang}"
-        # Subclass with prefix "notif" — but note: the base implementation
-        # uses _cache_key which is just f"{key}:{language}" ignoring prefix.
-        # This test verifies the current (base class) behaviour.
+        # cache_key_prefix is prepended verbatim — include a separator in the
+        # prefix itself (e.g. "notif:") to produce "notif:booking_subject:de".
         mock_cache_adapter.get.return_value = "hit"
         sel.get("booking_subject", "de")
-        # cache_key_prefix is defined but not used in base _cache_key
-        mock_cache_adapter.get.assert_called_once_with("booking_subject:de")
+        mock_cache_adapter.get.assert_called_once_with("notif:booking_subject:de")
