@@ -16,7 +16,7 @@ def adapter(adapter_models):
     cache.get_busy.return_value = None
     with patch("codex_django.booking.adapters.availability.SlotCalculator"):
         return DjangoAvailabilityAdapter(
-            master_model=adapter_models["master"],
+            resource_model=adapter_models["master"],
             appointment_model=adapter_models["appointment"],
             service_model=adapter_models["service"],
             working_day_model=adapter_models["working_day"],
@@ -44,7 +44,7 @@ class TestDjangoAvailabilityAdapterInit:
         adapter_models["appointment"].STATUS_CONFIRMED = "confirmed"
         with patch("codex_django.booking.adapters.availability.SlotCalculator"):
             a = DjangoAvailabilityAdapter(
-                master_model=adapter_models["master"],
+                resource_model=adapter_models["master"],
                 appointment_model=adapter_models["appointment"],
                 service_model=adapter_models["service"],
                 working_day_model=adapter_models["working_day"],
@@ -62,7 +62,7 @@ class TestDjangoAvailabilityAdapterInit:
         adapter_models["appointment"].STATUS_RESCHEDULE_PROPOSED = "reschedule_proposed"
         with patch("codex_django.booking.adapters.availability.SlotCalculator"):
             a = DjangoAvailabilityAdapter(
-                master_model=adapter_models["master"],
+                resource_model=adapter_models["master"],
                 appointment_model=adapter_models["appointment"],
                 service_model=adapter_models["service"],
                 working_day_model=adapter_models["working_day"],
@@ -78,7 +78,7 @@ class TestDjangoAvailabilityAdapterInit:
 
         with patch("codex_django.booking.adapters.availability.SlotCalculator"):
             a = DjangoAvailabilityAdapter(
-                master_model=adapter_models["master"],
+                resource_model=adapter_models["master"],
                 appointment_model=adapter_models["appointment"],
                 service_model=adapter_models["service"],
                 working_day_model=adapter_models["working_day"],
@@ -98,7 +98,7 @@ class TestDjangoAvailabilityAdapterInit:
         ):
             mock_cls.return_value = MagicMock()
             DjangoAvailabilityAdapter(
-                master_model=adapter_models["master"],
+                resource_model=adapter_models["master"],
                 appointment_model=adapter_models["appointment"],
                 service_model=adapter_models["service"],
                 working_day_model=adapter_models["working_day"],
@@ -110,27 +110,27 @@ class TestDjangoAvailabilityAdapterInit:
 
 
 # ---------------------------------------------------------------------------
-# _resolve_master_ids
+# _resolve_resource_ids
 # ---------------------------------------------------------------------------
 
 
-class TestResolveMasterIds:
-    def test_returns_locked_master_id_when_provided(self, adapter):
-        result = adapter._resolve_master_ids(
+class TestResolveResourceIds:
+    def test_returns_locked_resource_id_when_provided(self, adapter):
+        result = adapter._resolve_resource_ids(
             service=MagicMock(),
             weekday=0,
-            locked_master_id=99,
-            master_selections=None,
+            locked_resource_id=99,
+            resource_selections=None,
             service_id=5,
         )
         assert result == ["99"]
 
-    def test_returns_selection_from_master_selections(self, adapter):
-        result = adapter._resolve_master_ids(
+    def test_returns_selection_from_resource_selections(self, adapter):
+        result = adapter._resolve_resource_ids(
             service=MagicMock(),
             weekday=0,
-            locked_master_id=None,
-            master_selections={5: 7},
+            locked_resource_id=None,
+            resource_selections={5: 7},
             service_id=5,
         )
         assert result == ["7"]
@@ -145,22 +145,22 @@ class TestResolveMasterIds:
         adapter_models["master"].objects.filter.return_value = masters_qs
         adapter_models["working_day"].objects.filter.return_value.values_list.return_value = [1]
 
-        result = adapter._resolve_master_ids(
+        result = adapter._resolve_resource_ids(
             service=MagicMock(),
             weekday=0,
-            locked_master_id=None,
-            master_selections={5: None},
+            locked_resource_id=None,
+            resource_selections={5: None},
             service_id=5,
         )
         # Should return master IDs from DB, not ["any"]
         assert result == ["1"]
 
-    def test_locked_master_id_takes_priority_over_selections(self, adapter):
-        result = adapter._resolve_master_ids(
+    def test_locked_resource_id_takes_priority_over_selections(self, adapter):
+        result = adapter._resolve_resource_ids(
             service=MagicMock(),
             weekday=0,
-            locked_master_id=5,
-            master_selections={7: 7},
+            locked_resource_id=5,
+            resource_selections={7: 7},
             service_id=7,
         )
         assert result == ["5"]
@@ -172,39 +172,39 @@ class TestResolveMasterIds:
         adapter_models["master"].objects.filter.return_value = masters_qs
         adapter_models["working_day"].objects.filter.return_value.values_list.return_value = []
 
-        result = adapter._resolve_master_ids(
+        result = adapter._resolve_resource_ids(
             service=MagicMock(),
             weekday=0,
-            locked_master_id=None,
-            master_selections=None,
+            locked_resource_id=None,
+            resource_selections=None,
             service_id=5,
         )
         assert result == []
 
 
 # ---------------------------------------------------------------------------
-# _normalize_master_selections
+# _normalize_resource_selections
 # ---------------------------------------------------------------------------
 
 
-class TestNormalizeMasterSelections:
+class TestNormalizeResourceSelections:
     def test_returns_empty_for_none(self, adapter):
-        assert adapter._normalize_master_selections([5, 7], None) == {}
+        assert adapter._normalize_resource_selections([5, 7], None) == {}
 
     def test_normalizes_legacy_positional_format(self, adapter):
-        result = adapter._normalize_master_selections([5, 7], {"0": "10", "1": "12"})
+        result = adapter._normalize_resource_selections([5, 7], {"0": "10", "1": "12"})
         assert result == {5: 10, 7: 12}
 
     def test_legacy_any_is_ignored(self, adapter):
-        result = adapter._normalize_master_selections([5, 7], {"0": "10", "1": "any"})
+        result = adapter._normalize_resource_selections([5, 7], {"0": "10", "1": "any"})
         assert result == {5: 10}
 
     def test_new_format_int_keys(self, adapter):
-        result = adapter._normalize_master_selections([5, 7], {5: 10, 7: None})
+        result = adapter._normalize_resource_selections([5, 7], {5: 10, 7: None})
         assert result == {5: 10, 7: None}
 
     def test_new_format_str_keys(self, adapter):
-        result = adapter._normalize_master_selections([5, 7], {"5": "10", "7": "12"})
+        result = adapter._normalize_resource_selections([5, 7], {"5": "10", "7": "12"})
         assert result == {5: 10, 7: 12}
 
 
@@ -348,16 +348,16 @@ class TestGetBreakInterval:
 
 
 class TestGetBusyIntervals:
-    def _make_appointment(self, master_id, start_dt, duration_minutes):
+    def _make_appointment(self, resource_id, start_dt, duration_minutes):
         appt = MagicMock()
-        appt.master_id = master_id
+        appt.master_id = resource_id
         appt.datetime_start = start_dt
         appt.duration_minutes = duration_minutes
         return appt
 
     def test_builds_dict_keyed_by_master_id(self, adapter, adapter_models):
         appt = self._make_appointment(
-            master_id=1,
+            resource_id=1,
             start_dt=datetime(2025, 1, 6, 9, 0, tzinfo=UTC),
             duration_minutes=60,
         )
@@ -390,7 +390,7 @@ class TestGetBusyIntervals:
 
     def test_intervals_are_utc_with_seconds_stripped(self, adapter, adapter_models):
         appt = self._make_appointment(
-            master_id=1,
+            resource_id=1,
             start_dt=datetime(2025, 1, 6, 9, 30, 45, tzinfo=UTC),
             duration_minutes=30,
         )
@@ -437,13 +437,13 @@ class TestResultToSlotsMap:
 
 
 # ---------------------------------------------------------------------------
-# lock_masters
+# lock_resources
 # ---------------------------------------------------------------------------
 
 
 class TestLockMasters:
     def test_noop_when_empty_list(self, adapter, adapter_models):
-        adapter.lock_masters([])
+        adapter.lock_resources([])
         adapter_models["master"].objects.select_for_update.assert_not_called()
 
     def test_sorts_ids_before_locking(self, adapter, adapter_models):
@@ -454,7 +454,7 @@ class TestLockMasters:
         sfu_qs = MagicMock()
         sfu_qs.filter.return_value = filter_qs
         adapter_models["master"].objects.select_for_update.return_value = sfu_qs
-        adapter.lock_masters([3, 1, 2])
+        adapter.lock_resources([3, 1, 2])
         filter_call_kwargs = sfu_qs.filter.call_args[1]
         assert filter_call_kwargs["pk__in"] == [1, 2, 3]
 
@@ -466,7 +466,7 @@ class TestLockMasters:
         sfu_qs = MagicMock()
         sfu_qs.filter.return_value = filter_qs
         adapter_models["master"].objects.select_for_update.return_value = sfu_qs
-        adapter.lock_masters([1])
+        adapter.lock_resources([1])
         adapter_models["master"].objects.select_for_update.assert_called_once_with(of=("self",))
 
 
@@ -544,7 +544,7 @@ class TestBuildEngineRequest:
         service.parallel_group = None
         adapter_models["service"].objects.filter.return_value.select_related.return_value = [service]
 
-        with patch.object(adapter, "_resolve_master_ids", return_value=["1", "2"]):
+        with patch.object(adapter, "_resolve_resource_ids", return_value=["1", "2"]):
             result = adapter.build_engine_request(service_ids=[5], target_date=date(2025, 1, 6))
         assert len(result.service_requests) == 1
         sr = result.service_requests[0]
@@ -561,7 +561,7 @@ class TestBuildEngineRequest:
             adapter.build_engine_request(service_ids=[999], target_date=date(2025, 1, 6))
 
     def test_skips_service_with_no_masters_raises_validation(self, adapter, adapter_models):
-        """If _resolve_master_ids returns [] for all services → ValidationError."""
+        """If _resolve_resource_ids returns [] for all services → ValidationError."""
         from pydantic import ValidationError
 
         service = MagicMock()
@@ -569,7 +569,7 @@ class TestBuildEngineRequest:
         service.duration = 60
         adapter_models["service"].objects.filter.return_value.select_related.return_value = [service]
         with (
-            patch.object(adapter, "_resolve_master_ids", return_value=[]),
+            patch.object(adapter, "_resolve_resource_ids", return_value=[]),
             pytest.raises(ValidationError),
         ):
             adapter.build_engine_request(service_ids=[5], target_date=date(2025, 1, 6))
@@ -581,7 +581,7 @@ class TestBuildEngineRequest:
         service.min_gap_after_minutes = 0
         service.parallel_group = None
         adapter_models["service"].objects.filter.return_value.select_related.return_value = [service]
-        with patch.object(adapter, "_resolve_master_ids", return_value=["1"]):
+        with patch.object(adapter, "_resolve_resource_ids", return_value=["1"]):
             result = adapter.build_engine_request(service_ids=[5], target_date=date(2025, 3, 15))
         assert result.booking_date == date(2025, 3, 15)
 
@@ -597,7 +597,7 @@ class TestBuildEngineRequest:
         svc2.min_gap_after_minutes = 5
         svc2.parallel_group = None
         adapter_models["service"].objects.filter.return_value.select_related.return_value = [svc1, svc2]
-        with patch.object(adapter, "_resolve_master_ids", return_value=["1"]):
+        with patch.object(adapter, "_resolve_resource_ids", return_value=["1"]):
             result = adapter.build_engine_request(service_ids=[1, 2], target_date=date(2025, 1, 6))
         assert len(result.service_requests) == 2
 
@@ -611,7 +611,7 @@ class TestBuildEngineRequest:
         service.parallel_group = None
         adapter_models["service"].objects.filter.return_value.select_related.return_value = [service]
 
-        with patch.object(adapter, "_resolve_master_ids", return_value=["10"]):
+        with patch.object(adapter, "_resolve_resource_ids", return_value=["10"]):
             result = adapter.build_engine_request(
                 service_ids=[5],
                 target_date=date(2026, 4, 1),
@@ -628,7 +628,7 @@ class TestBuildEngineRequest:
         service.parallel_group = None
         adapter_models["service"].objects.filter.return_value.select_related.return_value = [service]
 
-        with patch.object(adapter, "_resolve_master_ids", return_value=["10"]):
+        with patch.object(adapter, "_resolve_resource_ids", return_value=["10"]):
             result = adapter.build_engine_request(
                 service_ids=[5],
                 target_date=date(2026, 4, 1),
@@ -637,7 +637,7 @@ class TestBuildEngineRequest:
 
         assert result.overlap_allowed is True
 
-    def test_new_master_selections_format_is_service_keyed(self, adapter, adapter_models):
+    def test_new_resource_selections_format_is_service_keyed(self, adapter, adapter_models):
         svc1 = MagicMock()
         svc1.id = 5
         svc1.duration = 30
@@ -652,13 +652,13 @@ class TestBuildEngineRequest:
 
         with patch.object(
             adapter,
-            "_resolve_master_ids",
+            "_resolve_resource_ids",
             side_effect=[["10"], ["12"]],
         ) as mock_resolve:
             result = adapter.build_engine_request(
                 service_ids=[5, 7],
                 target_date=date(2026, 4, 1),
-                master_selections={5: 10, 7: 12},
+                resource_selections={5: 10, 7: 12},
             )
 
         assert len(result.service_requests) == 2
@@ -666,9 +666,9 @@ class TestBuildEngineRequest:
         assert result.service_requests[1].possible_resource_ids == ["12"]
         assert mock_resolve.call_args_list[0].kwargs["service_id"] == 5
         assert mock_resolve.call_args_list[1].kwargs["service_id"] == 7
-        assert mock_resolve.call_args_list[0].kwargs["master_selections"] == {5: 10, 7: 12}
+        assert mock_resolve.call_args_list[0].kwargs["resource_selections"] == {5: 10, 7: 12}
 
-    def test_legacy_master_selections_still_supported(self, adapter, adapter_models):
+    def test_legacy_resource_selections_still_supported(self, adapter, adapter_models):
         svc1 = MagicMock()
         svc1.id = 5
         svc1.duration = 30
@@ -683,16 +683,16 @@ class TestBuildEngineRequest:
 
         with patch.object(
             adapter,
-            "_resolve_master_ids",
+            "_resolve_resource_ids",
             side_effect=[["10"], ["12"]],
         ) as mock_resolve:
             adapter.build_engine_request(
                 service_ids=[5, 7],
                 target_date=date(2026, 4, 1),
-                master_selections={"0": "10", "1": "12"},
+                resource_selections={"0": "10", "1": "12"},
             )
 
-        assert mock_resolve.call_args_list[0].kwargs["master_selections"] == {5: 10, 7: 12}
+        assert mock_resolve.call_args_list[0].kwargs["resource_selections"] == {5: 10, 7: 12}
 
     def test_missing_service_in_selection_means_any(self, adapter, adapter_models):
         svc1 = MagicMock()
@@ -707,15 +707,15 @@ class TestBuildEngineRequest:
         svc2.parallel_group = None
         adapter_models["service"].objects.filter.return_value.select_related.return_value = [svc1, svc2]
 
-        with patch.object(adapter, "_resolve_master_ids", side_effect=[["10"], ["12", "13"]]) as mock_resolve:
+        with patch.object(adapter, "_resolve_resource_ids", side_effect=[["10"], ["12", "13"]]) as mock_resolve:
             result = adapter.build_engine_request(
                 service_ids=[5, 7],
                 target_date=date(2026, 4, 1),
-                master_selections={5: 10},
+                resource_selections={5: 10},
             )
 
         assert len(result.service_requests) == 2
-        assert mock_resolve.call_args_list[1].kwargs["master_selections"] == {5: 10}
+        assert mock_resolve.call_args_list[1].kwargs["resource_selections"] == {5: 10}
 
     def test_parallel_groups_override_service_field(self, adapter, adapter_models):
         svc1 = MagicMock()
@@ -730,7 +730,7 @@ class TestBuildEngineRequest:
         svc2.parallel_group = None
         adapter_models["service"].objects.filter.return_value.select_related.return_value = [svc1, svc2]
 
-        with patch.object(adapter, "_resolve_master_ids", return_value=["10"]):
+        with patch.object(adapter, "_resolve_resource_ids", return_value=["10"]):
             result = adapter.build_engine_request(
                 service_ids=[5, 7],
                 target_date=date(2026, 4, 1),
@@ -739,3 +739,20 @@ class TestBuildEngineRequest:
 
         assert result.service_requests[0].parallel_group == "A"
         assert result.service_requests[1].parallel_group == "B"
+
+    def test_calls_prioritize_resource_ids_seam(self, adapter, adapter_models):
+        service = MagicMock()
+        service.id = 5
+        service.duration = 60
+        service.min_gap_after_minutes = 0
+        service.parallel_group = None
+        adapter_models["service"].objects.filter.return_value.select_related.return_value = [service]
+
+        with (
+            patch.object(adapter, "_resolve_resource_ids", return_value=["10", "11"]),
+            patch.object(adapter, "prioritize_resource_ids", return_value=["11", "10"]) as prioritize_mock,
+        ):
+            result = adapter.build_engine_request(service_ids=[5], target_date=date(2026, 4, 1))
+
+        assert result.service_requests[0].possible_resource_ids == ["11", "10"]
+        prioritize_mock.assert_called_once()

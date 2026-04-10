@@ -40,7 +40,7 @@ def test_contracts_are_importable_from_public_booking_module():
 def test_feature_models_bundle_keeps_runtime_model_references():
     bundle = BookingFeatureModels(
         appointment_model=object,
-        master_model=dict,
+        resource_model=dict,
         service_model=list,
         working_day_model=tuple,
         day_off_model=set,

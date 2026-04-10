@@ -30,8 +30,9 @@
 
   </div>
 
-  <script src="{% static 'cabinet/js/vendor/htmx.min.js' %}"></script>
-  <script src="{% static 'cabinet/js/app/cabinet.js' %}" defer></script>
+  <script src="{% static 'cabinet/js/vendor/htmx.min.js' %}" defer></script>
+  <script src="{% static 'cabinet/js/app/cabinet.js' %}?v=2" defer></script>
+  <script src="{% static 'cabinet/js/app/cabinet_local.js' %}?v=2" defer></script>
   <script src="{% static 'cabinet/js/vendor/alpine.min.js' %}" defer></script>
   <script src="{% static 'cabinet/js/vendor/bootstrap.bundle.min.js' %}" defer></script>
   {% block extra_js %}{% endblock %}

@@ -29,15 +29,20 @@
           <div class="text-center text-muted" style="font-size: .65rem; font-weight: 600; padding: 4px 0;">Mo</div><div class="text-center text-muted" style="font-size: .65rem; font-weight: 600; padding: 4px 0;">Tu</div><div class="text-center text-muted" style="font-size: .65rem; font-weight: 600; padding: 4px 0;">We</div><div class="text-center text-muted" style="font-size: .65rem; font-weight: 600; padding: 4px 0;">Th</div><div class="text-center text-muted" style="font-size: .65rem; font-weight: 600; padding: 4px 0;">Fr</div><div class="text-center text-muted" style="font-size: .65rem; font-weight: 600; padding: 4px 0;">Sa</div><div class="text-center text-muted" style="font-size: .65rem; font-weight: 600; padding: 4px 0;">Su</div>
         </div>
         <div style="display: grid; grid-template-columns: repeat(7,1fr); gap: 2px;">
-          {% for day in picker.available_days %}
-          <div class="cab-cal-day justify-content-center"
-               x-show="isDayInCurrentMonth('{{ day.iso }}')"
-               :class="selectedDate === '{{ day.iso }}' ? 'cab-cal-day--today' : ''"
-               @click="selectDate('{{ day.iso }}')"
-               style="{% if day.busy %}opacity: .45; pointer-events: none;{% endif %}">
-            {{ day.day }}
-          </div>
-          {% endfor %}
+          {% with calendar_cells=picker.calendar_cells|default:picker.available_days %}
+            {% for day in calendar_cells %}
+              {% if day.blank %}
+              <div aria-hidden="true" class="cab-cal-day cab-cal-day--empty"></div>
+              {% else %}
+              <div class="cab-cal-day justify-content-center"
+                   :class="selectedDate === '{{ day.iso }}' ? 'cab-cal-day--today' : ''"
+                   @click="selectDate('{{ day.iso }}')"
+                   style="{% if day.busy %}opacity: .45; pointer-events: none;{% endif %}">
+                {{ day.day }}
+              </div>
+              {% endif %}
+            {% endfor %}
+          {% endwith %}
         </div>
       </div>
     </div>

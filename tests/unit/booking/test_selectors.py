@@ -20,8 +20,8 @@ def mock_adapter():
     request = MagicMock()
     request.service_requests = [sr]
     adapter.build_engine_request.return_value = request
-    adapter.build_masters_availability.return_value = {"1": MagicMock(), "2": MagicMock()}
-    adapter.lock_masters.return_value = None
+    adapter.build_resources_availability.return_value = {"1": MagicMock(), "2": MagicMock()}
+    adapter.lock_resources.return_value = None
     return adapter
 
 
@@ -51,14 +51,14 @@ class TestGetAvailableSlots:
         mock_adapter.build_engine_request.assert_called_once_with(
             service_ids=[1, 2],
             target_date=date(2025, 1, 6),
-            locked_master_id=None,
-            master_selections=None,
+            locked_resource_id=None,
+            resource_selections=None,
             mode=BookingMode.SINGLE_DAY,
             overlap_allowed=False,
             parallel_groups=None,
         )
 
-    def test_deduplicates_master_ids(self, mock_adapter, mock_finder):
+    def test_deduplicates_resource_ids(self, mock_adapter, mock_finder):
         finder, _ = mock_finder
         sr = MagicMock()
         sr.possible_resource_ids = ["1", "1", "2"]
@@ -67,7 +67,7 @@ class TestGetAvailableSlots:
             from codex_django.booking.selectors import get_available_slots
 
             get_available_slots(mock_adapter, [1], date(2025, 1, 6))
-        called_ids = mock_adapter.build_masters_availability.call_args[1]["master_ids"]
+        called_ids = mock_adapter.build_resources_availability.call_args[1]["resource_ids"]
         assert sorted(called_ids) == [1, 2]
         assert len(called_ids) == len(set(called_ids))
 
@@ -94,19 +94,19 @@ class TestGetAvailableSlots:
             from codex_django.booking.selectors import get_available_slots
 
             get_available_slots(mock_adapter, [1], date(2025, 1, 6), cache_ttl=60)
-        assert mock_adapter.build_masters_availability.call_args[1]["cache_ttl"] == 60
+        assert mock_adapter.build_resources_availability.call_args[1]["cache_ttl"] == 60
 
-    def test_passes_locked_master_id(self, mock_adapter, mock_finder):
+    def test_passes_locked_resource_id(self, mock_adapter, mock_finder):
         finder, _ = mock_finder
         with patch("codex_django.booking.selectors.ChainFinder", return_value=finder):
             from codex_django.booking.selectors import get_available_slots
 
-            get_available_slots(mock_adapter, [1], date(2025, 1, 6), locked_master_id=5)
+            get_available_slots(mock_adapter, [1], date(2025, 1, 6), locked_resource_id=5)
         mock_adapter.build_engine_request.assert_called_once_with(
             service_ids=[1],
             target_date=date(2025, 1, 6),
-            locked_master_id=5,
-            master_selections=None,
+            locked_resource_id=5,
+            resource_selections=None,
             mode=BookingMode.SINGLE_DAY,
             overlap_allowed=False,
             parallel_groups=None,
@@ -138,8 +138,8 @@ class TestGetAvailableSlots:
         mock_adapter.build_engine_request.assert_called_once_with(
             service_ids=[5, 7],
             target_date=date(2026, 4, 1),
-            locked_master_id=None,
-            master_selections=None,
+            locked_resource_id=None,
+            resource_selections=None,
             mode=BookingMode.MULTI_DAY,
             overlap_allowed=True,
             parallel_groups={5: "A", 7: "B"},
@@ -210,6 +210,112 @@ class TestGetCalendarData:
         assert call_kwargs["holidays_subdiv"] == "BY"
 
 
+class TestBuildMonthGridCells:
+    def test_adds_leading_and_trailing_blank_cells(self):
+        from codex_django.booking.selectors import build_month_grid_cells
+
+        visible_days = [{"day": day, "iso": f"2026-05-{day:02d}"} for day in range(1, 32)]
+
+        result = build_month_grid_cells(2026, 5, visible_days)
+
+        assert len(result) == 35
+        assert result[0] == {"blank": True}
+        assert result[1] == {"blank": True}
+        assert result[2] == {"blank": True}
+        assert result[3] == {"blank": True}
+        assert result[4]["day"] == 1
+        assert result[4]["iso"] == "2026-05-01"
+        assert result[4]["blank"] is False
+        assert result[-1]["day"] == 31
+        assert result[-1]["blank"] is False
+
+    def test_returns_empty_list_when_visible_days_missing(self):
+        from codex_django.booking.selectors import build_month_grid_cells
+
+        assert build_month_grid_cells(2026, 5, []) == []
+
+
+class TestBuildPickerDayRows:
+    def test_builds_rows_with_month_blanks_and_availability_flags(self):
+        from codex_django.booking.selectors import build_picker_day_rows
+
+        result = build_picker_day_rows(
+            start_date=date(2026, 5, 1),  # Friday
+            horizon=3,
+            available_dates={"2026-05-02"},
+        )
+
+        assert len(result) == 7
+        assert result[0]["iso"] == "2026-05-blank-0"
+        assert result[3]["iso"] == "2026-05-blank-3"
+        assert result[4]["day"] == 1
+        assert result[4]["busy"] is True
+        assert result[5]["day"] == 2
+        assert result[5]["available"] is True
+        assert result[5]["busy"] is False
+        assert result[6]["month_key"] == "2026-05"
+        assert result[6]["month_label"] == "May 2026"
+
+    def test_horizon_zero_returns_empty(self):
+        from codex_django.booking.selectors import build_picker_day_rows
+
+        assert build_picker_day_rows(start_date=date(2026, 5, 1), horizon=0, available_dates=set()) == []
+
+    def test_can_disable_service_scope_flags(self):
+        from codex_django.booking.selectors import build_picker_day_rows
+
+        result = build_picker_day_rows(
+            start_date=date(2026, 5, 1),
+            horizon=1,
+            available_dates={"2026-05-01"},
+            has_service_scope=False,
+        )
+
+        assert result[-1]["available"] is False
+        assert result[-1]["busy"] is False
+
+
+class TestParseMasterSelections:
+    def test_returns_none_for_empty_or_invalid_payload(self):
+        from codex_django.booking.selectors import parse_resource_selections
+
+        assert parse_resource_selections("") is None
+        assert parse_resource_selections("{") is None
+        assert parse_resource_selections('["not", "a", "dict"]') is None
+
+    def test_filters_non_selection_values_and_normalizes_to_strings(self):
+        from codex_django.booking.selectors import parse_resource_selections
+
+        payload = '{"1":"10","2":"any","3":null,"4":"","5":12}'
+        assert parse_resource_selections(payload) == {"1": "10", "5": "12"}
+
+
+class TestNormalizeSlotPayload:
+    def test_normalizes_engine_result_payload(self):
+        from codex_django.booking.selectors import normalize_slot_payload
+
+        payload = MagicMock()
+        payload.get_unique_start_times.return_value = ["10:00", "09:30", "10:00", ""]
+        assert normalize_slot_payload(payload) == ["09:30", "10:00"]
+
+    def test_normalizes_dict_payload(self):
+        from codex_django.booking.selectors import normalize_slot_payload
+
+        payload = {"10:00": True, "09:30": 1, "08:00": False}
+        assert normalize_slot_payload(payload) == ["09:30", "10:00"]
+
+    def test_normalizes_list_payload(self):
+        from codex_django.booking.selectors import normalize_slot_payload
+
+        payload = ["10:00", "09:30", ""]
+        assert normalize_slot_payload(payload) == ["09:30", "10:00"]
+
+    def test_returns_empty_for_unsupported_payload(self):
+        from codex_django.booking.selectors import normalize_slot_payload
+
+        assert normalize_slot_payload("09:30") == []
+
+
 # ---------------------------------------------------------------------------
 # get_nearest_slots
 # ---------------------------------------------------------------------------
@@ -258,8 +364,8 @@ class TestGetNearestSlots:
             get_nearest_slots(mock_adapter, [1], date(2025, 1, 6))
         fn = finder.find_nearest.call_args[1]["get_availability_for_date"]
         fn(date(2025, 1, 7))
-        mock_adapter.build_masters_availability.assert_called()
-        last_call_kwargs = mock_adapter.build_masters_availability.call_args[1]
+        mock_adapter.build_resources_availability.assert_called()
+        last_call_kwargs = mock_adapter.build_resources_availability.call_args[1]
         assert last_call_kwargs["target_date"] == date(2025, 1, 7)
 
     def test_search_from_passed_to_finder(self, mock_adapter, mock_finder):
@@ -288,8 +394,8 @@ class TestGetNearestSlots:
         mock_adapter.build_engine_request.assert_called_once_with(
             service_ids=[5, 7],
             target_date=date(2026, 4, 1),
-            locked_master_id=None,
-            master_selections=None,
+            locked_resource_id=None,
+            resource_selections=None,
             mode=BookingMode.MULTI_DAY,
             overlap_allowed=True,
             parallel_groups={5: "A", 7: "B"},
@@ -333,7 +439,7 @@ class TestCreateBookingUnit:
                         service_ids=[1],
                         target_date=date(2025, 1, 6),
                         selected_time="09:00",  # not in ["10:00", "10:30"]
-                        master_id=1,
+                        resource_id=1,
                         client=MagicMock(),
                     )
 
@@ -360,7 +466,7 @@ class TestCreateBookingUnit:
                         service_ids=[1],
                         target_date=date(2025, 1, 6),
                         selected_time="09:00",
-                        master_id=1,
+                        resource_id=1,
                         client=MagicMock(),
                     )
 
@@ -385,7 +491,7 @@ class TestCreateBookingUnit:
                     service_ids=[1],
                     target_date=date(2025, 1, 6),
                     selected_time="09:00",
-                    master_id=1,
+                    resource_id=1,
                     client=MagicMock(),
                     extra_fields={"notes": "VIP client"},
                 )
@@ -416,7 +522,7 @@ class TestCreateBookingUnit:
                     service_ids=[1],
                     target_date=date(2025, 1, 6),
                     selected_time="09:00",
-                    master_id=1,
+                    resource_id=1,
                     client=MagicMock(),
                 )
         assert len(captured_callbacks) == 1
@@ -438,10 +544,10 @@ class TestCreateBookingUnit:
                     service_ids=[1, 2],
                     target_date=date(2025, 1, 6),
                     selected_time="09:00",
-                    master_id=1,
+                    resource_id=1,
                     client=MagicMock(),
                 )
-        mock_adapter.lock_masters.assert_not_called()
+        mock_adapter.lock_resources.assert_not_called()
 
     def test_multi_with_hook_calls_persist_chain(self, mock_adapter):
         engine_result = self._setup_mocks(["09:00"])
@@ -471,13 +577,13 @@ class TestCreateBookingUnit:
                     service_ids=[1, 2],
                     target_date=date(2025, 1, 6),
                     selected_time="09:00",
-                    master_id=1,
+                    resource_id=1,
                     client=MagicMock(),
                     persistence_hook=hook,
                 )
 
         hook.persist_chain.assert_called_once()
-        mock_adapter.lock_masters.assert_called_once_with([1, 2])
+        mock_adapter.lock_resources.assert_called_once_with([1, 2])
         assert result == created
 
     def test_multi_hook_error_prevents_on_commit_registration(self, mock_adapter):
@@ -504,7 +610,7 @@ class TestCreateBookingUnit:
                         service_ids=[1, 2],
                         target_date=date(2025, 1, 6),
                         selected_time="09:00",
-                        master_id=1,
+                        resource_id=1,
                         client=MagicMock(),
                         persistence_hook=hook,
                     )
@@ -539,8 +645,8 @@ class TestCreateBookingWithDb:
         req = MagicMock()
         req.service_requests = [sr]
         adapter.build_engine_request.return_value = req
-        adapter.build_masters_availability.return_value = {}
-        adapter.lock_masters.return_value = None
+        adapter.build_resources_availability.return_value = {}
+        adapter.lock_resources.return_value = None
         with patch("codex_django.booking.selectors.ChainFinder") as finder_cls:
             finder = MagicMock()
             finder.find.return_value = engine_result
@@ -554,7 +660,7 @@ class TestCreateBookingWithDb:
                 service_ids=[1],
                 target_date=date(2025, 1, 6),
                 selected_time="09:00",
-                master_id=1,
+                resource_id=1,
                 client=MagicMock(),
             )
         appointment_model.objects.create.assert_called_once()

@@ -7,7 +7,7 @@ All models are injected at construction time — no hardcoded imports.
 
 Rules enforced:
     R1 — Cache invalidation via ``transaction.on_commit()`` only (see selectors).
-    R2 — ``select_for_update(of=('self',))`` in ``lock_masters()``.
+    R2 — ``select_for_update(of=('self',))`` in ``lock_resources()``.
     R3 — No clean/save overrides here; pure adapter logic.
 """
 
@@ -36,7 +36,7 @@ class DjangoAvailabilityAdapter:
     can be used directly with ``ChainFinder``.
 
     Args:
-        master_model: Django model class for masters/resources.
+        resource_model: Django model class for resources/executors.
         appointment_model: Django model class for appointments.
         service_model: Django model class for services.
         working_day_model: Django model class for per-weekday schedule.
@@ -50,7 +50,7 @@ class DjangoAvailabilityAdapter:
 
     def __init__(
         self,
-        master_model: type[Any],
+        resource_model: type[Any],
         appointment_model: type[Any],
         service_model: type[Any],
         working_day_model: type[Any],
@@ -61,7 +61,7 @@ class DjangoAvailabilityAdapter:
         appointment_status_filter: list[str] | None = None,
         cache_adapter: BookingCacheAdapter | None = None,
     ) -> None:
-        self.master_model = master_model
+        self.resource_model = resource_model
         self.appointment_model = appointment_model
         self.service_model = service_model
         self.working_day_model = working_day_model
@@ -94,16 +94,16 @@ class DjangoAvailabilityAdapter:
         self,
         service_ids: list[int],
         target_date: date,
-        locked_master_id: int | None = None,
-        master_selections: dict[str, str] | dict[int, int | None] | None = None,
+        locked_resource_id: int | None = None,
+        resource_selections: dict[str, str] | dict[int, int | None] | None = None,
         mode: BookingMode = BookingMode.SINGLE_DAY,
         overlap_allowed: bool = False,
         parallel_groups: dict[int, str] | None = None,
     ) -> BookingEngineRequest:
-        """Build a ``BookingEngineRequest`` from DB service/master data."""
+        """Build a ``BookingEngineRequest`` from DB service/resource data."""
         services = self.service_model.objects.filter(id__in=service_ids).select_related("category")
         service_map = {s.id: s for s in services}
-        normalized_master_selections = self._normalize_master_selections(service_ids, master_selections)
+        normalized_resource_selections = self._normalize_resource_selections(service_ids, resource_selections)
 
         weekday = target_date.weekday()
         service_requests: list[ServiceRequest] = []
@@ -113,11 +113,17 @@ class DjangoAvailabilityAdapter:
             if not service:
                 continue
 
-            possible_ids = self._resolve_master_ids(
+            possible_ids = self._resolve_resource_ids(
                 service=service,
                 weekday=weekday,
-                locked_master_id=locked_master_id,
-                master_selections=normalized_master_selections,
+                locked_resource_id=locked_resource_id,
+                resource_selections=normalized_resource_selections,
+                service_id=svc_id,
+            )
+            possible_ids = self.prioritize_resource_ids(
+                resource_ids=possible_ids,
+                service=service,
+                target_date=target_date,
                 service_id=svc_id,
             )
             if not possible_ids:
@@ -149,9 +155,9 @@ class DjangoAvailabilityAdapter:
     # Availability builder (implements AvailabilityProvider pattern)
     # ------------------------------------------------------------------
 
-    def build_masters_availability(
+    def build_resources_availability(
         self,
-        master_ids: list[int],
+        resource_ids: list[int],
         target_date: date,
         cache_ttl: int = 0,
         exclude_appointment_ids: list[int] | None = None,
@@ -163,18 +169,18 @@ class DjangoAvailabilityAdapter:
         settings = self._get_booking_settings()
         result: dict[str, MasterAvailability] = {}
 
-        # Days off — exclude these masters entirely
+        # Days off — exclude these resources entirely
         day_off_ids = set(
-            self.day_off_model.objects.filter(master_id__in=master_ids, date=target_date).values_list(
+            self.day_off_model.objects.filter(master_id__in=resource_ids, date=target_date).values_list(
                 "master_id", flat=True
             )
         )
 
         # Busy intervals (from appointments)
-        busy_by_master = self._get_busy_intervals(master_ids, target_date, exclude_appointment_ids)
+        busy_by_resource = self._get_busy_intervals(resource_ids, target_date, exclude_appointment_ids)
 
-        masters = self.master_model.objects.filter(pk__in=master_ids)
-        for master in masters:
+        resources = self.resource_model.objects.filter(pk__in=resource_ids)
+        for master in resources:
             if master.pk in day_off_ids:
                 continue
 
@@ -189,7 +195,7 @@ class DjangoAvailabilityAdapter:
             free_windows = self._calc.merge_free_windows(
                 work_start=work_start_dt,
                 work_end=work_end_dt,
-                busy_intervals=busy_by_master.get(master.pk, []),
+                busy_intervals=busy_by_resource.get(master.pk, []),
                 break_interval=break_interval,
                 buffer_minutes=buffer,
                 min_duration_minutes=self.step_minutes,
@@ -202,6 +208,18 @@ class DjangoAvailabilityAdapter:
             )
 
         return result
+
+    def prioritize_resource_ids(
+        self,
+        *,
+        resource_ids: list[str],
+        service: Any,
+        target_date: date,
+        service_id: int,
+    ) -> list[str]:
+        """Public seam for project-specific resource ordering policies."""
+        del service, target_date, service_id
+        return resource_ids
 
     # ------------------------------------------------------------------
     # Schedule (implements ScheduleProvider pattern)
@@ -270,16 +288,16 @@ class DjangoAvailabilityAdapter:
     # Locking (R2: select_for_update with of=('self',))
     # ------------------------------------------------------------------
 
-    def lock_masters(self, master_ids: list[int]) -> None:
-        """Acquire row-level locks on master records.
+    def lock_resources(self, resource_ids: list[int]) -> None:
+        """Acquire row-level locks on resource records.
 
         Must be called inside ``transaction.atomic()``.
         IDs are sorted to prevent deadlocks.
         """
-        if not master_ids:
+        if not resource_ids:
             return
-        sorted_ids = sorted(master_ids)
-        list(self.master_model.objects.select_for_update(of=("self",)).filter(pk__in=sorted_ids).only("pk"))
+        sorted_ids = sorted(resource_ids)
+        list(self.resource_model.objects.select_for_update(of=("self",)).filter(pk__in=sorted_ids).only("pk"))
 
     # ------------------------------------------------------------------
     # Busy intervals (implements BusySlotsProvider pattern)
@@ -287,15 +305,15 @@ class DjangoAvailabilityAdapter:
 
     def _get_busy_intervals(
         self,
-        master_ids: list[int],
+        resource_ids: list[int],
         target_date: date,
         exclude_appointment_ids: list[int] | None = None,
     ) -> dict[int, list[tuple[datetime, datetime]]]:
         """Fetch busy intervals from cache or DB."""
-        busy_by_master: dict[int, list[tuple[datetime, datetime]]] = {mid: [] for mid in master_ids}
+        busy_by_master: dict[int, list[tuple[datetime, datetime]]] = {mid: [] for mid in resource_ids}
 
         appt_filter = {
-            "master_id__in": master_ids,
+            "master_id__in": resource_ids,
             "datetime_start__date": target_date,
             "status__in": self.appointment_status_filter,
         }
@@ -320,27 +338,27 @@ class DjangoAvailabilityAdapter:
         times = result.get_unique_start_times()
         return dict.fromkeys(times, True)
 
-    def _resolve_master_ids(
+    def _resolve_resource_ids(
         self,
         service: Any,
         weekday: int,
-        locked_master_id: int | None,
-        master_selections: dict[int, int | None] | None,
+        locked_resource_id: int | None,
+        resource_selections: dict[int, int | None] | None,
         service_id: int,
     ) -> list[str]:
-        """Determine which master IDs can perform a service."""
-        if locked_master_id:
-            return [str(locked_master_id)]
+        """Determine which resource IDs can perform a service."""
+        if locked_resource_id:
+            return [str(locked_resource_id)]
 
-        if master_selections and service_id in master_selections:
-            m_id = master_selections[service_id]
+        if resource_selections and service_id in resource_selections:
+            m_id = resource_selections[service_id]
             if m_id is not None:
                 return [str(m_id)]
 
-        # All active masters for this service's category working on this weekday
-        masters = self.master_model.objects.filter(
+        # All active resources for this service's category working on this weekday
+        masters = self.resource_model.objects.filter(
             categories=service.category,
-            status=self.master_model.STATUS_ACTIVE,
+            status=self.resource_model.STATUS_ACTIVE,
         )
 
         # Filter by weekday using the relational working_day_model
@@ -353,27 +371,27 @@ class DjangoAvailabilityAdapter:
 
         return [str(m.pk) for m in masters if m.pk in masters_with_schedule]
 
-    def _normalize_master_selections(
+    def _normalize_resource_selections(
         self,
         service_ids: list[int],
-        master_selections: dict[str, str] | dict[int, int | None] | None,
+        resource_selections: dict[str, str] | dict[int, int | None] | None,
     ) -> dict[int, int | None]:
-        """Normalize legacy and new master selection formats.
+        """Normalize legacy and new resource selection formats.
 
         Supported input formats:
         - Legacy positional: {"0": "10", "1": "12"}
         - Service keyed: {5: 10, 7: None} or {"5": "10", "7": "12"}
         """
-        if not master_selections:
+        if not resource_selections:
             return {}
 
         # Legacy positional format: keys are indices inside service_ids.
         is_legacy_positional = all(
-            isinstance(key, str) and key.isdigit() and int(key) < len(service_ids) for key in master_selections
+            isinstance(key, str) and key.isdigit() and int(key) < len(service_ids) for key in resource_selections
         )
         if is_legacy_positional:
             normalized_legacy: dict[int, int | None] = {}
-            for key, raw_val in master_selections.items():
+            for key, raw_val in resource_selections.items():
                 idx = int(key)
                 if raw_val in (None, "any", ""):
                     continue
@@ -383,7 +401,7 @@ class DjangoAvailabilityAdapter:
             return normalized_legacy
 
         normalized: dict[int, int | None] = {}
-        for raw_key, raw_val in master_selections.items():
+        for raw_key, raw_val in resource_selections.items():
             service_id = int(raw_key)
             if raw_val in (None, "any", ""):
                 normalized[service_id] = None

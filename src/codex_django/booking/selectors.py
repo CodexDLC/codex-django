@@ -8,11 +8,14 @@ The adapter is passed as an argument (dependency injection).
 
 Rules enforced:
     R1 — Cache invalidation via ``transaction.on_commit()`` only.
-    R2 — ``lock_masters()`` uses ``select_for_update(of=('self',))``.
+    R2 — ``lock_resources()`` uses ``select_for_update(of=('self',))``.
 """
 
 from __future__ import annotations
 
+import json
+from calendar import monthrange
+from collections.abc import Mapping
 from datetime import date
 from typing import TYPE_CHECKING, Any, Protocol
 
@@ -27,7 +30,7 @@ if TYPE_CHECKING:
     from codex_django.booking.adapters.cache import BookingCacheAdapter
 
 
-MasterSelections = dict[str, str] | dict[int, int | None] | None
+ResourceSelections = dict[str, str] | dict[int, int | None] | None
 
 
 class BookingPersistenceHook(Protocol):
@@ -49,8 +52,8 @@ def get_available_slots(
     service_ids: list[int],
     target_date: date,
     *,
-    locked_master_id: int | None = None,
-    master_selections: MasterSelections = None,
+    locked_resource_id: int | None = None,
+    resource_selections: ResourceSelections = None,
     mode: BookingMode = BookingMode.SINGLE_DAY,
     overlap_allowed: bool = False,
     parallel_groups: dict[int, str] | None = None,
@@ -67,8 +70,8 @@ def get_available_slots(
         adapter: Availability adapter that bridges Django models to the engine.
         service_ids: Ordered list of requested service identifiers.
         target_date: Date for which slots should be computed.
-        locked_master_id: Optional master id that constrains the search.
-        master_selections: Optional per-service master selection mapping.
+        locked_resource_id: Optional resource id that constrains the search.
+        resource_selections: Optional per-service resource selection mapping.
         mode: Booking engine search mode.
         overlap_allowed: Whether services may overlap in time.
         parallel_groups: Optional mapping of service id to parallel group id.
@@ -82,20 +85,20 @@ def get_available_slots(
     request = adapter.build_engine_request(
         service_ids=service_ids,
         target_date=target_date,
-        locked_master_id=locked_master_id,
-        master_selections=master_selections,
+        locked_resource_id=locked_resource_id,
+        resource_selections=resource_selections,
         mode=mode,
         overlap_allowed=overlap_allowed,
         parallel_groups=parallel_groups,
     )
 
-    all_master_ids: list[int] = []
+    all_resource_ids: list[int] = []
     for sr in request.service_requests:
-        all_master_ids.extend(int(mid) for mid in sr.possible_resource_ids)
-    unique_master_ids = list(set(all_master_ids))
+        all_resource_ids.extend(int(mid) for mid in sr.possible_resource_ids)
+    unique_resource_ids = list(set(all_resource_ids))
 
-    availability = adapter.build_masters_availability(
-        master_ids=unique_master_ids,
+    availability = adapter.build_resources_availability(
+        resource_ids=unique_resource_ids,
         target_date=target_date,
         cache_ttl=cache_ttl,
     )
@@ -144,13 +147,148 @@ def get_calendar_data(
     )
 
 
+def build_month_grid_cells(year: int, month: int, visible_days: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Expand visible month days into a 7-column calendar grid.
+
+    The cabinet date-time picker expects a Monday-first month grid. Some
+    upstream calendar payloads expose only the visible days for the current
+    month, which makes the first week shift left when the month starts on a
+    later weekday. This helper pads the visible days with leading and trailing
+    blank cells so templates can render a stable 7-column matrix.
+
+    Args:
+        year: Target calendar year.
+        month: Target calendar month.
+        visible_days: Flat list of day payloads for the given month.
+
+    Returns:
+        A list of calendar cell dicts. Blank placeholders include
+        ``{"blank": True}``; real day payloads are copied and annotated with
+        ``blank=False``.
+    """
+    if not visible_days:
+        return []
+
+    first_weekday, month_days = monthrange(year, month)
+    month_payload = visible_days[:month_days]
+    leading_blanks = first_weekday
+    trailing_blanks = (-((leading_blanks + len(month_payload)) % 7)) % 7
+
+    cells: list[dict[str, Any]] = [{"blank": True} for _ in range(leading_blanks)]
+    cells.extend({**day, "blank": False} for day in month_payload)
+    cells.extend({"blank": True} for _ in range(trailing_blanks))
+    return cells
+
+
+def build_picker_day_rows(
+    *,
+    start_date: date,
+    horizon: int,
+    available_dates: set[str],
+    has_service_scope: bool = True,
+) -> list[dict[str, str | int | bool]]:
+    """Build booking day-picker rows with month headers and blank paddings.
+
+    This helper mirrors the cabinet date-picker payload shape used by booking
+    workflows. It keeps month grouping and leading blank cell generation in one
+    reusable place so project services don't reimplement this rendering contract.
+    """
+    rows: list[dict[str, str | int | bool]] = []
+    if horizon <= 0:
+        return rows
+
+    current_month_key: str | None = None
+    for offset in range(horizon):
+        current_date = start_date.fromordinal(start_date.toordinal() + offset)
+        month_key = current_date.strftime("%Y-%m")
+        month_label = current_date.strftime("%B %Y")
+        if month_key != current_month_key:
+            for blank_index in range(current_date.weekday()):
+                rows.append(
+                    {
+                        "day": "",
+                        "iso": f"{month_key}-blank-{blank_index}",
+                        "busy": True,
+                        "available": False,
+                        "label": "",
+                        "month_key": month_key,
+                        "month_label": month_label,
+                    }
+                )
+            current_month_key = month_key
+
+        iso = current_date.isoformat()
+        is_available = iso in available_dates if has_service_scope else False
+        rows.append(
+            {
+                "day": current_date.day,
+                "iso": iso,
+                "busy": has_service_scope and not is_available,
+                "available": is_available,
+                "label": current_date.strftime("%b %d, %Y"),
+                "month_key": month_key,
+                "month_label": month_label,
+            }
+        )
+    return rows
+
+
+def parse_resource_selections(raw_value: str | None) -> dict[str, str] | None:
+    """Parse serialized resource selections from HTTP payloads.
+
+    Accepts a JSON object and drops non-selections (``any``, empty, ``null``).
+    Returns ``None`` when the payload is missing, invalid, or produces no
+    effective selections.
+    """
+    if not raw_value:
+        return None
+    try:
+        parsed = json.loads(raw_value)
+    except Exception:
+        return None
+    if not isinstance(parsed, dict):
+        return None
+
+    normalized: dict[str, str] = {}
+    for key, value in parsed.items():
+        if value in ("", None, "any"):
+            continue
+        normalized[str(key)] = str(value)
+    return normalized or None
+
+
+def normalize_slot_payload(payload: Any) -> list[str]:
+    """Normalize slot payloads from booking gateway calls.
+
+    Supports engine results (``get_unique_start_times``), ``dict`` payloads
+    like ``{slot: allowed}``, and plain iterables of slot strings.
+    """
+    if payload is None:
+        return []
+
+    get_unique_start_times = getattr(payload, "get_unique_start_times", None)
+    if callable(get_unique_start_times):
+        try:
+            return sorted({str(slot) for slot in get_unique_start_times() if str(slot)})
+        except Exception:
+            return []
+
+    if isinstance(payload, Mapping):
+        return sorted(str(slot) for slot, allowed in payload.items() if allowed)
+
+    if isinstance(payload, list | tuple | set):
+        return sorted(str(slot) for slot in payload if str(slot))
+
+    return []
+
+
 def get_nearest_slots(
     adapter: DjangoAvailabilityAdapter,
     service_ids: list[int],
     search_from: date,
     *,
-    locked_master_id: int | None = None,
-    master_selections: MasterSelections = None,
+    locked_resource_id: int | None = None,
+    resource_selections: ResourceSelections = None,
     mode: BookingMode = BookingMode.SINGLE_DAY,
     overlap_allowed: bool = False,
     parallel_groups: dict[int, str] | None = None,
@@ -165,8 +303,8 @@ def get_nearest_slots(
         adapter: Availability adapter that bridges Django models to the engine.
         service_ids: Ordered list of requested service identifiers.
         search_from: First date included in the forward search.
-        locked_master_id: Optional master id that constrains the search.
-        master_selections: Optional per-service master selection mapping.
+        locked_resource_id: Optional resource id that constrains the search.
+        resource_selections: Optional per-service resource selection mapping.
         mode: Booking engine search mode.
         overlap_allowed: Whether services may overlap in time.
         parallel_groups: Optional mapping of service id to parallel group id.
@@ -179,8 +317,8 @@ def get_nearest_slots(
     request = adapter.build_engine_request(
         service_ids=service_ids,
         target_date=search_from,
-        locked_master_id=locked_master_id,
-        master_selections=master_selections,
+        locked_resource_id=locked_resource_id,
+        resource_selections=resource_selections,
         mode=mode,
         overlap_allowed=overlap_allowed,
         parallel_groups=parallel_groups,
@@ -189,11 +327,11 @@ def get_nearest_slots(
     def get_availability_for_date(
         d: date,
     ) -> dict[str, Any]:
-        all_master_ids: list[int] = []
+        all_resource_ids: list[int] = []
         for sr in request.service_requests:
-            all_master_ids.extend(int(mid) for mid in sr.possible_resource_ids)
-        return adapter.build_masters_availability(
-            master_ids=list(set(all_master_ids)),
+            all_resource_ids.extend(int(mid) for mid in sr.possible_resource_ids)
+        return adapter.build_resources_availability(
+            resource_ids=list(set(all_resource_ids)),
             target_date=d,
         )
 
@@ -215,10 +353,10 @@ def create_booking(
     service_ids: list[int],
     target_date: date,
     selected_time: str,
-    master_id: int,
+    resource_id: int | None,
     client: Any,
     extra_fields: dict[str, Any] | None = None,
-    master_selections: MasterSelections = None,
+    resource_selections: ResourceSelections = None,
     mode: BookingMode = BookingMode.SINGLE_DAY,
     overlap_allowed: bool = False,
     parallel_groups: dict[int, str] | None = None,
@@ -226,15 +364,15 @@ def create_booking(
 ) -> Any | list[Any]:
     """Create a booking with concurrency protection.
 
-    Solo mode:
-    1. Locks a single master row
+    Locked-resource mode:
+    1. Locks a single resource row
     2. Re-checks slot availability under lock
     3. Creates one appointment
     4. Invalidates cache after commit (R1: ``transaction.on_commit()``)
 
-    Multi-service mode:
+    Chain mode:
     1. Requires a ``persistence_hook``
-    2. Locks all candidate masters for the chain
+    2. Locks all candidate resources for the chain
     3. Re-checks chain availability under lock
     4. Delegates persistence to ``persistence_hook.persist_chain()``
     5. Invalidates cache for chain masters after commit
@@ -246,18 +384,18 @@ def create_booking(
         service_ids: Ordered list of requested service identifiers.
         target_date: Booking date selected by the client.
         selected_time: Selected start time in ``HH:MM`` format.
-        master_id: Master chosen for single-service mode.
+        resource_id: Resource chosen for single-service mode.
         client: Client object attached to the booking.
         extra_fields: Optional extra model fields passed to persistence.
-        master_selections: Optional per-service master selection mapping.
+        resource_selections: Optional per-service resource selection mapping.
         mode: Booking engine search mode.
         overlap_allowed: Whether services may overlap in time.
         parallel_groups: Optional mapping of service id to parallel group id.
         persistence_hook: Required persistence hook for multi-service mode.
 
     Returns:
-        A single appointment instance in solo mode, or a list of created
-        appointment-like objects in multi-service mode.
+        A single appointment instance in locked-resource mode, or a list of
+        created appointment-like objects in chain mode.
 
     Raises:
         codex_services.booking.slot_master.SlotAlreadyBookedError: If the
@@ -265,31 +403,33 @@ def create_booking(
         NotImplementedError: If multi-service mode is requested without a
             persistence hook.
     """
-    is_multi_service = len(service_ids) > 1
+    is_chain_flow = len(service_ids) > 1 or resource_id is None
 
     with transaction.atomic():
-        if is_multi_service:
-            if persistence_hook is None:
+        if is_chain_flow:
+            if len(service_ids) > 1 and persistence_hook is None:
                 raise NotImplementedError("Multi-service persistence requires a persistence hook")
 
             request = adapter.build_engine_request(
                 service_ids=service_ids,
                 target_date=target_date,
-                locked_master_id=None,
-                master_selections=master_selections,
+                locked_resource_id=resource_id,
+                resource_selections=resource_selections,
                 mode=mode,
                 overlap_allowed=overlap_allowed,
                 parallel_groups=parallel_groups,
             )
-            all_master_ids: set[int] = {int(mid) for sr in request.service_requests for mid in sr.possible_resource_ids}
-            adapter.lock_masters(sorted(all_master_ids))
+            all_resource_ids: set[int] = {
+                int(mid) for sr in request.service_requests for mid in sr.possible_resource_ids
+            }
+            adapter.lock_resources(sorted(all_resource_ids))
 
             result = get_available_slots(
                 adapter=adapter,
                 service_ids=service_ids,
                 target_date=target_date,
-                locked_master_id=None,
-                master_selections=master_selections,
+                locked_resource_id=resource_id,
+                resource_selections=resource_selections,
                 mode=mode,
                 overlap_allowed=overlap_allowed,
                 parallel_groups=parallel_groups,
@@ -303,36 +443,56 @@ def create_booking(
             if best is None:
                 raise SlotAlreadyBookedError("No solution found.")
 
-            created_appointments = persistence_hook.persist_chain(
-                solution=best,
-                service_ids=service_ids,
-                client=client,
-                extra_fields=extra_fields,
-            )
+            if persistence_hook is not None:
+                created_appointments = persistence_hook.persist_chain(
+                    solution=best,
+                    service_ids=service_ids,
+                    client=client,
+                    extra_fields=extra_fields,
+                )
+            else:
+                # Generic fallback for single-service "any resource" flows.
+                primary_item = next(iter(getattr(best, "items", [])), None)
+                if primary_item is None:
+                    raise SlotAlreadyBookedError("No solution found.")
+                created_appointments = [
+                    _create_single_appointment(
+                        appointment_model=appointment_model,
+                        resource_id=int(primary_item.resource_id),
+                        service_ids=service_ids,
+                        starts_at=best.starts_at,
+                        span_minutes=best.span_minutes,
+                        client=client,
+                        extra_fields=extra_fields,
+                    )
+                ]
 
-            chain_master_ids = {
+            chain_resource_ids = {
                 str(item.resource_id) for item in getattr(best, "items", []) if getattr(item, "resource_id", None)
             }
-            if not chain_master_ids:
-                chain_master_ids = {str(master_id)}
+            if not chain_resource_ids and resource_id is not None:
+                chain_resource_ids = {str(resource_id)}
 
             _date_str = str(target_date)
 
             def _invalidate_many() -> None:
-                for mid in chain_master_ids:
+                for mid in chain_resource_ids:
                     cache_adapter.invalidate_master_date(mid, _date_str)
 
             transaction.on_commit(_invalidate_many)
             return created_appointments
 
-        adapter.lock_masters([master_id])
+        if resource_id is None:
+            raise SlotAlreadyBookedError("Resource id is required for single-resource booking flow.")
+
+        adapter.lock_resources([resource_id])
 
         result = get_available_slots(
             adapter=adapter,
             service_ids=service_ids,
             target_date=target_date,
-            locked_master_id=master_id,
-            master_selections=master_selections,
+            locked_resource_id=resource_id,
+            resource_selections=resource_selections,
             mode=mode,
             overlap_allowed=overlap_allowed,
             parallel_groups=parallel_groups,
@@ -348,20 +508,53 @@ def create_booking(
         if best is None:
             raise SlotAlreadyBookedError("No solution found.")
 
-        fields: dict[str, Any] = {
-            "master_id": master_id,
-            "datetime_start": best.starts_at,
-            "duration_minutes": best.span_minutes,
-            "client": client,
-        }
-        if extra_fields:
-            fields.update(extra_fields)
-
-        appointment = appointment_model.objects.create(**fields)
+        appointment = _create_single_appointment(
+            appointment_model=appointment_model,
+            resource_id=resource_id,
+            service_ids=service_ids,
+            starts_at=best.starts_at,
+            span_minutes=best.span_minutes,
+            client=client,
+            extra_fields=extra_fields,
+        )
 
         # R1: invalidate cache AFTER transaction commits
-        _master_id_str = str(master_id)
+        _resource_id_str = str(resource_id)
         _date_str = str(target_date)
-        transaction.on_commit(lambda: cache_adapter.invalidate_master_date(_master_id_str, _date_str))
+        transaction.on_commit(lambda: cache_adapter.invalidate_master_date(_resource_id_str, _date_str))
 
     return appointment
+
+
+def _create_single_appointment(
+    *,
+    appointment_model: type[Any],
+    resource_id: int,
+    service_ids: list[int],
+    starts_at: Any,
+    span_minutes: int,
+    client: Any,
+    extra_fields: dict[str, Any] | None,
+) -> Any:
+    fields: dict[str, Any] = {
+        "datetime_start": starts_at,
+        "duration_minutes": span_minutes,
+        "client": client,
+    }
+    if extra_fields:
+        fields.update(extra_fields)
+
+    meta = getattr(appointment_model, "_meta", None)
+    attnames: set[str] = set()
+    if meta is not None:
+        attnames = {field.attname for field in meta.fields}
+
+    if "resource_id" in attnames:
+        fields["resource_id"] = resource_id
+    else:
+        fields["master_id"] = resource_id
+
+    if len(service_ids) == 1 and "service_id" in attnames:
+        fields["service_id"] = service_ids[0]
+
+    return appointment_model.objects.create(**fields)

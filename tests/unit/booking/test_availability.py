@@ -11,7 +11,7 @@ def adapter():
     master_model = MagicMock()
     master_model.STATUS_ACTIVE = "active"
     return DjangoAvailabilityAdapter(
-        master_model=master_model,
+        resource_model=master_model,
         appointment_model=MagicMock(),
         service_model=MagicMock(),
         working_day_model=MagicMock(),
@@ -48,13 +48,13 @@ def test_get_working_hours_site_defaults(adapter, settings):
 
 
 @pytest.mark.unit
-def test_build_masters_availability(adapter):
+def test_build_resources_availability(adapter):
     master = MagicMock(pk=1)
     # Ensure buffer and timezone are real values to avoid TypeError in timedelta
     master.buffer_between_minutes = 0
     master.timezone = "UTC"
 
-    adapter.master_model.objects.filter.return_value = [master]
+    adapter.resource_model.objects.filter.return_value = [master]
     adapter.day_off_model.objects.filter.return_value.values_list.return_value = []
 
     # Mock working hours
@@ -64,19 +64,19 @@ def test_build_masters_availability(adapter):
 
     adapter.booking_settings_model.objects.first.return_value = MagicMock(default_buffer_between_minutes=0)
 
-    res = adapter.build_masters_availability([1], date(2024, 1, 1))
+    res = adapter.build_resources_availability([1], date(2024, 1, 1))
     assert "1" in res
     assert len(res["1"].free_windows) > 0
 
 
 @pytest.mark.unit
-def test_normalize_master_selections_edge_cases(adapter):
+def test_normalize_resource_selections_edge_cases(adapter):
     # Pass real int value instead of MagicMock to satisfy isinstance(raw_val, (str, int))
-    res = adapter._normalize_master_selections([10], {10: 5})
+    res = adapter._normalize_resource_selections([10], {10: 5})
     assert 10 in res
     assert res[10] == 5
 
     # Test legacy positional
-    res = adapter._normalize_master_selections([100, 200], {"0": "10", "1": "20"})
+    res = adapter._normalize_resource_selections([100, 200], {"0": "10", "1": "20"})
     assert res[100] == 10
     assert res[200] == 20

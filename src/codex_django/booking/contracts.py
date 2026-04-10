@@ -186,7 +186,7 @@ class BookingFeatureModels:
     """Concrete project models required by the resource-slot engine gateway."""
 
     appointment_model: type[Any]
-    master_model: type[Any]
+    resource_model: type[Any]
     service_model: type[Any]
     working_day_model: type[Any]
     day_off_model: type[Any]
@@ -244,7 +244,13 @@ class BookingProjectDataProvider(Protocol):
         email: str,
     ) -> dict[str, Any]: ...
 
-    def get_quick_create_slot_options(self, *, resource_id: int, booking_date: str) -> list[str]: ...
+    def get_quick_create_slot_options(
+        self,
+        *,
+        resource_id: int,
+        booking_date: str,
+        service_ids: list[int] | None = None,
+    ) -> list[str]: ...
 
     def create_quick_appointment(
         self,
@@ -281,13 +287,20 @@ class BookingEngineGateway(Protocol):
 
     def get_nearest_slots(self, *, service_ids: list[int], search_from: date, **kwargs: Any) -> Any: ...
 
+    def get_resource_day_slots(
+        self,
+        *,
+        resource_id: int,
+        target_date: date,
+    ) -> list[str]: ...
+
     def create_booking(
         self,
         *,
         service_ids: list[int],
         target_date: date,
         selected_time: str,
-        master_id: int | None,
+        resource_id: int | None,
         client: Any,
         **kwargs: Any,
     ) -> Any: ...

@@ -72,6 +72,23 @@ search_nodes("MASTER_INDEX")
 | `Claude:Index` | PersonalNotes | Стиль работы, уроки |
 | `Graph:ConventionStandard` | Standard | Правила именования нод |
 
+### Cabinet — подграф (prefix `cabinet:`):
+
+| Нода | Тип | Что описывает |
+|------|-----|--------------|
+| `cabinet:CabinetRegistry` | Component | Singleton registry, V1/V2 API, `declare()` |
+| `cabinet:AutodiscoverFlow` | Mechanism | Boot: `autodiscover_modules('cabinet')` → `declare()` |
+| `cabinet:ContextPipeline` | Component | Context processors, space/module detection, permissions |
+| `cabinet:ModalSystem` | Component | Modal dispatch, `generic_modal.html`, 7 section types |
+| `cabinet:DashboardSelector` | Component | `@extend` decorator, Redis caching, widget templates |
+| `cabinet:SiteSettingsService` | Component | Auto-tab discovery via `_*.html` partials |
+| `cabinet:ContentComponents` | Component | DataTable, CalendarGrid, CardGrid, ListView, SplitPanel |
+| `cabinet:NotificationRegistry` | Component | Bell providers, `@register('key')` pattern |
+| `cabinet:SatelliteModules` | Component | booking/cabinet, conversations/cabinet, system/cabinet |
+
+> **Навигация:** `codex-django:cabinet:index` → CONTAINS → `cabinet:*` ноды.
+> **Поиск:** используй prefix `cabinet:` для поиска любой дочерней ноды.
+
 ---
 
 ## Git ветки

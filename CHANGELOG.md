@@ -16,6 +16,10 @@ All notable changes to this project will be documented in this file.
 - Raised the optional CLI extra to `codex-django-cli>=0.3.0,<0.4.0` so new installs resolve against the current standalone CLI release line.
 - Expanded English and Russian docs around cabinet architecture, guides, and settings.
 
+### Fixed
+
+- Aligned the cabinet `date_time_picker` month grid by supporting padded calendar cells with leading and trailing blank placeholders.
+
 ## [0.2.5] - 2026-03-29
 
 First public release.
