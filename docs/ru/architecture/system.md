@@ -40,7 +40,8 @@
 ### Redis-Синхронизация Проектного Состояния
 
 `AbstractSiteSettings` получает логику синхронизации через `SiteSettingsSyncMixin`.
-Когда конкретная settings-модель сохраняется, ее concrete fields превращаются в словарь и синхронизируются в Redis через site settings manager из `core`.
+Когда конкретная settings-модель сохраняется, ее concrete fields превращаются в словарь и синхронизируются в Redis через site settings manager из `core` (используя общий ключ `site_settings`).
+Этот же ключ используется модулем `cabinet`, что обеспечивает сквозную синхронизацию расширенных полей модели и настроек брендинга кабинета.
 
 Благодаря этому шаблоны могут быстро получать данные через `system.context_processors.site_settings()`, который возвращает безопасный `SettingsProxy`.
 

@@ -38,7 +38,7 @@ Cabinet намеренно изолирован:
 - собственные static assets в `static/cabinet/`
 - собственные `AppConfig` и urls
 - собственный context processor
-- собственный Redis-backed settings cache
+- отказоустойчивый механизм SiteSettingsService с DB-fallback и кэшированием в Redis
 
 Это позволяет переиспользовать cabinet в сгенерированных проектах, не смешивая его с публичной структурой сайта.
 
@@ -144,12 +144,13 @@ Context processor фильтрует секции и widgets по:
 
 ### Redis-Backed Cabinet State
 
-Cabinet использует отдельные Redis managers для двух видов состояния:
+Cabinet использует унифицированные механизмы для работы с состоянием:
 
-- настройки кабинета
+- настройки кабинета (интегрированы с Site Settings через SiteSettingsService)
 - кэш данных dashboard providers
 
-`CabinetSettings` оформлен как singleton и синхронизируется в Redis при сохранении.
+`CabinetSettings` и `SiteSettings` теперь синхронизируются в Redis по общему ключу `site_settings`.
+`SiteSettingsService` обеспечивает прозрачный DB-fallback: если Redis недоступен или пуст, данные агрегируются напрямую из базы данных (объединяя модель SiteSettings и настройки брендинга CabinetSettings), что гарантирует работоспособность UI в любых условиях.
 Результаты dashboard providers кэшируются отдельно по provider key, что позволяет точечно инвалидировать только один widget, когда его данные изменились.
 
 ### Контентные Компоненты
