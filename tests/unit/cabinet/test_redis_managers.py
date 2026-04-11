@@ -26,10 +26,10 @@ def mgr(mock_redis_from_url):
 
 @pytest.mark.unit
 class TestCabinetSettingsRedisManagerKey:
-    def test_key_contains_prefix_and_name(self, mgr):
-        key = mgr.make_key("settings")
-        assert "cabinet" in key
-        assert "settings" in key
+    def test_key_is_site_settings(self, mgr):
+        key = mgr.make_key("site_settings")
+        assert key.endswith("site_settings")
+        assert "cabinet" not in key
 
     def test_key_contains_project_name(self, mgr):
         key = mgr.make_key("settings")
@@ -74,7 +74,7 @@ class TestCabinetSettingsRedisManagerSave:
         instance = MagicMock()
         instance.to_cabinet_dict.return_value = {"cabinet_name": "Cabinet"}
         await mgr.asave_instance(instance)
-        mgr.hash.set_fields.assert_called_once_with(mgr.make_key("settings"), {"cabinet_name": "Cabinet"})
+        mgr.hash.set_fields.assert_called_once_with(mgr.make_key("site_settings"), {"cabinet_name": "Cabinet"})
 
     @pytest.mark.asyncio
     async def test_asave_instance_skips_empty_dict(self, mgr):
@@ -106,7 +106,7 @@ class TestCabinetSettingsRedisManagerInvalidate:
     @pytest.mark.asyncio
     async def test_ainvalidate_deletes_key(self, mgr):
         await mgr.ainvalidate()
-        mgr.string.delete.assert_called_once_with(mgr.make_key("settings"))
+        mgr.string.delete.assert_called_once_with(mgr.make_key("site_settings"))
 
     def test_invalidate_sync_wrapper(self, mgr):
         mgr.invalidate()

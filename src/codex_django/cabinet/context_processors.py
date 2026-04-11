@@ -6,11 +6,8 @@ from django.http import HttpRequest
 
 from .notifications import notification_registry
 from .quick_access import get_enabled_staff_quick_access, parse_selected_keys
-from .redis.managers.settings import CabinetSettingsRedisManager
 from .registry import cabinet_registry
 from .runtime import CabinetRuntimeResolver
-
-_settings_manager = CabinetSettingsRedisManager()
 
 
 def _detect_space(request: HttpRequest) -> str:
@@ -63,7 +60,9 @@ def cabinet(request: HttpRequest) -> dict[str, Any]:
         for widget in cabinet_registry.get_dashboard_widgets(nav_group)
         if not widget.permissions or any(request.user.has_perm(p) for p in widget.permissions)
     ]
-    settings_data = _settings_manager.get()
+    from .services.site_settings import SiteSettingsService
+
+    settings_data = SiteSettingsService.get_all_settings()
 
     return {
         "cabinet_sidebar": sidebar_items,

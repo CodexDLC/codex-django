@@ -114,12 +114,43 @@ class SiteSettingsService:
         return tabs
 
     @classmethod
+    def get_all_settings(cls) -> dict[str, Any]:
+        """Возвращает объединенные настройки из Redis с фолбеком на базу данных.
+
+        Объединяет проектные настройки (SiteSettings) и настройки брендинга
+        кабинета (CabinetSettings). Результат в Redis не сохраняется (fallback-only).
+        """
+        from ..redis.managers.settings import CabinetSettingsRedisManager
+
+        # 1. Попытка получить из Redis
+        manager = CabinetSettingsRedisManager()
+        data = manager.get()
+        if data:
+            return data
+
+        # 2. Если в Redis пусто — идем в базу данных
+        data = {}
+
+        # Проектные настройки (SiteSettings)
+        SiteSettings = cls.get_model()
+        if SiteSettings:
+            instance = SiteSettings.objects.first()
+            if instance and hasattr(instance, "to_dict"):
+                data.update(instance.to_dict())
+
+        # Брендинг кабинета (CabinetSettings)
+        from ..models.settings import CabinetSettings
+
+        cabinet_instance = CabinetSettings.load()
+        data.update(cabinet_instance.to_cabinet_dict())
+
+        return data
+
+    @classmethod
     def get_context(cls, request: HttpRequest) -> dict[str, Any]:
         """Формирует полный контекст для одой общей страницы настроек."""
-        from codex_django.cabinet.redis.managers.settings import CabinetSettingsRedisManager
-
         tabs = cls.get_tabs()
-        settings_data = CabinetSettingsRedisManager().get() or {}
+        settings_data = cls.get_all_settings()
         selected_keys = parse_selected_keys(settings_data.get("staff_quick_access_links"))
 
         return {

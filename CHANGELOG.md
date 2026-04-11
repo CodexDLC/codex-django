@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-04-11
+
+### Fixed
+
+- Fixed Redis key mismatch in `CabinetSettingsRedisManager` by aligning it with the global `site_settings` key.
+- Implemented robust database fallback and settings merging in `SiteSettingsService.get_all_settings()` to ensure settings remain available when Redis is offline.
+- Updated cabinet context processor to utilize `SiteSettingsService` for unified settings retrieval.
+
 ## [0.4.0] - 2026-04-10
 
 ### Added

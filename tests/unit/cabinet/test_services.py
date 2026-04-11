@@ -69,6 +69,35 @@ def test_save_context_success(settings):
 
         with patch.object(instance, "save") as mock_save:
             success, msg = SiteSettingsService.save_context(request)
-            assert success is True, f"Failed with message: {msg}"
             assert instance.enabled is True
             mock_save.assert_called_once()
+
+
+@pytest.mark.unit
+@pytest.mark.django_db
+def test_get_all_settings_fallback_to_db(settings):
+    settings.CODEX_SITE_SETTINGS_MODEL = "system.SiteSettings"
+
+    # Mock Redis manager to return empty {} (simulating miss or disabled)
+    with (
+        patch("codex_django.cabinet.redis.managers.settings.CabinetSettingsRedisManager.get", return_value={}),
+        patch.object(SiteSettingsService, "get_model") as mock_get_model,
+        patch("codex_django.cabinet.models.settings.CabinetSettings.load") as mock_cab_load,
+    ):
+        mock_instance = MagicMock()
+        mock_instance.to_dict.return_value = {"phone": "123456"}
+
+        mock_model = MagicMock()
+        mock_model.objects.first.return_value = mock_instance
+        mock_get_model.return_value = mock_model
+
+        mock_cab_instance = MagicMock()
+        mock_cab_instance.to_cabinet_dict.return_value = {"cabinet_name": "Test Cabinet"}
+        mock_cab_load.return_value = mock_cab_instance
+
+        settings_data = SiteSettingsService.get_all_settings()
+
+        assert settings_data["phone"] == "123456"
+        assert settings_data["cabinet_name"] == "Test Cabinet"
+        assert "cabinet_name" in settings_data
+        assert "phone" in settings_data

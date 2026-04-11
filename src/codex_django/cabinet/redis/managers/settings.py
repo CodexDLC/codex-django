@@ -15,10 +15,10 @@ class CabinetSettingsRedisManager(BaseDjangoRedisManager):
     Respects DEBUG mode + CODEX_REDIS_ENABLED flag — safe for local dev without Redis.
     """
 
-    _KEY = "settings"
+    _KEY = "site_settings"
 
     def __init__(self) -> None:
-        super().__init__(prefix="cabinet")
+        super().__init__(prefix="")
 
     async def aget(self) -> dict[str, Any]:
         """Asynchronously return the cached cabinet settings payload.
