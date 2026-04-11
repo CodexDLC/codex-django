@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-04-11
+
+### Changed
+
+- Breaking: booking runtime contracts no longer depend on `SiteSettings`; `BookingFeatureModels` now wires only booking-specific models.
+- Breaking: booking fallback hours now use a full 7-day `BookingSettings` schedule with `<day>_is_closed`, `work_start_<day>`, and `work_end_<day>` fields.
+- Booking availability timezone handling now defaults to `UTC` at runtime, with optional adapter/resource overrides instead of site-settings coupling.
+- Updated README and booking documentation to reflect the booking-only runtime boundary and 7-day schedule model.
+
+### Fixed
+
+- Fixed `DjangoAvailabilityAdapter` fallback math so default working hours are read only from `BookingSettings`, never from `SiteSettings`.
+- Fixed booking contract and adapter tests to cover closed days, 7-day defaults, and the new runtime timezone behavior.
+
 ## [0.4.1] - 2026-04-11
 
 ### Fixed

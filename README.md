@@ -62,13 +62,13 @@ from codex_django.booking import DjangoAvailabilityAdapter
 from codex_django.booking.selectors import get_available_slots
 
 adapter = DjangoAvailabilityAdapter(
-    master_model=Master,
+    resource_model=Master,
     appointment_model=Appointment,
     service_model=Service,
     working_day_model=MasterWorkingDay,
     day_off_model=MasterDayOff,
     booking_settings_model=BookingSettings,
-    site_settings_model=SiteSettings,
+    timezone="UTC",
 )
 
 result = get_available_slots(

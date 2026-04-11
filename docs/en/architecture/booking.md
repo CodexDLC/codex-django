@@ -91,7 +91,12 @@ This keeps cache invalidation surgical and avoids storing derived slot maps as t
 - slot step size
 - default buffer between appointments
 - advance booking limits
-- fallback working hours
+- fallback working hours for all 7 weekdays
+
+The booking adapter reads fallback hours only from booking settings.
+It does not depend on site settings.
+Timezone handling defaults to `UTC` unless a project passes a different
+runtime timezone into the adapter or exposes a per-resource timezone field.
 
 Its save hook synchronizes settings to Redis, following the same general pattern used elsewhere in the repository for runtime-accessed administrative state.
 
@@ -156,5 +161,5 @@ That makes it different from:
 ## See Also
 
 - `notifications` for confirmation and reminder workflows built on top of booking events
-- `system` for settings models that can store booking defaults at the project level
+- `system` for site-facing project state that remains outside booking runtime math
 - `codex-services` for the actual slot-finding and chain-solving engine this module integrates with

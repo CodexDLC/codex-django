@@ -42,8 +42,9 @@ class DjangoAvailabilityAdapter:
         working_day_model: Django model class for per-weekday schedule.
         day_off_model: Django model class for days off.
         booking_settings_model: Django model class for booking settings.
-        site_settings_model: Django model class for site-level settings.
         step_minutes: Time grid step for the engine.
+        timezone: Default timezone for booking calculations when no resource
+            timezone is provided.
         appointment_status_filter: Which statuses count as "busy".
         cache_adapter: Optional cache adapter; defaults to BookingCacheAdapter.
     """
@@ -56,8 +57,8 @@ class DjangoAvailabilityAdapter:
         working_day_model: type[Any],
         day_off_model: type[Any],
         booking_settings_model: type[Any],
-        site_settings_model: type[Any],
         step_minutes: int = 30,
+        timezone: str = "UTC",
         appointment_status_filter: list[str] | None = None,
         cache_adapter: BookingCacheAdapter | None = None,
     ) -> None:
@@ -67,9 +68,9 @@ class DjangoAvailabilityAdapter:
         self.working_day_model = working_day_model
         self.day_off_model = day_off_model
         self.booking_settings_model = booking_settings_model
-        self.site_settings_model = site_settings_model
 
         self.step_minutes = step_minutes
+        self.timezone = timezone
         self._calc = SlotCalculator(step_minutes)
         self._cache = cache_adapter or BookingCacheAdapter()
 
@@ -84,7 +85,6 @@ class DjangoAvailabilityAdapter:
                 self.appointment_status_filter.append(appointment_model.STATUS_RESCHEDULE_PROPOSED)
 
         self._booking_settings: Any = None
-        self._site_settings: Any = None
 
     # ------------------------------------------------------------------
     # Engine request builder
@@ -229,7 +229,7 @@ class DjangoAvailabilityAdapter:
         """Return UTC working hours for a master on a specific date.
 
         Reads from ``working_day_model`` first; falls back to
-        master-level defaults, then site-level defaults.
+        master-level defaults, then booking settings defaults.
         """
         weekday = target_date.weekday()
         tz = self._get_tz(master)
@@ -246,14 +246,11 @@ class DjangoAvailabilityAdapter:
             end_t = getattr(master, "work_end", None)
 
         if not (start_t and end_t):
-            # 3. Site-level defaults
-            site = self._get_site_settings()
-            if weekday < 5:
-                start_t = getattr(site, "work_start_weekdays", None)
-                end_t = getattr(site, "work_end_weekdays", None)
-            elif weekday == 5:
-                start_t = getattr(site, "work_start_saturday", None)
-                end_t = getattr(site, "work_end_saturday", None)
+            # 3. Booking-level defaults
+            settings = self._get_booking_settings()
+            day_schedule = self._get_default_day_schedule(settings, weekday)
+            if day_schedule is not None:
+                start_t, end_t = day_schedule
 
         if not start_t or not end_t:
             return None
@@ -419,24 +416,48 @@ class DjangoAvailabilityAdapter:
         return getattr(settings, "default_buffer_between_minutes", 0)
 
     def _get_tz(self, master: Any) -> zoneinfo.ZoneInfo:
-        """Resolve the master timezone, falling back to the site timezone."""
+        """Resolve the resource timezone, falling back to the adapter timezone."""
         tz_name = getattr(master, "timezone", None)
+        if tz_name == "":
+            tz_name = None
         if not tz_name:
-            site = self._get_site_settings()
-            tz_name = getattr(site, "timezone", None) or "UTC"
+            tz_name = self.timezone or "UTC"
         try:
             return zoneinfo.ZoneInfo(tz_name)
         except Exception:
             return zoneinfo.ZoneInfo("UTC")
+
+    def _get_default_day_schedule(self, settings: Any, weekday: int) -> tuple[Any, Any] | None:
+        """Return booking-level fallback hours for a weekday."""
+        get_day_schedule = getattr(settings, "get_day_schedule", None)
+        if callable(get_day_schedule):
+            result = get_day_schedule(weekday)
+            if isinstance(result, tuple) and len(result) == 2:
+                return result
+            if result is None:
+                return None
+
+        day_names = (
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday",
+        )
+        day_name = day_names[weekday]
+        if getattr(settings, f"{day_name}_is_closed", False):
+            return None
+
+        start_t = getattr(settings, f"work_start_{day_name}", None)
+        end_t = getattr(settings, f"work_end_{day_name}", None)
+        if not start_t or not end_t:
+            return None
+        return (start_t, end_t)
 
     def _get_booking_settings(self) -> Any:
         """Lazy-load and memoize the booking settings singleton."""
         if self._booking_settings is None:
             self._booking_settings = self.booking_settings_model.objects.first()
         return self._booking_settings
-
-    def _get_site_settings(self) -> Any:
-        """Lazy-load and memoize the site settings singleton."""
-        if self._site_settings is None:
-            self._site_settings = self.site_settings_model.objects.first()
-        return self._site_settings

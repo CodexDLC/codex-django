@@ -15,7 +15,6 @@ def adapter_models():
             "working_day",
             "day_off",
             "booking_settings",
-            "site_settings",
         ]
     }
     # Default STATUS_* constants

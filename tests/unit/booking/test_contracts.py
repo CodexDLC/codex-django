@@ -45,11 +45,10 @@ def test_feature_models_bundle_keeps_runtime_model_references():
         working_day_model=tuple,
         day_off_model=set,
         booking_settings_model=str,
-        site_settings_model=int,
     )
 
     assert bundle.appointment_model is object
-    assert bundle.site_settings_model is int
+    assert bundle.booking_settings_model is str
 
 
 def test_booking_modal_state_supports_quick_create_and_slot_picker_sections():

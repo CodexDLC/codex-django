@@ -38,13 +38,13 @@ class BookingSettingsMixin(models.Model):
                 "max_advance_days",
             ),
         }),
-        (_("Default Working Hours — Weekdays"), {
-            "fields": ("work_start_weekdays", "work_end_weekdays"),
-        }),
-        (_("Default Working Hours — Saturday"), {
-            "fields": ("work_start_saturday", "work_end_saturday"),
-            "classes": ("collapse",),
-        }),
+        (_("Monday"), {"fields": ("monday_is_closed", "work_start_monday", "work_end_monday")}),
+        (_("Tuesday"), {"fields": ("tuesday_is_closed", "work_start_tuesday", "work_end_tuesday")}),
+        (_("Wednesday"), {"fields": ("wednesday_is_closed", "work_start_wednesday", "work_end_wednesday")}),
+        (_("Thursday"), {"fields": ("thursday_is_closed", "work_start_thursday", "work_end_thursday")}),
+        (_("Friday"), {"fields": ("friday_is_closed", "work_start_friday", "work_end_friday")}),
+        (_("Saturday"), {"fields": ("saturday_is_closed", "work_start_saturday", "work_end_saturday")}),
+        (_("Sunday"), {"fields": ("sunday_is_closed", "work_start_sunday", "work_end_sunday")}),
     """
 
     step_minutes = models.PositiveIntegerField(
@@ -66,11 +66,28 @@ class BookingSettingsMixin(models.Model):
         default=60,
     )
 
-    # Default working hours (fallback when master has no individual schedule)
-    work_start_weekdays = models.TimeField(_("Weekday Start"), null=True, blank=True)
-    work_end_weekdays = models.TimeField(_("Weekday End"), null=True, blank=True)
+    # Default working hours (fallback when a resource has no individual schedule)
+    monday_is_closed = models.BooleanField(_("Monday Closed"), default=False)
+    work_start_monday = models.TimeField(_("Monday Start"), null=True, blank=True)
+    work_end_monday = models.TimeField(_("Monday End"), null=True, blank=True)
+    tuesday_is_closed = models.BooleanField(_("Tuesday Closed"), default=False)
+    work_start_tuesday = models.TimeField(_("Tuesday Start"), null=True, blank=True)
+    work_end_tuesday = models.TimeField(_("Tuesday End"), null=True, blank=True)
+    wednesday_is_closed = models.BooleanField(_("Wednesday Closed"), default=False)
+    work_start_wednesday = models.TimeField(_("Wednesday Start"), null=True, blank=True)
+    work_end_wednesday = models.TimeField(_("Wednesday End"), null=True, blank=True)
+    thursday_is_closed = models.BooleanField(_("Thursday Closed"), default=False)
+    work_start_thursday = models.TimeField(_("Thursday Start"), null=True, blank=True)
+    work_end_thursday = models.TimeField(_("Thursday End"), null=True, blank=True)
+    friday_is_closed = models.BooleanField(_("Friday Closed"), default=False)
+    work_start_friday = models.TimeField(_("Friday Start"), null=True, blank=True)
+    work_end_friday = models.TimeField(_("Friday End"), null=True, blank=True)
+    saturday_is_closed = models.BooleanField(_("Saturday Closed"), default=False)
     work_start_saturday = models.TimeField(_("Saturday Start"), null=True, blank=True)
     work_end_saturday = models.TimeField(_("Saturday End"), null=True, blank=True)
+    sunday_is_closed = models.BooleanField(_("Sunday Closed"), default=False)
+    work_start_sunday = models.TimeField(_("Sunday Start"), null=True, blank=True)
+    work_end_sunday = models.TimeField(_("Sunday End"), null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -85,6 +102,30 @@ class BookingSettingsMixin(models.Model):
                 value = getattr(self, field.name)
                 data[field.name] = str(value) if value is not None else None
         return data
+
+    def get_day_schedule(self, weekday: int) -> tuple[Any, Any] | None:
+        """Return the configured fallback schedule for a weekday.
+
+        Weekday numbering follows ``date.weekday()``:
+        ``0=Monday`` ... ``6=Sunday``.
+        """
+        day_names = (
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday",
+        )
+        day_name = day_names[weekday]
+        if getattr(self, f"{day_name}_is_closed", False):
+            return None
+        start_t = getattr(self, f"work_start_{day_name}", None)
+        end_t = getattr(self, f"work_end_{day_name}", None)
+        if not start_t or not end_t:
+            return None
+        return (start_t, end_t)
 
 
 class BookingSettingsSyncMixin(LifecycleModelMixin, models.Model):

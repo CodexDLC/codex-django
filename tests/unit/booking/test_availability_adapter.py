@@ -22,7 +22,6 @@ def adapter(adapter_models):
             working_day_model=adapter_models["working_day"],
             day_off_model=adapter_models["day_off"],
             booking_settings_model=adapter_models["booking_settings"],
-            site_settings_model=adapter_models["site_settings"],
             step_minutes=30,
             cache_adapter=cache,
         )
@@ -50,7 +49,6 @@ class TestDjangoAvailabilityAdapterInit:
                 working_day_model=adapter_models["working_day"],
                 day_off_model=adapter_models["day_off"],
                 booking_settings_model=adapter_models["booking_settings"],
-                site_settings_model=adapter_models["site_settings"],
                 step_minutes=30,
             )
         assert "pending" in a.appointment_status_filter
@@ -68,7 +66,6 @@ class TestDjangoAvailabilityAdapterInit:
                 working_day_model=adapter_models["working_day"],
                 day_off_model=adapter_models["day_off"],
                 booking_settings_model=adapter_models["booking_settings"],
-                site_settings_model=adapter_models["site_settings"],
                 step_minutes=30,
             )
         assert "reschedule_proposed" in a.appointment_status_filter
@@ -84,7 +81,6 @@ class TestDjangoAvailabilityAdapterInit:
                 working_day_model=adapter_models["working_day"],
                 day_off_model=adapter_models["day_off"],
                 booking_settings_model=adapter_models["booking_settings"],
-                site_settings_model=adapter_models["site_settings"],
                 appointment_status_filter=["done"],
             )
         assert a.appointment_status_filter == ["done"]
@@ -104,7 +100,6 @@ class TestDjangoAvailabilityAdapterInit:
                 working_day_model=adapter_models["working_day"],
                 day_off_model=adapter_models["day_off"],
                 booking_settings_model=adapter_models["booking_settings"],
-                site_settings_model=adapter_models["site_settings"],
             )
             mock_cls.assert_called_once()
 
@@ -243,13 +238,11 @@ class TestGetWorkingHours:
         assert start_utc.hour == 10
         assert end_utc.hour == 18
 
-    def test_falls_back_to_site_settings_weekday(self, adapter, adapter_models):
+    def test_falls_back_to_booking_settings_weekday(self, adapter, adapter_models):
         adapter_models["working_day"].objects.filter.return_value.first.return_value = None
-        site = MagicMock()
-        site.work_start_weekdays = time(8, 0)
-        site.work_end_weekdays = time(16, 0)
-        site.timezone = "UTC"
-        adapter_models["site_settings"].objects.first.return_value = site
+        booking_settings = MagicMock()
+        booking_settings.get_day_schedule.return_value = (time(8, 0), time(16, 0))
+        adapter_models["booking_settings"].objects.first.return_value = booking_settings
         master = self._master(tz="UTC", work_start=None, work_end=None)
         result = adapter.get_working_hours(master, date(2025, 1, 6))  # Monday
         assert result is not None
@@ -258,16 +251,21 @@ class TestGetWorkingHours:
 
     def test_returns_none_when_nothing_configured(self, adapter, adapter_models):
         adapter_models["working_day"].objects.filter.return_value.first.return_value = None
-        site = MagicMock()
-        site.work_start_weekdays = None
-        site.work_end_weekdays = None
-        site.work_start_saturday = None
-        site.work_end_saturday = None
-        site.timezone = "UTC"
-        adapter_models["site_settings"].objects.first.return_value = site
+        booking_settings = MagicMock()
+        booking_settings.get_day_schedule.return_value = None
+        adapter_models["booking_settings"].objects.first.return_value = booking_settings
         master = self._master(tz="UTC", work_start=None, work_end=None)
         result = adapter.get_working_hours(master, date(2025, 1, 6))
         assert result is None
+
+    def test_closed_day_returns_none_from_booking_settings(self, adapter, adapter_models):
+        adapter_models["working_day"].objects.filter.return_value.first.return_value = None
+        booking_settings = MagicMock()
+        booking_settings.get_day_schedule.return_value = None
+        adapter_models["booking_settings"].objects.first.return_value = booking_settings
+        master = self._master(tz="UTC", work_start=None, work_end=None)
+
+        assert adapter.get_working_hours(master, date(2025, 1, 12)) is None
 
     def test_converts_local_time_to_utc(self, adapter, adapter_models):
         """Berlin UTC+1 in winter: 09:00 local → 08:00 UTC."""
@@ -511,23 +509,26 @@ class TestGetTz:
         tz = adapter._get_tz(master)
         assert str(tz) == "Europe/Berlin"
 
-    def test_returns_utc_for_invalid_tz(self, adapter, adapter_models):
-        site = MagicMock()
-        site.timezone = None
-        adapter_models["site_settings"].objects.first.return_value = site
+    def test_returns_utc_for_invalid_tz(self, adapter):
         master = MagicMock()
         master.timezone = "Invalid/Zone"
         tz = adapter._get_tz(master)
         assert str(tz) == "UTC"
 
-    def test_falls_back_to_utc_when_no_tz_anywhere(self, adapter, adapter_models):
-        site = MagicMock()
-        site.timezone = None
-        adapter_models["site_settings"].objects.first.return_value = site
+    def test_falls_back_to_utc_when_no_tz_anywhere(self, adapter):
         master = MagicMock()
         master.timezone = None
         tz = adapter._get_tz(master)
         assert str(tz) == "UTC"
+
+    def test_uses_adapter_timezone_when_master_has_none(self, adapter):
+        adapter.timezone = "Europe/Berlin"
+        master = MagicMock()
+        master.timezone = None
+
+        tz = adapter._get_tz(master)
+
+        assert str(tz) == "Europe/Berlin"
 
 
 # ---------------------------------------------------------------------------

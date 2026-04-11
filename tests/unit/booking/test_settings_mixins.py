@@ -37,8 +37,10 @@ def test_booking_settings_to_dict_serializes_concrete_fields():
         default_buffer_between_minutes=5,
         min_advance_minutes=30,
         max_advance_days=14,
-        work_start_weekdays=time(9, 0),
-        work_end_weekdays=time(18, 30),
+        monday_is_closed=False,
+        work_start_monday=time(9, 0),
+        work_end_monday=time(18, 30),
+        saturday_is_closed=True,
         work_start_saturday=None,
         work_end_saturday=None,
     )
@@ -49,8 +51,10 @@ def test_booking_settings_to_dict_serializes_concrete_fields():
     assert data["default_buffer_between_minutes"] == "5"
     assert data["min_advance_minutes"] == "30"
     assert data["max_advance_days"] == "14"
-    assert data["work_start_weekdays"] == "09:00:00"
-    assert data["work_end_weekdays"] == "18:30:00"
+    assert data["work_start_monday"] == "09:00:00"
+    assert data["work_end_monday"] == "18:30:00"
+    assert data["monday_is_closed"] == "False"
+    assert data["saturday_is_closed"] == "True"
     assert data["work_start_saturday"] is None
     assert "id" not in data
     assert "pk" not in data
@@ -137,3 +141,15 @@ def test_abstract_booking_settings_composes_both_mixins():
     assert isinstance(settings, BookingSettingsMixin)
     assert isinstance(settings, BookingSettingsSyncMixin)
     assert settings.to_dict()["step_minutes"] == "45"
+
+
+def test_booking_settings_get_day_schedule_respects_closed_flag():
+    settings = ConcreteBookingSettings(
+        monday_is_closed=False,
+        work_start_monday=time(8, 0),
+        work_end_monday=time(17, 0),
+        sunday_is_closed=True,
+    )
+
+    assert settings.get_day_schedule(0) == (time(8, 0), time(17, 0))
+    assert settings.get_day_schedule(6) is None

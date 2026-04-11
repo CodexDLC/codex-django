@@ -15,7 +15,7 @@ codex-django add-booking --project myproject
 ## What Gets Added
 
 - `booking/` application files
-- booking settings files under `system/`
+- project booking settings model and admin wiring
 - cabinet booking views and templates
 - booking page templates and partials
 
@@ -24,7 +24,7 @@ codex-django add-booking --project myproject
 After scaffolding, wire the generated code into your project:
 
 1. Add `booking` to `INSTALLED_APPS` or `LOCAL_APPS`.
-2. Export `BookingSettings` from `system/models/__init__.py`.
+2. Export your concrete `BookingSettings` model from the project module that owns booking runtime state.
 3. Register the generated admin integration for booking settings.
 4. Run migrations for `booking` and `system`.
 5. Include `booking.urls` in the project URL configuration.

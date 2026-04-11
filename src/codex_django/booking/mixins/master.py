@@ -109,7 +109,7 @@ class MasterCapacityMixin(models.Model):
 class MasterTimezoneMixin(models.Model):
     """Individual timezone for the master.
 
-    Falls back to site-level timezone when empty.
+    Falls back to the booking adapter timezone when empty.
 
     Admin fieldsets example::
 

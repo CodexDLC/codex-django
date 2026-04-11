@@ -191,7 +191,6 @@ class BookingFeatureModels:
     working_day_model: type[Any]
     day_off_model: type[Any]
     booking_settings_model: type[Any]
-    site_settings_model: type[Any]
 
 
 class BookingBridge(Protocol):
