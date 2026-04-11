@@ -42,9 +42,9 @@ class TestCabinetContextProcessorAnonymous:
     def test_anonymous_never_calls_redis(self):
         from codex_django.cabinet.context_processors import cabinet
 
-        with patch("codex_django.cabinet.context_processors._settings_manager") as mock_mgr:
+        with patch("codex_django.cabinet.services.site_settings.SiteSettingsService.get_all_settings") as mock_get:
             cabinet(_make_anon_request())
-            mock_mgr.get.assert_not_called()
+            mock_get.assert_not_called()
 
 
 @pytest.mark.unit
@@ -54,9 +54,9 @@ class TestCabinetContextProcessorAuthenticated:
 
         with (
             patch("codex_django.cabinet.context_processors.cabinet_registry", registry),
-            patch("codex_django.cabinet.context_processors._settings_manager") as mock_mgr,
+            patch("codex_django.cabinet.services.site_settings.SiteSettingsService.get_all_settings") as mock_get,
         ):
-            mock_mgr.get.return_value = {"cabinet_name": "Test"}
+            mock_get.return_value = {"cabinet_name": "Test"}
             return cabinet(_make_auth_request(perms=perms, path=path))
 
     def test_authenticated_gets_open_sections(self):

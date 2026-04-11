@@ -30,9 +30,9 @@ def test_context_processor_no_group(registry):
 
     with (
         patch("codex_django.cabinet.context_processors.cabinet_registry", registry),
-        patch("codex_django.cabinet.context_processors._settings_manager") as mock_mgr,
+        patch("codex_django.cabinet.services.site_settings.SiteSettingsService.get_all_settings") as mock_get,
     ):
-        mock_mgr.get.return_value = None
+        mock_get.return_value = None
         result = cabinet(request)
 
     # Default behavior: get_sections(None) returns all
@@ -51,9 +51,9 @@ def test_context_processor_admin_group(registry):
 
     with (
         patch("codex_django.cabinet.context_processors.cabinet_registry", registry),
-        patch("codex_django.cabinet.context_processors._settings_manager") as mock_mgr,
+        patch("codex_django.cabinet.services.site_settings.SiteSettingsService.get_all_settings") as mock_get,
     ):
-        mock_mgr.get.return_value = None
+        mock_get.return_value = None
         result = cabinet(request)
 
     assert len(result["cabinet_nav"]) == 1
@@ -73,9 +73,9 @@ def test_context_processor_client_group(registry):
 
     with (
         patch("codex_django.cabinet.context_processors.cabinet_registry", registry),
-        patch("codex_django.cabinet.context_processors._settings_manager") as mock_mgr,
+        patch("codex_django.cabinet.services.site_settings.SiteSettingsService.get_all_settings") as mock_get,
     ):
-        mock_mgr.get.return_value = None
+        mock_get.return_value = None
         result = cabinet(request)
 
     assert len(result["cabinet_nav"]) == 1
