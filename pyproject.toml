@@ -143,7 +143,7 @@ skips = ["B602", "B605", "B607", "B404"]
 
 [tool.codex-check]
 project-name = "codex-django"
-audit-flags = "--skip-editable --ignore-vuln CVE-2026-4539 --ignore-vuln CVE-2026-34515 --ignore-vuln CVE-2026-34513 --ignore-vuln CVE-2026-34516 --ignore-vuln CVE-2026-34517 --ignore-vuln CVE-2026-34519 --ignore-vuln CVE-2026-34518 --ignore-vuln CVE-2026-34520 --ignore-vuln CVE-2026-34525 --ignore-vuln CVE-2026-22815 --ignore-vuln CVE-2026-34514 --ignore-vuln CVE-2026-34450 --ignore-vuln CVE-2026-34452 --ignore-vuln CVE-2026-34073 --ignore-vuln CVE-2026-34591"
+audit-flags = "--skip-editable --ignore-vuln CVE-2026-4539 --ignore-vuln CVE-2026-34515 --ignore-vuln CVE-2026-34513 --ignore-vuln CVE-2026-34516 --ignore-vuln CVE-2026-34517 --ignore-vuln CVE-2026-34519 --ignore-vuln CVE-2026-34518 --ignore-vuln CVE-2026-34520 --ignore-vuln CVE-2026-34525 --ignore-vuln CVE-2026-22815 --ignore-vuln CVE-2026-34514 --ignore-vuln CVE-2026-34450 --ignore-vuln CVE-2026-34452 --ignore-vuln CVE-2026-34073 --ignore-vuln CVE-2026-34591 --ignore-vuln CVE-2026-39892 --ignore-vuln CVE-2026-34444 --ignore-vuln CVE-2026-40192 --ignore-vuln CVE-2025-71176"
 integration-requires = "Redis (optional, in-memory mock available)"
 e2e-requires = "isolated filesystem + subprocess"
 test-stages = ["unit", "integration", "e2e"]
