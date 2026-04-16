@@ -91,9 +91,7 @@ def test_report_partials_render_data_driven_contract():
         tabs=[ReportTabData(key="revenue", label="Revenue", icon="bi-currency-dollar")],
         period_options=[ReportTabData(key="month", label="Month")],
         period_label="Selected period: 01.04.2026 - 16.04.2026",
-        summary_cards=[
-            ReportSummaryCardData(label="Revenue", value="$2,700.00", hint="Gross sales", icon="bi-cash")
-        ],
+        summary_cards=[ReportSummaryCardData(label="Revenue", value="$2,700.00", hint="Gross sales", icon="bi-cash")],
         table=ReportTableData(
             title="Data Breakdown",
             columns=[

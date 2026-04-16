@@ -122,8 +122,7 @@ class ReportChartData:
             "type": self.type,
             "chart_labels": self.labels,
             "datasets": [
-                dataset.as_chartjs() if isinstance(dataset, ChartDatasetData) else dataset
-                for dataset in self.datasets
+                dataset.as_chartjs() if isinstance(dataset, ChartDatasetData) else dataset for dataset in self.datasets
             ],
             "height": self.height,
             "show_legend": self.show_legend,
