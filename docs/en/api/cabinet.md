@@ -34,6 +34,16 @@ from codex_django.cabinet import (
 )
 ```
 
+The cabinet context processor also exposes shell navigation URLs used by the
+staff and client topbars:
+
+- `cabinet_site_url` defaults to `/` and can be set with `CODEX_CABINET_SITE_URL`.
+- `cabinet_client_switch_url` defaults to `/cabinet/my/` and can be set with `CODEX_CABINET_CLIENT_URL_NAME`.
+- `cabinet_staff_switch_url` defaults to `/cabinet/` and can be set with `CODEX_CABINET_STAFF_URL_NAME`.
+- `cabinet_login_url` and `cabinet_logout_url` default to Django/allauth-style auth paths and can be set with `CODEX_CABINET_LOGIN_URL_NAME` and `CODEX_CABINET_LOGOUT_URL_NAME`.
+
+Each setting can be either a URL name or a literal URL path.
+
 ### Page component contracts
 
 ```python
@@ -60,6 +70,21 @@ from codex_django.cabinet import (
     TableWidgetData,
     ListWidgetData,
     DashboardWidget,
+)
+```
+
+### Report page contracts
+
+```python
+from codex_django.cabinet import (
+    ReportPageData,
+    ReportTabData,
+    ReportSummaryCardData,
+    ReportTableData,
+    ReportChartData,
+    ChartDatasetData,
+    ChartAxisData,
+    resolve_report_period,
 )
 ```
 
@@ -182,6 +207,76 @@ return render(request, "booking/schedule.html", {"calendar": calendar})
 ```django
 {% templatetag openblock %} include "cabinet/components/calendar_grid.html" with calendar=calendar {% templatetag closeblock %}
 {% templatetag openblock %} include "cabinet/includes/_modal_base.html" {% templatetag closeblock %}
+```
+
+### Build a reusable report page
+
+Report pages are data-driven. Project code owns the business queries, then
+passes a typed report contract to the library template.
+
+```python
+from codex_django.cabinet import (
+    ChartAxisData,
+    ChartDatasetData,
+    ReportChartData,
+    ReportPageData,
+    ReportSummaryCardData,
+    ReportTabData,
+    ReportTableData,
+    TableColumn,
+    resolve_report_period,
+)
+
+def reports_view(request):
+    request.cabinet_module = "analytics"
+    period = resolve_report_period(request.GET.get("period"))
+
+    report = ReportPageData(
+        title="Reports",
+        summary="Revenue and order volume for the selected period.",
+        active_tab=request.GET.get("tab", "revenue"),
+        active_period=period.key,
+        tabs=[
+            ReportTabData(key="revenue", label="Revenue", icon="bi-currency-dollar"),
+            ReportTabData(key="products", label="Products", icon="bi-box-seam"),
+        ],
+        period_options=[
+            ReportTabData(key="week", label="Week"),
+            ReportTabData(key="month", label="Month"),
+            ReportTabData(key="quarter", label="Quarter"),
+        ],
+        period_label=f"{period.date_from:%d.%m.%Y} - {period.date_to:%d.%m.%Y}",
+        summary_cards=[
+            ReportSummaryCardData(label="Revenue", value="$12,400", hint="Gross sales"),
+        ],
+        table=ReportTableData(
+            title="Data Breakdown",
+            columns=[
+                TableColumn(key="label", label="Day", bold=True),
+                TableColumn(key="revenue", label="Revenue", align="right"),
+                TableColumn(key="orders", label="Orders", align="right"),
+            ],
+            rows=[
+                {"label": "01.04", "revenue": "$1,200", "orders": 4},
+            ],
+            summary_row={"label": "Total", "revenue": "$1,200", "orders": 4},
+        ),
+        chart=ReportChartData(
+            chart_id="revenueVolumeChart",
+            title="Revenue Trend",
+            labels=["01.04"],
+            type="bar",
+            datasets=[
+                ChartDatasetData(label="Orders", data=[4], type="bar", y_axis_id="y"),
+                ChartDatasetData(label="Revenue", data=[1200], type="line", y_axis_id="y1"),
+            ],
+            axes=[
+                ChartAxisData(id="y", position="left", label="Orders"),
+                ChartAxisData(id="y1", position="right", label="Revenue", draw_on_chart_area=False),
+            ],
+        ),
+    )
+    return render(request, "cabinet/reports/page.html", {"report": report})
 ```
 
 For registry internals, dashboard selectors, Redis managers, and cabinet views,

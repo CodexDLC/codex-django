@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.template.loader import render_to_string
 from django.test import RequestFactory, override_settings
 
 from codex_django.cabinet.registry import CabinetRegistry
@@ -38,6 +39,10 @@ class TestCabinetContextProcessorAnonymous:
         assert result["cabinet_topbar_actions"] == []
         assert result["cabinet_dashboard_widgets"] == []
         assert result["cabinet_settings"] is None
+        assert result["cabinet_site_url"] == "/"
+        assert result["cabinet_client_switch_url"] == "/cabinet/my/"
+        assert result["cabinet_staff_switch_url"] == "/cabinet/"
+        assert result["cabinet_logout_url"] == "/accounts/logout/"
 
     def test_anonymous_never_calls_redis(self):
         from codex_django.cabinet.context_processors import cabinet
@@ -141,3 +146,40 @@ class TestCabinetContextProcessorAuthenticated:
 
         assert result["cabinet_space"] == "client"
         assert result["cabinet_active_module"] == "portal"
+
+    @override_settings(
+        CODEX_CABINET_SITE_URL="/home/",
+        CODEX_CABINET_CLIENT_URL_NAME="/profile/",
+        CODEX_CABINET_STAFF_URL_NAME="/staff/",
+        CODEX_CABINET_LOGOUT_URL_NAME="/logout/",
+    )
+    def test_shell_urls_are_available_for_topbar_navigation(self):
+        registry = CabinetRegistry()
+        result = self._call(registry)
+
+        assert result["cabinet_site_url"] == "/home/"
+        assert result["cabinet_client_switch_url"] == "/profile/"
+        assert result["cabinet_staff_switch_url"] == "/staff/"
+        assert result["cabinet_logout_url"] == "/logout/"
+
+    def test_staff_topbar_uses_safe_shell_urls_without_account_routes(self):
+        request = _make_auth_request()
+        request.user.get_full_name.return_value = "Admin User"
+        html = render_to_string(
+            "cabinet/includes/_topbar.html",
+            {
+                "request": request,
+                "cabinet_nav": [],
+                "cabinet_topbar_entries": [],
+                "cabinet_quick_access": [],
+                "cabinet_topbar_actions": [],
+                "notification_items": [],
+                "cabinet_site_url": "/",
+                "cabinet_client_switch_url": "/cabinet/my/",
+                "cabinet_logout_url": "/accounts/logout/",
+            },
+        )
+
+        assert 'href="/"' in html
+        assert 'href="/cabinet/my/"' in html
+        assert 'href="/accounts/logout/"' in html

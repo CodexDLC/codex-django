@@ -49,6 +49,42 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
+            const hasY1 = config.datasets && config.datasets.some(dataset => dataset.yAxisID === 'y1');
+            const defaultScales = {
+                y: {
+                    type: 'linear',
+                    display: config.show_y_axis ?? true,
+                    position: 'left',
+                    beginAtZero: true,
+                    grid: { color: '#f1f5f9' },
+                    ticks: { font: { size: 10 }, color: '#64748b' }
+                },
+                x: {
+                    display: config.show_x_axis ?? true,
+                    grid: { display: false },
+                    ticks: { font: { size: 10 }, color: '#64748b' }
+                }
+            };
+
+            if (hasY1) {
+                defaultScales.y1 = {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    beginAtZero: true,
+                    grid: { drawOnChartArea: false },
+                    ticks: { font: { size: 10 }, color: '#64748b' }
+                };
+            }
+
+            const scales = config.scales || defaultScales;
+            Object.values(scales).forEach(scale => {
+                if (!scale.ticks || (!scale.ticks.prefix && !scale.ticks.suffix)) return;
+                const prefix = scale.ticks.prefix || '';
+                const suffix = scale.ticks.suffix || '';
+                scale.ticks.callback = (value) => `${prefix}${value}${suffix}`;
+            });
+
             this.chart = new Chart(ctx, {
                 type: config.type || 'line',
                 data: {
@@ -68,6 +104,10 @@ document.addEventListener('alpine:init', () => {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
                     plugins: {
                         legend: {
                             display: config.show_legend ?? (config.datasets && config.datasets.length > 1),
@@ -76,19 +116,7 @@ document.addEventListener('alpine:init', () => {
                             labels: { boxWidth: 10, font: { size: 10 } }
                         }
                     },
-                    scales: {
-                        y: {
-                            display: config.show_y_axis ?? true,
-                            beginAtZero: true,
-                            grid: { color: '#f1f5f9' },
-                            ticks: { font: { size: 10 }, color: '#64748b' }
-                        },
-                        x: {
-                            display: config.show_x_axis ?? true,
-                            grid: { display: false },
-                            ticks: { font: { size: 10 }, color: '#64748b' }
-                        }
-                    }
+                    scales: scales
                 }
             });
         }

@@ -2,7 +2,9 @@
 
 from typing import Any
 
+from django.conf import settings
 from django.http import HttpRequest
+from django.urls import NoReverseMatch, reverse
 
 from .notifications import notification_registry
 from .quick_access import get_enabled_staff_quick_access, parse_selected_keys
@@ -17,6 +19,39 @@ def _detect_space(request: HttpRequest) -> str:
 def _detect_module(request: HttpRequest) -> str:
     space = _detect_space(request)
     return CabinetRuntimeResolver(cabinet_registry).detect_module(request, space)
+
+
+def _reverse_or_literal(value: str | None, fallback: str | None = None) -> str | None:
+    if not value:
+        return fallback
+    if value.startswith(("/", "#", "http://", "https://")):
+        return value
+    try:
+        return reverse(value)
+    except NoReverseMatch:
+        return fallback
+
+
+def _cabinet_shell_urls() -> dict[str, str | None]:
+    return {
+        "cabinet_site_url": getattr(settings, "CODEX_CABINET_SITE_URL", "/"),
+        "cabinet_login_url": _reverse_or_literal(
+            getattr(settings, "CODEX_CABINET_LOGIN_URL_NAME", "account_login"),
+            getattr(settings, "LOGIN_URL", "/accounts/login/"),
+        ),
+        "cabinet_logout_url": _reverse_or_literal(
+            getattr(settings, "CODEX_CABINET_LOGOUT_URL_NAME", "account_logout"),
+            "/accounts/logout/",
+        ),
+        "cabinet_client_switch_url": _reverse_or_literal(
+            getattr(settings, "CODEX_CABINET_CLIENT_URL_NAME", "cabinet:client_home"),
+            "/cabinet/my/",
+        ),
+        "cabinet_staff_switch_url": _reverse_or_literal(
+            getattr(settings, "CODEX_CABINET_STAFF_URL_NAME", "cabinet:dashboard"),
+            "/cabinet/",
+        ),
+    }
 
 
 def cabinet(request: HttpRequest) -> dict[str, Any]:
@@ -34,6 +69,7 @@ def cabinet(request: HttpRequest) -> dict[str, Any]:
             "cabinet_active_topbar": None,
             "cabinet_settings": None,
             "cabinet_settings_url": None,
+            **_cabinet_shell_urls(),
         }
 
     resolved = CabinetRuntimeResolver(cabinet_registry).get_context(request)
@@ -85,6 +121,7 @@ def cabinet(request: HttpRequest) -> dict[str, Any]:
             if space == "staff"
             else []
         ),
+        **_cabinet_shell_urls(),
     }
 
 

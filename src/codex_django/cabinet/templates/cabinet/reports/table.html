@@ -1,0 +1,57 @@
+{% load cabinet_tags %}
+
+<section class="cab-report-table">
+  <div class="cab-report-table__head">
+    <div>
+      <h2 class="cab-report-table__title">{{ table.title }}</h2>
+      {% if table.subtitle %}<p class="cab-report-table__subtitle">{{ table.subtitle }}</p>{% endif %}
+    </div>
+    {% if table.primary_summary or table.secondary_summary %}
+      <div class="cab-report-table__summary">
+        {% if table.secondary_summary %}<span>{{ table.secondary_summary }}</span>{% endif %}
+        {% if table.primary_summary %}<strong>{{ table.primary_summary }}</strong>{% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  {% if table.rows %}
+    <div class="cab-report-table__scroll">
+      <table class="cab-report-table__grid">
+        <thead>
+          <tr>
+            {% for column in table.columns %}
+              <th class="{% if column.align == 'right' %}is-num{% endif %}">{{ column.label }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in table.rows %}
+            <tr>
+              {% for column in table.columns %}
+                <td class="{% if column.align == 'right' %}is-num{% endif %}">
+                  {% if column.bold %}<strong>{{ row|get_item:column.key }}</strong>{% else %}{{ row|get_item:column.key }}{% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+        {% if table.summary_row %}
+          <tfoot>
+            <tr>
+              {% for column in table.columns %}
+                <td class="{% if column.align == 'right' %}is-num{% endif %}">
+                  {{ table.summary_row|get_item:column.key }}
+                </td>
+              {% endfor %}
+            </tr>
+          </tfoot>
+        {% endif %}
+      </table>
+    </div>
+  {% else %}
+    <div class="cab-report-table__empty">
+      <i class="bi bi-clipboard-data"></i>
+      <p>{{ table.empty_message }}</p>
+    </div>
+  {% endif %}
+</section>

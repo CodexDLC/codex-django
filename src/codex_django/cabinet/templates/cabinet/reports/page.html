@@ -1,0 +1,71 @@
+{% extends "cabinet/base_cabinet.html" %}
+{% load cabinet_tags %}
+
+{% block title %}{{ report.title }}{% endblock %}
+
+{% block cabinet_content %}
+<div class="cab-report">
+  <header class="cab-report__header">
+    <div>
+      <h1 class="cab-report__title">{{ report.title }}</h1>
+      <p class="cab-report__summary">{{ report.summary }}</p>
+    </div>
+    <span class="cab-report__period">
+      <i class="bi bi-calendar3"></i>
+      {{ report.period_label }}
+    </span>
+  </header>
+
+  <nav class="cab-report__toolbar" aria-label="Report filters">
+    <div class="cab-report__pills">
+      {% for tab in report.tabs %}
+        <a class="cab-report__pill{% if tab.key == report.active_tab %} is-active{% endif %}"
+           href="?tab={{ tab.key }}&period={{ report.active_period }}">
+          {% if tab.icon %}<i class="bi {{ tab.icon }}"></i>{% endif %}
+          {{ tab.label }}
+        </a>
+      {% endfor %}
+    </div>
+    <div class="cab-report__pills">
+      {% for option in report.period_options %}
+        <a class="cab-report__pill{% if option.key == report.active_period %} is-active{% endif %}"
+           href="?tab={{ report.active_tab }}&period={{ option.key }}">
+          {{ option.label }}
+        </a>
+      {% endfor %}
+    </div>
+    {% if report.export_url %}
+      <a class="cab-report__export" href="{{ report.export_url }}">
+        <i class="bi bi-file-earmark-spreadsheet"></i>
+        {% cab_trans "Export" %}
+      </a>
+    {% endif %}
+  </nav>
+
+  {% if report.summary_cards %}
+    <section class="cab-report__cards" aria-label="Report summary">
+      {% for card in report.summary_cards %}
+        <article class="cab-report-card">
+          <div>
+            <span class="cab-report-card__label">{{ card.label }}</span>
+            <strong class="cab-report-card__value">{{ card.value }}</strong>
+          </div>
+          {% if card.icon %}<i class="cab-report-card__icon bi {{ card.icon }}"></i>{% endif %}
+          {% if card.hint or card.trend_value %}
+            <small class="cab-report-card__hint">
+              {% if card.trend_value %}<span class="cab-report-card__trend is-{{ card.trend_direction }}">{{ card.trend_value }}</span>{% endif %}
+              {% if card.hint %}{{ card.hint }}{% endif %}
+            </small>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </section>
+  {% endif %}
+
+  {% include "cabinet/reports/table.html" with table=report.table %}
+
+  {% if report.chart %}
+    {% include "cabinet/reports/chart.html" with chart=report.chart %}
+  {% endif %}
+</div>
+{% endblock %}

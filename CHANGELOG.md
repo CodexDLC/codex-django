@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.4.4] - 2026-04-16
+
+### Added
+
+- Added reusable cabinet report contracts (`ReportPageData`, `ReportChartData`, `ReportTableData`, period helpers) and library report templates for data-driven analytics pages.
+- Added dual-axis/mixed dataset support to the cabinet Chart.js widget config.
+- Added default cabinet shell URLs for public site, staff/client space switching, login, and logout links, plus safe staff/client topbar navigation that does not require allauth URL names.
+
 ## [0.4.3] - 2026-04-16
 
 ### Added

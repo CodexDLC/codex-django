@@ -1,0 +1,17 @@
+{% load cabinet_tags %}
+
+<section class="cab-report-chart"
+         x-data="chartWidget({{ chart.as_widget_config|jsonify|force_escape }})">
+  <div class="cab-report-chart__head">
+    <div class="cab-report-chart__icon">
+      <i class="bi {% firstof chart.icon 'bi-graph-up-arrow' %}"></i>
+    </div>
+    <div>
+      <h2 class="cab-report-chart__title">{{ chart.title }}</h2>
+      {% if chart.description %}<p class="cab-report-chart__description">{{ chart.description }}</p>{% endif %}
+    </div>
+  </div>
+  <div class="cab-report-chart__canvas" style="height:{{ chart.height }};">
+    <canvas x-ref="canvas"></canvas>
+  </div>
+</section>
