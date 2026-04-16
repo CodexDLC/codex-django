@@ -44,6 +44,10 @@ document.addEventListener('alpine:init', () => {
         init() {
             const ctx = this.$refs.canvas;
             if (!ctx) return;
+            if (typeof Chart === 'undefined') {
+                console.error('[codex_django] Chart.js not loaded. Do not remove or override the cabinet_vendor_js block without including Chart.js.');
+                return;
+            }
 
             this.chart = new Chart(ctx, {
                 type: config.type || 'line',
@@ -97,6 +101,10 @@ document.addEventListener('alpine:init', () => {
         init() {
             const ctx = this.$refs.canvas;
             if (!ctx) return;
+            if (typeof Chart === 'undefined') {
+                console.error('[codex_django] Chart.js not loaded. Do not remove or override the cabinet_vendor_js block without including Chart.js.');
+                return;
+            }
 
             const labels = config.chart_labels || [];
             const data = config.chart_data || [];

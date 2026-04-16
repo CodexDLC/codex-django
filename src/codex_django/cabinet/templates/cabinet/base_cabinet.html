@@ -9,6 +9,10 @@
     {% include "cabinet/includes/_head.html" %}
     <style>[x-cloak] { display: none !important; }</style>
     <script src="{% static 'cabinet/js/vendor/htmx.min.js' %}" defer></script>
+    {# Chart.js and other feature vendors — override this block to use CDN or a different version #}
+    {% block cabinet_vendor_js %}
+      <script src="{% static 'cabinet/js/vendor/chart.min.js' %}" defer></script>
+    {% endblock %}
     <script src="{% static 'cabinet/js/app/cabinet.js' %}?v=2" defer></script>
     <script src="{% static 'cabinet/js/app/cabinet_local.js' %}?v=2" defer></script>
     <script src="{% static 'cabinet/js/vendor/alpine.min.js' %}" defer></script>

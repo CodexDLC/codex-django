@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-04-16
+
+### Added
+
+- Added `cabinet_vendor_js` block to `base_cabinet.html` to allow flexible overriding or CDN-loading of feature dependencies (like Chart.js).
+
+### Fixed
+
+- Fixed `SiteSettingsService` to correctly handle empty raw values for nullable fields (e.g., `TimeField`, `DateField`) by setting them to `None`.
+- Added safety checks for `Chart` existence in `cabinet.js` to prevent runtime errors when the vendor block is modified or missing.
+
 ## [0.4.2] - 2026-04-11
 
 ### Changed

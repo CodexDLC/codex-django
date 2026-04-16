@@ -190,6 +190,10 @@ class SiteSettingsService:
                     # Преобразование типов для Boolean
                     if isinstance(field, models.BooleanField | models.NullBooleanField):
                         final_value: Any = raw_value.lower() in ["true", "on", "1"]
+                    elif not raw_value and field.null:
+                        # Если значение пустое и поле допускает NULL — ставим None
+                        # Это важно для TimeField, DateField и других не-строковых полей
+                        final_value = None
                     else:
                         final_value = raw_value
                     setattr(instance, field.name, final_value)
