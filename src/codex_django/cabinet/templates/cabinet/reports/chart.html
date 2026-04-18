@@ -1,7 +1,7 @@
 {% load cabinet_tags %}
 
 <section class="cab-report-chart"
-         x-data="chartWidget({{ chart.as_widget_config|jsonify|force_escape }})">
+         x-data='chartWidget({{ chart.as_widget_config|jsonify }})'>
   <div class="cab-report-chart__head">
     <div class="cab-report-chart__icon">
       <i class="bi {% firstof chart.icon 'bi-graph-up-arrow' %}"></i>

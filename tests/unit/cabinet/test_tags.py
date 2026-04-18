@@ -1,6 +1,8 @@
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
+from django.template.loader import get_template, render_to_string
 
 from codex_django.cabinet.templatetags.cabinet_tags import (
     cab_initials,
@@ -61,3 +63,79 @@ def test_jsonify():
         a: int
 
     assert '{"a": 1}' in jsonify(D(a=1))
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "template_name",
+    [
+        "cabinet/widgets/chart.html",
+        "cabinet/widgets/donut.html",
+        "cabinet/reports/chart.html",
+        "cabinet/widgets/table.html",
+        "cabinet/includes/_report_filters.html",
+    ],
+)
+def test_cabinet_templates_load_registered_tag_library(template_name):
+    assert get_template(template_name)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("template_name", "component_name", "context"),
+    [
+        (
+            "cabinet/widgets/chart.html",
+            "chartWidget",
+            {
+                "data": {
+                    "chart_id": "appointmentsChart",
+                    "title": "Appointments",
+                    "chart_labels": ["Mon", "Tue"],
+                    "chart_data": [4, 7],
+                }
+            },
+        ),
+        (
+            "cabinet/widgets/donut.html",
+            "donutWidget",
+            {
+                "data": {
+                    "chart_id": "categoriesDonut",
+                    "title": "Popular categories",
+                    "icon": "bi-pie-chart-fill",
+                    "chart_labels": ["Nails", "Brows"],
+                    "chart_data": [18, 16],
+                    "colors": ["#10b981", "#34d399"],
+                }
+            },
+        ),
+        (
+            "cabinet/reports/chart.html",
+            "chartWidget",
+            {
+                "chart": SimpleNamespace(
+                    as_widget_config={
+                        "chart_id": "revenueChart",
+                        "title": "Revenue",
+                        "chart_labels": ["Mon", "Tue"],
+                        "chart_data": [100, 120],
+                    },
+                    description="",
+                    height="260px",
+                    icon="bi-graph-up-arrow",
+                    title="Revenue",
+                )
+            },
+        ),
+    ],
+)
+def test_chart_templates_pass_json_object_to_x_data(template_name, component_name, context):
+    html = render_to_string(
+        template_name,
+        context,
+    )
+
+    assert f'x-data=\'{component_name}({{"chart_id":' in html
+    assert "force_escape" not in html
+    assert "&quot;" not in html

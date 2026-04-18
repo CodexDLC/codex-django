@@ -1,5 +1,7 @@
+{% load cabinet_tags %}
+
 <div class="card border-0 shadow-sm h-100"
-     x-data="chartWidget({{ data|jsonify|force_escape }})">
+     x-data='chartWidget({{ data|jsonify }})'>
   <div class="card-header bg-white border-0 pt-3 pb-0 d-flex align-items-center justify-content-between">
     <h6 class="fw-semibold mb-0"
         style="font-size:.8rem;
