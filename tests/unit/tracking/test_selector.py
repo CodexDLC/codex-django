@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pytest
 from django.utils import timezone
+from django.test import override_settings
 
 from codex_django.tracking.models import PageView
 from codex_django.tracking.selector import TrackingSelector
@@ -39,6 +40,42 @@ def test_multi_day_totals_uses_database_and_overlays_live_snapshots():
     assert rows == [
         {"date": yesterday.isoformat(), "views": 5},
         {"date": today.isoformat(), "views": 10},
+    ]
+
+
+@override_settings(CODEX_TRACKING={"skip_prefixes": ["/internal/"]})
+def test_top_pages_filters_paths_from_configured_skip_prefixes():
+    today = timezone.localdate()
+    PageView.objects.create(path="/internal/from-db/", date=today, views=7)
+    PageView.objects.create(path="/public/from-db/", date=today, views=3)
+
+    with patch("codex_django.tracking.selector.get_tracking_manager") as get_manager:
+        get_manager.return_value.get_daily.return_value = {
+            "/internal/from-redis/": "9",
+            "/public/from-redis/": "8",
+        }
+        rows = TrackingSelector.top_pages(limit=10)
+
+    assert rows == [
+        {"path": "/public/from-redis/", "views": 8},
+        {"path": "/public/from-db/", "views": 3},
+    ]
+
+
+@override_settings(CODEX_TRACKING={"skip_prefixes": ["/internal/"]})
+def test_multi_day_totals_skips_filtered_paths_in_live_snapshot_sum():
+    today = timezone.localdate()
+    yesterday = today - timedelta(days=1)
+    PageView.objects.create(path="/a/", date=yesterday, views=5)
+    PageView.objects.create(path="/b/", date=today, views=2)
+
+    with patch("codex_django.tracking.selector.get_tracking_manager") as get_manager:
+        get_manager.return_value.get_multi_day.return_value = [None, {"/b/": "9", "/internal/c/": "6"}]
+        rows = TrackingSelector.multi_day_totals(days=2)
+
+    assert rows == [
+        {"date": yesterday.isoformat(), "views": 5},
+        {"date": today.isoformat(), "views": 9},
     ]
 
 

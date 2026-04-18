@@ -8,7 +8,7 @@ from codex_django.cabinet import DashboardWidget, SidebarItem, TopbarEntry, decl
 
 from .settings import get_tracking_settings
 
-_analytics_url = get_tracking_settings().analytics_url
+_settings = get_tracking_settings()
 
 declare(
     module="tracking",
@@ -17,13 +17,13 @@ declare(
         group="admin",
         label=_("Analytics"),
         icon="bi-bar-chart",
-        url=_analytics_url,
+        url=_settings.analytics_url,
         order=30,
     ),
     sidebar=[
         SidebarItem(
             label=_("Visits"),
-            url=_analytics_url,
+            url=_settings.analytics_url,
             icon="bi-graph-up-arrow",
             order=10,
         ),
@@ -50,5 +50,7 @@ declare(
             nav_group="admin",
             order=72,
         ),
-    ],
+    ]
+    if _settings.track_dashboard_widgets
+    else [],
 )

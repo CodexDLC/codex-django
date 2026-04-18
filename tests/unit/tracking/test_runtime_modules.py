@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib
 import io
+import sys
 from datetime import date
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -10,6 +11,7 @@ import pytest
 from django.contrib import admin
 from django.core.management import call_command
 from django.test import RequestFactory
+from django.test import override_settings
 
 from codex_django.tracking.admin import PageViewAdmin
 from codex_django.tracking.models import PageView
@@ -134,3 +136,30 @@ def test_tracking_provider_module_import_is_stable():
     module = importlib.import_module("codex_django.tracking.providers")
 
     assert hasattr(module, "provide_tracking_analytics")
+
+
+@override_settings(CODEX_TRACKING={"track_dashboard_widgets": False, "analytics_url": "/cabinet/tracking/"})
+def test_tracking_settings_reads_track_dashboard_widgets_flag():
+    from codex_django.tracking.settings import get_tracking_settings
+
+    resolved = get_tracking_settings()
+
+    assert resolved.track_dashboard_widgets is False
+
+
+def test_tracking_cabinet_declaration_hides_dashboard_widgets_when_disabled():
+    with (
+        patch("codex_django.cabinet.declare") as declare,
+        patch(
+            "codex_django.tracking.settings.get_tracking_settings",
+            return_value=SimpleNamespace(track_dashboard_widgets=False, analytics_url="/cabinet/tracking/"),
+        ),
+    ):
+        tracking_cabinet = sys.modules.get("codex_django.tracking.cabinet")
+        if tracking_cabinet is None:
+            importlib.import_module("codex_django.tracking.cabinet")
+        else:
+            importlib.reload(tracking_cabinet)
+
+    assert declare.call_count == 1
+    assert declare.call_args.kwargs["dashboard_widgets"] == []

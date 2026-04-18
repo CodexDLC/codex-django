@@ -29,6 +29,11 @@ def _merge_counts(db_counts: dict[str, int], redis_counts: dict[str, str] | None
     return merged
 
 
+def _filter_skipped_paths(counts: dict[str, int]) -> dict[str, int]:
+    skip = get_tracking_settings().skip_prefixes
+    return {path: views for path, views in counts.items() if not any(path.startswith(prefix) for prefix in skip)}
+
+
 @dataclass(frozen=True)
 class TrackingAnalyticsContext:
     """Dashboard-ready tracking analytics payload."""
@@ -80,7 +85,8 @@ class TrackingSelector:
             row["path"]: int(row["views"])
             for row in PageView.objects.filter(date=day).values("path", "views").order_by("-views", "path")
         }
-        return _merge_counts(db_counts, get_tracking_manager().get_daily(day))
+        merged = _merge_counts(db_counts, get_tracking_manager().get_daily(day))
+        return _filter_skipped_paths(merged)
 
     @staticmethod
     def top_pages(date_str: str | None = None, limit: int = 10) -> list[dict[str, Any]]:
@@ -161,7 +167,10 @@ class TrackingSelector:
         redis_snapshots = get_tracking_manager().get_multi_day([day.isoformat() for day in dates])
         for day, snapshot in zip(dates, redis_snapshots, strict=False):
             if snapshot:
-                totals[day.isoformat()] = sum(int(value) for value in snapshot.values())
+                # Convert snapshot to int values and filter skipped paths before summing
+                int_snapshot = {path: int(views) for path, views in snapshot.items()}
+                filtered_snapshot = _filter_skipped_paths(int_snapshot)
+                totals[day.isoformat()] = sum(filtered_snapshot.values())
 
         return [{"date": day.isoformat(), "views": totals[day.isoformat()]} for day in dates]
 

@@ -14,6 +14,8 @@ All notable changes to this project will be documented in this file.
 
 - `ReportPeriodKey` type alias broadened to `Literal["week", "month", "quarter", "year", "custom"]`. Callers that narrow the type explicitly must update their annotations.
 - Report filter templates now read `date_from` / `date_to` from context (ISO strings) instead of hardcoded `2026-03-01` / `2026-03-31`, and preserve custom bounds across report-tab navigation when `active_period == "custom"`.
+- Tracking cabinet declarations now honor `CODEX_TRACKING.track_dashboard_widgets` to allow disabling tracking dashboard widgets without removing the analytics route/topbar/sidebar entry.
+- Tracking analytics selectors now apply configured `skip_prefixes` to merged top-pages output and to live Redis multi-day totals before chart summation.
 
 ## [0.5.1] - 2026-04-18
 

@@ -26,6 +26,7 @@ class TrackingSettings:
     )
     track_anonymous: bool = False
     track_redirects: bool = True
+    track_dashboard_widgets: bool = True
     analytics_url: str = "/cabinet/tracking/"
     analytics_days: int = 30
 
@@ -55,6 +56,7 @@ def get_tracking_settings() -> TrackingSettings:
         skip_prefixes=tuple(str(prefix) for prefix in raw.get("skip_prefixes", TrackingSettings.skip_prefixes)),
         track_anonymous=bool(raw.get("track_anonymous", False)),
         track_redirects=bool(raw.get("track_redirects", True)),
+        track_dashboard_widgets=bool(raw.get("track_dashboard_widgets", True)),
         analytics_url=str(raw.get("analytics_url", "/cabinet/tracking/")),
         analytics_days=int(raw.get("analytics_days", 30)),
     )
