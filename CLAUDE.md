@@ -41,6 +41,7 @@ C:\Users\prime\.claude\projects\C--install-projects-codex-tools-codex-django\mem
 | `roadmap_block6.md` | Booking: мульти-сервис |
 | `roadmap_block7.md` | Docs + PyPI alpha |
 | `roadmap_block8.md` | Deploy blueprints + Showcase |
+| `roadmap_block_cache_sessions.md` | Redis Django session + cache backends (0.5.0) |
 | `cabinet_index.md` | Архитектура кабинета |
 | `cabinet_css_js.md` | CSS/JS стек |
 | `cabinet_dashboard_architecture.md` | DashboardSelector, Redis, adapter pattern |

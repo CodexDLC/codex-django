@@ -57,6 +57,10 @@ Context processor определяет текущий `url_name` и пробра
 Во всем модуле используется единый паттерн: async-first методы плюс sync-обертки для обычного Django-кода.
 Это дает верхним слоям единый способ работать с Redis без повторной настройки клиента и схемы ключей.
 
+`core.redis.django_adapter` — более легкий вспомогательный модуль, который используют session- и cache-бэкенды вместо наследования `BaseDjangoRedisManager`. Он предоставляет `build_redis_client`, `build_redis_service` и `namespaced_key` без логики `_is_disabled`, чтобы сессии и кэш вели себя предсказуемо в любой среде.
+
+О полных Django-бэкендах для сессий и кэша: [Redis Cache и Session](redis.md).
+
 ### Internationalization Helpers
 
 `core.i18n.discovery.discover_locale_paths()` ищет locale-директории сразу в нескольких схемах проекта:

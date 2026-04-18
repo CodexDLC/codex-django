@@ -57,6 +57,10 @@ In practice, `core` does not own SEO content itself. It provides the access path
 The pattern is consistent across the module: async-first manager methods with synchronous wrappers for regular Django usage.
 This lets higher-level modules use Redis without repeating connection setup and key conventions.
 
+`core.redis.django_adapter` is a lighter utility that the session and cache backends use instead of inheriting `BaseDjangoRedisManager`. It exposes `build_redis_client`, `build_redis_service`, and `namespaced_key` without carrying the `_is_disabled` local-dev bypass — ensuring that session and cache backends always behave consistently.
+
+For the full Django session and cache backends, see [Redis Cache and Session](redis.md).
+
 ### Internationalization Helpers
 
 `core.i18n.discovery.discover_locale_paths()` discovers locale directories in several project layouts:

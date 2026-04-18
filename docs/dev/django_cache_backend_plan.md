@@ -1,117 +1,155 @@
-# Django Cache Backend Plan
+# Django Cache and Session Backends
 
-This document tracks a future library task for `codex-django`: provide a
-native Django cache/session backend on top of the existing
-`codex-platform` / `codex-django` Redis layer.
+Status: **implemented** in codex-django 0.5.0. This document describes the
+Redis-backed cache and session backends shipped with codex-django and the
+migration path from `django-redis`.
 
-This is explicitly a future engineering task. It is not a blocker for the
-current `Django 6.0.4+` upgrade path as long as `django-redis` remains usable
-for cache/session wiring during that transition.
+## 1. What's included
 
-## 1. Goal
+Two independent, Redis-backed Django backends:
 
-Add a reusable Django cache backend for `codex-django` projects that:
+- `codex_django.sessions.backends.redis.SessionStore` — session engine.
+- `codex_django.cache.backends.redis.RedisCache` — full Django cache backend.
 
-- uses the internal Redis stack instead of `django-redis`
-- supports `CACHES["default"]`
-- can back `django.contrib.sessions.backends.cache`
-- aligns cache/session behavior with the existing codex Redis abstractions
-- avoids `pickle` as the default serialization strategy
+Both sit on top of the existing `codex_platform.redis_service` async stack and
+reuse `codex_django.core.redis.django_adapter` for client construction and
+namespacing. Neither depends on `django-redis`.
 
-## 2. Why this exists
+## 2. No-pickle policy
 
-Today, `codex-django` already has a Redis-oriented runtime layer for Django
-integrations, but standard Django cache/session usage may still depend on
-`django-redis`.
+Neither backend uses `pickle`:
 
-That leaves an architectural split:
+- Session payload is stored as the Django **encoded string** produced by
+  `SessionBase.encode()` — this requires `SESSION_SERIALIZER` to be a
+  JSON-based serializer. Django's built-in
+  `django.contrib.sessions.serializers.JSONSerializer` is the recommended
+  choice (and is the default in modern Django).
+- Cache values are stored as strict JSON via
+  `codex_django.cache.serializers.JsonSerializer`. Values that cannot be
+  JSON-encoded raise `TypeError` — there is **no** silent pickle fallback.
 
-- runtime managers use `codex-platform` / `codex-django` Redis abstractions
-- Django cache/session may still use a separate adapter
+Old pickled keys left behind by `django-redis` are **not** readable and are
+not migrated. The explicit expectation is that legacy sessions / cache entries
+are dropped at cut-over (users simply re-authenticate).
 
-The target direction is one Redis stack for both runtime features and Django
-cache/session integration.
+## 3. Settings example
 
-## 3. Available foundation
+```python
+# settings.py
 
-The required Redis primitives already exist in the platform layer, including:
+REDIS_URL = "redis://localhost:6379/0"
+PROJECT_NAME = "myproject"
 
-- base Redis managers
-- string/hash operations
-- pipeline helpers
-- TTL and related expiration primitives
+CACHES = {
+    "default": {
+        "BACKEND": "codex_django.cache.backends.redis.RedisCache",
+        "LOCATION": REDIS_URL,           # optional; defaults to settings.REDIS_URL
+        "KEY_PREFIX": PROJECT_NAME,       # REQUIRED for clear() — see §6
+        "TIMEOUT": 300,
+        "OPTIONS": {
+            # Optional: dotted path to a custom serializer class.
+            # "SERIALIZER": "myproject.cache.MySerializer",
+        },
+    }
+}
 
-The Django-aware Redis layer also already exists in `codex-django`, so this is
-not a from-scratch Redis implementation task. The missing piece is the Django
-cache backend adapter layer.
+SESSION_ENGINE = "codex_django.sessions.backends.redis"
+SESSION_COOKIE_NAME = f"sessionid_{PROJECT_NAME}"
+SESSION_SERIALIZER = "django.contrib.sessions.serializers.JSONSerializer"
 
-## 4. Required backend surface
+# Optional: override the middle segment of the session key namespace.
+# Default is "session" → Redis key "{PROJECT_NAME}:session:{session_key}".
+# CODEX_SESSION_KEY_PREFIX = "sess"
 
-The first implementation should cover the practical Django cache contract:
+# django-ratelimit remains pointed at the default cache — no change required.
+RATELIMIT_USE_CACHE = "default"
+```
 
-- `get()`
-- `set()`
-- `add()`
-- `delete()`
-- `get_many()`
-- `set_many()`
-- `delete_many()`
-- `clear()`
-- `touch()`
-- key prefix / version handling
-- timeout semantics compatible with Django expectations
+There is **no** `SESSION_CACHE_ALIAS` — the session backend talks to Redis
+directly, not through the cache framework.
 
-Session compatibility should then be validated explicitly on top of that.
+## 4. Serialization of complex types
 
-## 5. Serialization policy
+The cache serializer is strict by design. Writing `datetime`, `date`,
+`timedelta`, `Decimal`, `UUID`, `set`, or `bytes` to the cache raises
+`TypeError`. To round-trip such values, use the explicit helpers in
+`codex_django.cache.values.CacheCoder`:
 
-The backend should define an explicit serialization strategy for:
+```python
+from codex_django.cache.values import CacheCoder
+from django.core.cache import cache
 
-- strings
-- JSON-serializable payloads
-- non-JSON-compatible values
+cache.set("user:42:last_seen", CacheCoder.dump_datetime(user.last_seen), 3600)
+raw = cache.get("user:42:last_seen")
+last_seen = CacheCoder.load_datetime(raw) if raw else None
+```
 
-Preferred direction:
+`CacheCoder.dump()` also accepts nested structures (`dict` / `list` /
+`tuple`) and recursively converts known types to JSON-native forms. For the
+reverse, the caller must know which field is which — JSON does not preserve
+Python types, and codex-django intentionally does **not** smuggle magic type
+tags into the serialized payload (that would leak into every Redis consumer
+and make a future revert impossible).
 
-- JSON-first where possible
-- explicit serializer selection for unsupported payloads
-- no silent `pickle` default
+If the default is not enough, plug a custom serializer via
+`OPTIONS["SERIALIZER"]`. The class must expose `dumps(value) -> str` and
+`loads(raw) -> Any`.
 
-If `pickle` support exists at all, it should be explicit opt-in rather than the
-default behavior.
+## 5. Failure semantics
 
-## 6. Open design questions
+Both backends treat Redis as a hard dependency:
 
-Questions to resolve during implementation:
+- Session: Redis outage raises `RedisConnectionError` out of
+  `save` / `load` / `exists` / `create` / `delete`. A broken Redis must
+  never look like "empty session" — that would silently log users out and
+  allow replay of cleared cookies.
+- Cache: all operations propagate `RedisConnectionError` /
+  `RedisServiceError`. No transparent fallback to an in-memory cache.
 
-- exact backend module location in `codex-django`
-- whether any extra Redis primitives must be promoted into `codex-platform`
-- namespace/version handling for cache keys
-- `clear()` semantics
+The `CODEX_REDIS_ENABLED=False` DEBUG bypass used by domain managers
+(`SeoRedisManager`, etc.) does **not** apply here — session and cache behavior
+must be deterministic regardless of the environment.
 
-Expected direction for `clear()`:
+## 6. `clear()` is namespace-scoped
 
-- namespace-scoped clear
-- no broad Redis flush as default behavior
+`cache.clear()` performs a `SCAN` + `DEL` scoped to `{KEY_PREFIX}:*`. If
+`KEY_PREFIX` is empty, `clear()` refuses to run (raises
+`ImproperlyConfigured`) — codex-django will **never** issue `FLUSHDB` against
+a shared Redis.
 
-## 7. Sequencing
+Set `KEY_PREFIX = PROJECT_NAME` (or any non-empty value) to enable clear.
 
-Suggested order:
+## 7. Migration from django-redis
 
-1. Confirm the current Django 6 upgrade can proceed without replacing
-   `django-redis`.
-2. Design the `codex-django` backend API and serializer policy.
-3. Implement the minimal backend contract.
-4. Validate Django cache operations and session behavior.
-5. Document migration from `django-redis` and update project templates later.
+For a project currently using `django_redis.cache.RedisCache` +
+`django.contrib.sessions.backends.cache`:
 
-## 8. Status
+1. Update `CACHES["default"]["BACKEND"]` to
+   `codex_django.cache.backends.redis.RedisCache`.
+2. Remove the `OPTIONS["CLIENT_CLASS"]` entry (no longer applicable).
+3. Change `SESSION_ENGINE` to `codex_django.sessions.backends.redis`.
+4. Remove `SESSION_CACHE_ALIAS` — the session backend does not use the cache
+   framework.
+5. Confirm `SESSION_SERIALIZER` is a JSON serializer.
+6. Deploy; legacy sessions and cache entries expire or are orphaned — that is
+   acceptable by design.
+7. After the new stack is stable, remove `django-redis` from the project's
+   dependencies.
 
-Status: planned
+`django-ratelimit` continues to work unchanged — it uses
+`cache.add` + `cache.incr`, both of which are supported by `RedisCache`.
 
-Priority: post-Django-6 upgrade task
+## 8. Design notes
 
-Trigger to start:
-
-- current upgrade path is stabilized
-- immediate runtime blockers are resolved
+- The session and cache backends do **not** inherit from
+  `BaseDjangoRedisManager`. They build their own `RedisService` through
+  `codex_django.core.redis.django_adapter.build_redis_service()` so that the
+  local-dev `_is_disabled()` bypass of the domain managers cannot accidentally
+  disable them.
+- Both backends define async-native primitives (`aget`, `aset`, `aadd`,
+  `aload`, `asave`, `acreate`, …) and synchronous wrappers via
+  `asgiref.sync.async_to_sync`, matching the existing pattern used by domain
+  managers such as `SeoRedisManager`.
+- `RedisCache.add()` is atomic via Redis `SET NX EX`.
+- Session `save(must_create=True)` uses the same `SET NX EX` primitive, so
+  two simultaneous logins on the same fresh session key cannot both succeed.

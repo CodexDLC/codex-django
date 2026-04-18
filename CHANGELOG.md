@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Added Redis-backed Django session engine `codex_django.sessions.backends.redis.SessionStore`. Stores session payloads as Django-encoded JSON strings (no pickle), uses atomic `SET NX EX` for `must_create`, respects `SESSION_COOKIE_AGE` via `get_expiry_age()`, and propagates `RedisConnectionError` instead of silently returning empty sessions. Namespaced key: `{PROJECT_NAME}:{CODEX_SESSION_KEY_PREFIX}:{session_key}` (prefix defaults to `session`).
+- Added Redis-backed Django cache backend `codex_django.cache.backends.redis.RedisCache` implementing the full Django cache contract (`get`, `set`, `add`, `delete`, `get_many`, `set_many`, `delete_many`, `touch`, `has_key`, `incr`, `decr`, `clear`) on top of `codex_platform.redis_service`. Serialization is strict JSON via `codex_django.cache.serializers.JsonSerializer`; pluggable through `OPTIONS["SERIALIZER"]`. `add()` is atomic via `SET NX EX`. `clear()` is namespace-scoped through `SCAN + DEL` on `{KEY_PREFIX}:*` and refuses to run without a non-empty `KEY_PREFIX` — no `FLUSHDB` ever.
+- Added `codex_django.cache.values.CacheCoder` with explicit helpers to round-trip `datetime`, `date`, `timedelta`, `Decimal`, `UUID`, `set`, and `bytes` through a JSON cache, plus a recursive `dump()` convenience for nested structures. No magic type tags are stored in Redis — callers decode explicitly.
+- Added shared helper `codex_django.core.redis.django_adapter` exposing `build_redis_client`, `build_redis_service`, and `namespaced_key` for backends that need a Redis client without inheriting the `_is_disabled` shortcut of `BaseDjangoRedisManager`.
+
+### Changed
+
+- `docs/dev/django_cache_backend_plan.md` is no longer a forward-looking plan; it now documents the shipped backends, settings wiring, no-pickle policy, and migration path away from `django-redis`.
+
+### Fixed
+
+- Fixed cabinet widget/report filter templates loading the non-existent `cabinet_extras` tag library; they now load the registered `cabinet_tags` library.
+- Fixed cabinet chart widget JSON payload handling so Alpine receives valid `x-data` for regular charts, report charts, and donut charts instead of rendering blank cards.
+
 ## [0.4.4] - 2026-04-16
 
 ### Added
