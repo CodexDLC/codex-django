@@ -173,7 +173,7 @@ def test_touch_with_zero_timeout_deletes_and_reports_existence() -> None:
 
 def test_get_many_returns_only_found() -> None:
     cache, service = _make_cache()
-    service.string.mget.return_value = ['"a"', None, '42']
+    service.string.mget.return_value = ['"a"', None, "42"]
     assert cache.get_many(["k1", "k2", "k3"]) == {"k1": "a", "k3": 42}
 
 

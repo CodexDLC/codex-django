@@ -63,9 +63,7 @@ class RedisCache(BaseCache):
         self._location = server or None
         options = params.get("OPTIONS") or {}
         serializer_path = options.get("SERIALIZER")
-        self._serializer: Serializer = (
-            _import_serializer(serializer_path) if serializer_path else JsonSerializer()
-        )
+        self._serializer: Serializer = _import_serializer(serializer_path) if serializer_path else JsonSerializer()
         self._service: Any = None
 
     # ---- infrastructure ---------------------------------------------------

@@ -114,7 +114,7 @@ class CacheCoder:
         unknown type is returned as-is — JSON serialization will raise
         ``TypeError`` on it later, which is the intended strict-mode signal.
         """
-        if isinstance(value, (str, int, float, bool)) or value is None:
+        if isinstance(value, str | int | float | bool) or value is None:
             return value
         if isinstance(value, datetime):
             return cls.dump_datetime(value)
@@ -126,12 +126,12 @@ class CacheCoder:
             return cls.dump_decimal(value)
         if isinstance(value, UUID):
             return cls.dump_uuid(value)
-        if isinstance(value, (set, frozenset)):
+        if isinstance(value, set | frozenset):
             return [cls.dump(v) for v in value]
         if isinstance(value, bytes):
             return cls.dump_bytes(value)
         if isinstance(value, Mapping):
             return {k: cls.dump(v) for k, v in value.items()}
-        if isinstance(value, (list, tuple)):
+        if isinstance(value, list | tuple):
             return [cls.dump(v) for v in value]
         return value
