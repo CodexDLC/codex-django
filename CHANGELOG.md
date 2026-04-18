@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.2] - 2026-04-18
+
+### Added
+
+- Extended `codex_django.cabinet.reports.resolve_report_period` with two new period keys: `"year"` (year-to-date anchored at the current year's January 1st) and `"custom"` (inclusive range supplied via `date_from` / `date_to`, accepting either `date` objects or ISO `YYYY-MM-DD` strings). The comparison window is computed identically to existing periods (same-length block immediately preceding `date_from`).
+- `"custom"` with missing or inverted bounds (`date_from > date_to`) falls back to the default `"month"` period so callers can route query-string input through the resolver without pre-validation.
+- Report filter templates (`cabinet/includes/_report_filters.html` and the showcase twin) now render a compact `<form method="get">` around the date inputs with a calendar-range submit button. Submitting posts `period=custom&date_from=…&date_to=…` to the same view; the existing period pills continue to drive named periods.
+
+### Changed
+
+- `ReportPeriodKey` type alias broadened to `Literal["week", "month", "quarter", "year", "custom"]`. Callers that narrow the type explicitly must update their annotations.
+- Report filter templates now read `date_from` / `date_to` from context (ISO strings) instead of hardcoded `2026-03-01` / `2026-03-31`, and preserve custom bounds across report-tab navigation when `active_period == "custom"`.
+
 ## [0.5.1] - 2026-04-18
 
 ### Added

@@ -43,6 +43,45 @@ def test_resolve_report_period_supports_calendar_quarter():
     assert period.previous_to == date(2026, 3, 31)
 
 
+def test_resolve_report_period_supports_year_to_date():
+    period = resolve_report_period("year", today=date(2026, 4, 18))
+
+    assert period.key == "year"
+    assert period.date_from == date(2026, 1, 1)
+    assert period.date_to == date(2026, 4, 18)
+    assert period.previous_to == date(2025, 12, 31)
+    assert period.previous_from == date(2025, 9, 15)
+
+
+def test_resolve_report_period_supports_custom_range_from_iso_strings():
+    period = resolve_report_period(
+        "custom",
+        date_from="2026-02-10",
+        date_to="2026-02-20",
+        today=date(2026, 4, 18),
+    )
+
+    assert period.key == "custom"
+    assert period.date_from == date(2026, 2, 10)
+    assert period.date_to == date(2026, 2, 20)
+    assert period.days == 11
+    assert period.previous_to == date(2026, 2, 9)
+    assert period.previous_from == date(2026, 1, 30)
+
+
+def test_resolve_report_period_custom_falls_back_to_month_when_invalid():
+    period = resolve_report_period(
+        "custom",
+        date_from="2026-03-10",
+        date_to="2026-03-01",
+        today=date(2026, 4, 18),
+    )
+
+    assert period.key == "month"
+    assert period.date_from == date(2026, 4, 1)
+    assert period.date_to == date(2026, 4, 18)
+
+
 def test_report_chart_config_exports_mixed_dual_axis_payload():
     chart = ReportChartData(
         chart_id="revenueVolumeChart",
