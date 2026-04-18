@@ -17,7 +17,7 @@ from .seo import AbstractStaticPageSeo
 from .settings import (
     AbstractSiteSettings,
     SiteContactSettingsMixin,
-    SiteEmailSettingsMixin,
+    SiteEmailIdentityMixin,
     SiteGeoSettingsMixin,
     SiteMarketingSettingsMixin,
     SiteSettingsSyncMixin,
@@ -36,7 +36,7 @@ __all__ = [
     "SiteSettingsSyncMixin",
     "SiteTechnicalSettingsMixin",
     "SiteMarketingSettingsMixin",
-    "SiteEmailSettingsMixin",
+    "SiteEmailIdentityMixin",
     # SEO
     "AbstractStaticPageSeo",
     # Translations

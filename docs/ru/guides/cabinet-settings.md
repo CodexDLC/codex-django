@@ -103,102 +103,18 @@
 
 </details>
 
-### 2. Почта / SMTP (`_email.html`)
-Настройки почтового сервера и SendGrid.
+### 2. Почта / Идентичность (`_email.html`)
+Только «от кого» приходят письма. SMTP-транспорт задаётся через
+переменные окружения (`EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`,
+`EMAIL_HOST_PASSWORD`, `EMAIL_USE_TLS`/`EMAIL_USE_SSL`) в `settings.py`, а
+не через кабинет. Поля формы соответствуют миксину
+`SiteEmailIdentityMixin`: `email_from`, `email_sender_name`,
+`email_reply_to`.
 
-<details>
-<summary>Показать код шаблона</summary>
-
-```html
-{% load i18n %}
-<div class="row g-4">
-  <div class="col-12">
-
-    <div class="card border-0 shadow-sm mb-4">
-      <div class="card-header bg-white border-0 pt-3 pb-0">
-        <h6 class="fw-semibold mb-0">SMTP-сервер</h6>
-      </div>
-      <div class="card-body d-flex flex-column gap-3">
-
-        <div class="row g-3">
-          <div class="col-8">
-            <label class="form-label text-muted mb-1" style="font-size:.8rem;">SMTP Host</label>
-            <input type="text" name="smtp_host" value="{{ settings_data.smtp_host|default:'' }}"
-                   class="form-control form-control-sm border-0 bg-light" placeholder="smtp.example.com">
-          </div>
-          <div class="col-4">
-            <label class="form-label text-muted mb-1" style="font-size:.8rem;">Порт</label>
-            <input type="number" name="smtp_port" value="{{ settings_data.smtp_port|default:'587' }}"
-                   class="form-control form-control-sm border-0 bg-light">
-          </div>
-        </div>
-
-        <div class="row g-3">
-          <div class="col-6">
-            <label class="form-label text-muted mb-1" style="font-size:.8rem;">Пользователь</label>
-            <input type="text" name="smtp_user" value="{{ settings_data.smtp_user|default:'' }}"
-                   class="form-control form-control-sm border-0 bg-light" placeholder="user@example.com">
-          </div>
-          <div class="col-6">
-            <label class="form-label text-muted mb-1" style="font-size:.8rem;">Пароль</label>
-            <input type="password" name="smtp_password" value="{{ settings_data.smtp_password|default:'' }}"
-                   class="form-control form-control-sm border-0 bg-light">
-          </div>
-        </div>
-
-        <div>
-          <label class="form-label text-muted mb-1" style="font-size:.8rem;">From Email</label>
-          <input type="email" name="smtp_from_email" value="{{ settings_data.smtp_from_email|default:'' }}"
-                   class="form-control form-control-sm border-0 bg-light" placeholder="noreply@example.com">
-        </div>
-
-        <div class="d-flex align-items-center gap-4 py-1">
-          <div class="form-check d-flex align-items-center gap-2 mb-0">
-            <input class="form-check-input mt-0" type="checkbox" name="smtp_use_tls" id="use_tls"
-                   {% if settings_data.smtp_use_tls %}checked{% endif %}>
-            <label class="form-check-label" for="use_tls" style="font-size:.85rem;">Use TLS</label>
-          </div>
-          <div class="form-check d-flex align-items-center gap-2 mb-0">
-            <input class="form-check-input mt-0" type="checkbox" name="smtp_use_ssl" id="use_ssl"
-                   {% if settings_data.smtp_use_ssl %}checked{% endif %}>
-            <label class="form-check-label" for="use_ssl" style="font-size:.85rem;">Use SSL</label>
-          </div>
-        </div>
-
-        <div class="pt-2 border-top">
-          <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1">
-            <span class="bi bi-send"></span>
-            Тест соединения
-          </button>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="card border-0 shadow-sm">
-      <div class="card-header bg-white border-0 pt-3 pb-0 d-flex align-items-center justify-content-between">
-        <h6 class="fw-semibold mb-0">SendGrid</h6>
-        <span class="badge" style="background:#f1f5f9;color:#64748b;font-size:.7rem;">Альтернатива SMTP</span>
-      </div>
-      <div class="card-body d-flex flex-column gap-3">
-
-        <div>
-          <label class="form-label text-muted mb-1" style="font-size:.8rem;">SendGrid API Key</label>
-          <input type="password" name="sendgrid_api_key" value="{{ settings_data.sendgrid_api_key|default:'' }}"
-                 class="form-control form-control-sm border-0 bg-light" placeholder="SG.xxxxxxxxx">
-          <div class="text-muted mt-1" style="font-size:.75rem;">
-            Если заполнен — используется SendGrid вместо SMTP.
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-  </div>
-</div>
-```
-
-</details>
+> Начиная с **codex-django 0.5.1** поля транспорта (`smtp_host`, `smtp_port`,
+> `smtp_user`, `smtp_password`, `smtp_use_tls`, `smtp_use_ssl`,
+> `sendgrid_api_key`) удалены из библиотеки. Для миграции заведите
+> `EMAIL_*` в `.env` проекта и выполните `makemigrations` + `migrate`.
 
 ### 3. Геопозиция (`_geo.html`)
 Координаты и ссылка на карту.

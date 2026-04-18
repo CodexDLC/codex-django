@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.5.1] - 2026-04-18
 
 ### Added
 
@@ -14,6 +14,20 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - `docs/dev/django_cache_backend_plan.md` is no longer a forward-looking plan; it now documents the shipped backends, settings wiring, no-pickle policy, and migration path away from `django-redis`.
+- **Breaking:** Replaced `SiteEmailSettingsMixin` with `SiteEmailIdentityMixin` in `codex_django.system.mixins`. The new mixin exposes only identity fields (`email_from`, `email_sender_name`, `email_reply_to`) — SMTP transport (host, port, user, password, TLS/SSL flags, SendGrid key) is no longer stored in the database. Configure transport via `EMAIL_*` Django settings / `.env`.
+- Rewrote `cabinet/site_settings/partials/_email.html` to render identity-only fields with an info banner pointing at `.env` for transport.
+- `DjangoDirectAdapter` now resolves `from_email` as `"<sender_name> <email_from>"` from `SiteSettings` (via the Redis-synced site-settings manager and `CODEX_SITE_SETTINGS_MODEL`), falling back to `DEFAULT_FROM_EMAIL`.
+- Updated RU/EN cabinet settings guides to reflect the identity-only email section.
+
+### Removed
+
+- Removed fields `smtp_host`, `smtp_port`, `smtp_user`, `smtp_password`, `smtp_use_tls`, `smtp_use_ssl`, `sendgrid_api_key` from `codex_django.system.mixins.settings`. Projects must generate a `RemoveField` migration after upgrading — see the migration notes below.
+
+### Migration
+
+1. Move SMTP credentials from the DB / admin UI into `.env` (`EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `EMAIL_USE_TLS`/`EMAIL_USE_SSL`, `DEFAULT_FROM_EMAIL`).
+2. Replace `SiteEmailSettingsMixin` with `SiteEmailIdentityMixin` in your concrete `SiteSettings` model.
+3. `python manage.py makemigrations` — expect a `RemoveField` for the 7 removed columns plus `AddField` for `email_from` / `email_sender_name` / `email_reply_to`. If you want to preserve `smtp_from_email`, edit the migration to use `RenameField` for that column before the `RemoveField` batch runs.
 
 ### Fixed
 

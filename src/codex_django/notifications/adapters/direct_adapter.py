@@ -89,10 +89,9 @@ class DjangoDirectAdapter:
             log.warning("DjangoDirectAdapter: recipient_email is empty, skipping send")
             return None
 
-        from django.conf import settings
         from django.core.mail import send_mail
 
-        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@example.com")
+        from_email = self._resolve_from_email()
 
         send_mail(
             subject=subject,
@@ -104,6 +103,40 @@ class DjangoDirectAdapter:
         )
         log.info("DjangoDirectAdapter: sent email to %s (subject=%r)", recipient, subject)
         return None
+
+    def _resolve_from_email(self) -> str:
+        """Resolve From address from SiteSettings (identity mixin) with fallback.
+
+        Priority:
+            1. ``SiteSettings.email_from`` (+ ``email_sender_name`` for display)
+               resolved via ``CODEX_SITE_SETTINGS_MODEL`` and the Redis-synced
+               site-settings manager.
+            2. ``settings.DEFAULT_FROM_EMAIL``.
+            3. ``"noreply@example.com"``.
+        """
+        from django.conf import settings
+
+        fallback = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@example.com")
+        model_path = getattr(settings, "CODEX_SITE_SETTINGS_MODEL", None)
+        if not model_path:
+            return fallback
+        try:
+            from django.apps import apps
+
+            from codex_django.core.redis.managers.settings import (
+                get_site_settings_manager,
+            )
+
+            model_cls = apps.get_model(model_path)
+            data = get_site_settings_manager().load_cached(model_cls) or {}
+        except Exception:  # noqa: BLE001 — site settings are optional
+            return fallback
+
+        email = (data.get("email_from") or "").strip()
+        if not email:
+            return fallback
+        name = (data.get("email_sender_name") or "").strip()
+        return f"{name} <{email}>" if name else email
 
     def _render(self, payload: dict[str, Any]) -> tuple[str, str]:
         """Render a template-mode payload using the configured renderer."""

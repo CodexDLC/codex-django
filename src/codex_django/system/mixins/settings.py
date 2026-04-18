@@ -226,41 +226,28 @@ class SiteTechnicalSettingsMixin(models.Model):
         abstract = True
 
 
-class SiteEmailSettingsMixin(models.Model):
-    """Add SMTP and email provider configuration fields.
+class SiteEmailIdentityMixin(models.Model):
+    """Add outgoing-mail *identity* fields (From address, sender name, reply-to).
 
-    Notes:
-        These fields allow small projects to keep delivery configuration in a
-        single singleton-like settings model.
+    Transport (host/port/user/password/TLS) is configured via Django's
+    ``EMAIL_*`` settings and the ``.env`` file, not through this model. These
+    fields only describe **who** a notification is from, so that a site owner
+    can safely adjust branding from the cabinet UI without touching SMTP
+    credentials.
 
     Admin:
         fieldsets: (
-            _("Email Source Settings (SMTP)"),
+            _("Email Identity"),
             {
-                "fields": (
-                    "smtp_host",
-                    "smtp_port",
-                    "smtp_user",
-                    "smtp_password",
-                    "smtp_from_email",
-                    "smtp_use_tls",
-                    "smtp_use_ssl",
-                    "sendgrid_api_key",
-                ),
+                "fields": ("email_from", "email_sender_name", "email_reply_to"),
                 "classes": ("collapse",),
             },
         )
     """
 
-    smtp_host = models.CharField(_("SMTP Host"), max_length=255, blank=True)
-    smtp_port = models.IntegerField(_("SMTP Port"), default=465)
-    smtp_user = models.CharField(_("SMTP User"), max_length=255, blank=True)
-    smtp_password = models.CharField(_("SMTP Password"), max_length=255, blank=True)
-    smtp_from_email = models.EmailField(_("SMTP From Email"), blank=True)
-    smtp_use_tls = models.BooleanField(_("Use TLS"), default=True)
-    smtp_use_ssl = models.BooleanField(_("Use SSL"), default=False)
-
-    sendgrid_api_key = models.CharField(_("SendGrid API Key"), max_length=255, blank=True)
+    email_from = models.EmailField(_("From Email"), blank=True)
+    email_sender_name = models.CharField(_("Sender Name"), max_length=255, blank=True)
+    email_reply_to = models.EmailField(_("Reply-To"), blank=True)
 
     class Meta:
         abstract = True
