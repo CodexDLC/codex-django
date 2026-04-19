@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.3] - 2026-04-19
+
+### Fixed
+
+- Raised the default booking engine solution cap for multi-service availability lookups from 50 to 2000, while preserving the legacy 50 default for single-service requests.
+- Propagated the same multi-service default into `create_booking()` final availability revalidation so late-day chain starts do not fail confirmation solely because the revalidation search was truncated.
+
 ## [0.5.2] - 2026-04-18
 
 ### Added

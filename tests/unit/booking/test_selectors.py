@@ -121,6 +121,44 @@ class TestGetAvailableSlots:
         call_kwargs = finder.find.call_args[1]
         assert call_kwargs["max_solutions"] == 5
 
+    def test_single_service_default_max_solutions_stays_50(self, mock_adapter, mock_finder):
+        finder, _ = mock_finder
+        with patch("codex_django.booking.selectors.ChainFinder", return_value=finder):
+            from codex_django.booking.selectors import get_available_slots
+
+            get_available_slots(mock_adapter, [1], date(2025, 1, 6))
+
+        call_kwargs = finder.find.call_args[1]
+        assert call_kwargs["max_solutions"] == 50
+
+    def test_multi_service_default_max_solutions_is_2000(self, mock_adapter, mock_finder):
+        finder, _ = mock_finder
+        with patch("codex_django.booking.selectors.ChainFinder", return_value=finder):
+            from codex_django.booking.selectors import get_available_slots
+
+            get_available_slots(mock_adapter, [1, 2], date(2025, 1, 6))
+
+        call_kwargs = finder.find.call_args[1]
+        assert call_kwargs["max_solutions"] == 2000
+
+    def test_multi_service_default_keeps_late_starts_beyond_legacy_limit(self, mock_adapter):
+        legacy_result = MagicMock()
+        legacy_result.get_unique_start_times.return_value = ["09:00"]
+        full_result = MagicMock()
+        full_result.get_unique_start_times.return_value = ["09:00", "18:00"]
+
+        def find_side_effect(**kwargs):
+            return full_result if kwargs["max_solutions"] == 2000 else legacy_result
+
+        finder = MagicMock()
+        finder.find.side_effect = find_side_effect
+        with patch("codex_django.booking.selectors.ChainFinder", return_value=finder):
+            from codex_django.booking.selectors import get_available_slots
+
+            result = get_available_slots(mock_adapter, [1, 2], date(2025, 1, 6))
+
+        assert "18:00" in result.get_unique_start_times()
+
     def test_passes_mode_overlap_and_parallel_groups(self, mock_adapter, mock_finder):
         finder, _ = mock_finder
         with patch("codex_django.booking.selectors.ChainFinder", return_value=finder):
@@ -585,6 +623,75 @@ class TestCreateBookingUnit:
         hook.persist_chain.assert_called_once()
         mock_adapter.lock_resources.assert_called_once_with([1, 2])
         assert result == created
+
+    def test_multi_with_hook_uses_default_2000_for_late_slot_revalidation(self, mock_adapter):
+        legacy_result = self._setup_mocks(["09:00"])
+        full_result = self._setup_mocks(["09:00", "18:00"])
+        step1 = MagicMock()
+        step1.resource_id = "10"
+        step2 = MagicMock()
+        step2.resource_id = "12"
+        full_result.best.items = [step1, step2]
+
+        def find_side_effect(**kwargs):
+            return full_result if kwargs["max_solutions"] == 2000 else legacy_result
+
+        with patch("codex_django.booking.selectors.ChainFinder") as finder_cls:
+            finder = MagicMock()
+            finder.find.side_effect = find_side_effect
+            finder_cls.return_value = finder
+            with patch("codex_django.booking.selectors.transaction") as mock_txn:
+                mock_txn.atomic.return_value.__enter__ = MagicMock(return_value=None)
+                mock_txn.atomic.return_value.__exit__ = MagicMock(return_value=False)
+                mock_txn.on_commit = MagicMock()
+                from codex_django.booking.selectors import create_booking
+
+                hook = MagicMock()
+                created = [MagicMock(), MagicMock()]
+                hook.persist_chain.return_value = created
+                result = create_booking(
+                    adapter=mock_adapter,
+                    cache_adapter=MagicMock(),
+                    appointment_model=MagicMock(),
+                    service_ids=[1, 2],
+                    target_date=date(2025, 1, 6),
+                    selected_time="18:00",
+                    resource_id=1,
+                    client=MagicMock(),
+                    persistence_hook=hook,
+                )
+
+        assert result == created
+        hook.persist_chain.assert_called_once()
+        assert finder.find.call_args[1]["max_solutions"] == 2000
+
+    def test_single_create_booking_revalidation_uses_legacy_default(self, mock_adapter):
+        engine_result = self._setup_mocks(["09:00"])
+        appointment_model = MagicMock()
+        appointment_model.objects.create.return_value = MagicMock()
+
+        with patch("codex_django.booking.selectors.ChainFinder") as finder_cls:
+            finder = MagicMock()
+            finder.find.return_value = engine_result
+            finder_cls.return_value = finder
+            with patch("codex_django.booking.selectors.transaction") as mock_txn:
+                mock_txn.atomic.return_value.__enter__ = MagicMock(return_value=None)
+                mock_txn.atomic.return_value.__exit__ = MagicMock(return_value=False)
+                mock_txn.on_commit = MagicMock()
+                from codex_django.booking.selectors import create_booking
+
+                create_booking(
+                    adapter=mock_adapter,
+                    cache_adapter=MagicMock(),
+                    appointment_model=appointment_model,
+                    service_ids=[1],
+                    target_date=date(2025, 1, 6),
+                    selected_time="09:00",
+                    resource_id=1,
+                    client=MagicMock(),
+                )
+
+        assert finder.find.call_args[1]["max_solutions"] == 50
 
     def test_multi_hook_error_prevents_on_commit_registration(self, mock_adapter):
         engine_result = self._setup_mocks(["09:00"])

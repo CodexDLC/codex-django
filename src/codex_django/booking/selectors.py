@@ -31,6 +31,8 @@ if TYPE_CHECKING:
 
 
 ResourceSelections = dict[str, str] | dict[int, int | None] | None
+SINGLE_SERVICE_DEFAULT_MAX_SOLUTIONS = 50
+MULTI_SERVICE_DEFAULT_MAX_SOLUTIONS = 2000
 
 
 class BookingPersistenceHook(Protocol):
@@ -57,7 +59,7 @@ def get_available_slots(
     mode: BookingMode = BookingMode.SINGLE_DAY,
     overlap_allowed: bool = False,
     parallel_groups: dict[int, str] | None = None,
-    max_solutions: int = 50,
+    max_solutions: int | None = None,
     max_unique_starts: int | None = None,
     cache_ttl: int = 300,
 ) -> EngineResult:
@@ -75,7 +77,8 @@ def get_available_slots(
         mode: Booking engine search mode.
         overlap_allowed: Whether services may overlap in time.
         parallel_groups: Optional mapping of service id to parallel group id.
-        max_solutions: Maximum number of engine solutions to compute.
+        max_solutions: Maximum number of engine solutions to compute. Defaults
+            to 50 for single-service requests and 2000 for multi-service chains.
         max_unique_starts: Optional cap for unique start times.
         cache_ttl: Cache lifetime in seconds for busy-slot reads.
 
@@ -103,11 +106,13 @@ def get_available_slots(
         cache_ttl=cache_ttl,
     )
 
+    effective_max_solutions = _get_effective_max_solutions(service_ids, max_solutions)
+
     finder = ChainFinder(step_minutes=adapter.step_minutes)
     return finder.find(
         request=request,
         resources_availability=availability,
-        max_solutions=max_solutions,
+        max_solutions=effective_max_solutions,
         max_unique_starts=max_unique_starts,
     )
 
@@ -360,6 +365,7 @@ def create_booking(
     mode: BookingMode = BookingMode.SINGLE_DAY,
     overlap_allowed: bool = False,
     parallel_groups: dict[int, str] | None = None,
+    max_solutions: int | None = None,
     persistence_hook: BookingPersistenceHook | None = None,
 ) -> Any | list[Any]:
     """Create a booking with concurrency protection.
@@ -391,6 +397,8 @@ def create_booking(
         mode: Booking engine search mode.
         overlap_allowed: Whether services may overlap in time.
         parallel_groups: Optional mapping of service id to parallel group id.
+        max_solutions: Optional cap for engine solutions during final
+            revalidation. Defaults match ``get_available_slots()``.
         persistence_hook: Required persistence hook for multi-service mode.
 
     Returns:
@@ -433,6 +441,7 @@ def create_booking(
                 mode=mode,
                 overlap_allowed=overlap_allowed,
                 parallel_groups=parallel_groups,
+                max_solutions=max_solutions,
                 cache_ttl=0,  # no cache under lock — fresh data
             )
             available_times = result.get_unique_start_times()
@@ -496,6 +505,7 @@ def create_booking(
             mode=mode,
             overlap_allowed=overlap_allowed,
             parallel_groups=parallel_groups,
+            max_solutions=max_solutions,
             cache_ttl=0,  # no cache under lock — fresh data
         )
 
@@ -524,6 +534,14 @@ def create_booking(
         transaction.on_commit(lambda: cache_adapter.invalidate_master_date(_resource_id_str, _date_str))
 
     return appointment
+
+
+def _get_effective_max_solutions(service_ids: list[int], max_solutions: int | None) -> int:
+    if max_solutions is not None:
+        return max_solutions
+    if len(service_ids) > 1:
+        return MULTI_SERVICE_DEFAULT_MAX_SOLUTIONS
+    return SINGLE_SERVICE_DEFAULT_MAX_SOLUTIONS
 
 
 def _create_single_appointment(
