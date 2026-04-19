@@ -10,8 +10,7 @@ from unittest.mock import patch
 import pytest
 from django.contrib import admin
 from django.core.management import call_command
-from django.test import RequestFactory
-from django.test import override_settings
+from django.test import RequestFactory, override_settings
 
 from codex_django.tracking.admin import PageViewAdmin
 from codex_django.tracking.models import PageView
