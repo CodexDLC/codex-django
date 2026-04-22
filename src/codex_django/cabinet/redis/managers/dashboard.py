@@ -12,6 +12,7 @@ Key format: {PROJECT_NAME}:cabinet:dashboard:{provider_key}
 
 from __future__ import annotations
 
+import dataclasses
 import json
 from decimal import Decimal
 from typing import Any, cast
@@ -27,6 +28,8 @@ class _Encoder(json.JSONEncoder):
     def default(self, obj: Any) -> Any:
         if isinstance(obj, Decimal):
             return str(obj)
+        if dataclasses.is_dataclass(obj) and not isinstance(obj, type):
+            return dataclasses.asdict(obj)
         return super().default(obj)
 
 

@@ -5,6 +5,8 @@ import secrets
 from collections.abc import Mapping
 from typing import Any
 
+from django.core.serializers.json import DjangoJSONEncoder
+
 from codex_django.core.redis.managers.base import BaseDjangoRedisManager
 
 
@@ -69,7 +71,9 @@ class JsonActionTokenRedisManager(BaseDjangoRedisManager):
             timeout = self.default_ttl_seconds
 
         async with self.async_string() as s:
-            await s.set(self.make_key(token), json.dumps(self.validate_payload(payload)), ttl=timeout)
+            await s.set(
+                self.make_key(token), json.dumps(self.validate_payload(payload), cls=DjangoJSONEncoder), ttl=timeout
+            )
         return token
 
     async def aget_token_data(self, token: str) -> dict[str, Any] | None:
@@ -139,7 +143,11 @@ class JsonActionTokenRedisManager(BaseDjangoRedisManager):
             timeout = self.default_ttl_seconds
 
         with self.sync_string() as s:
-            s.set(self.make_key(token), json.dumps(self.validate_payload(payload)), ttl=timeout)
+            s.set(
+                self.make_key(token),
+                json.dumps(self.validate_payload(payload), cls=DjangoJSONEncoder),
+                ttl=timeout,
+            )
         return token
 
     def get_token_data(self, token: str) -> dict[str, Any] | None:

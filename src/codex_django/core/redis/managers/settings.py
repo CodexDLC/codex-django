@@ -135,7 +135,9 @@ class DjangoSiteSettingsManager(BaseDjangoRedisManager):
         for name, value in data.items():
             field = fields_by_name.get(name)
             if isinstance(field, models.JSONField):
-                encoded[name] = json.dumps(value)
+                from django.core.serializers.json import DjangoJSONEncoder
+
+                encoded[name] = json.dumps(value, cls=DjangoJSONEncoder)
             else:
                 encoded[name] = CacheCoder.dump(value)
         return encoded
