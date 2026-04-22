@@ -2,8 +2,6 @@
 
 from typing import Any
 
-from asgiref.sync import async_to_sync
-
 from codex_django.core.redis.managers.base import BaseDjangoRedisManager
 
 
@@ -30,7 +28,8 @@ class NotificationsCacheManager(BaseDjangoRedisManager):
         """
         if self._is_disabled():
             return None
-        return await self.string.get(self.make_key(key))  # type: ignore[no-any-return]
+        async with self.async_string() as s:
+            return await s.get(self.make_key(key))  # type: ignore[no-any-return]
 
     async def aset(self, key: str, value: Any, timeout: int | None = None) -> None:
         """Store a notification cache value with an optional TTL.
@@ -42,7 +41,8 @@ class NotificationsCacheManager(BaseDjangoRedisManager):
         """
         if self._is_disabled():
             return
-        await self.string.set(self.make_key(key), value, ttl=timeout)
+        async with self.async_string() as s:
+            await s.set(self.make_key(key), value, ttl=timeout)
 
     def get(self, key: str) -> str | None:
         """Synchronously return a cached notification value.
@@ -53,7 +53,10 @@ class NotificationsCacheManager(BaseDjangoRedisManager):
         Returns:
             The cached string value or ``None`` when the entry is missing.
         """
-        return async_to_sync(self.aget)(key)
+        if self._is_disabled():
+            return None
+        with self.sync_string() as s:
+            return s.get(self.make_key(key))  # type: ignore[no-any-return]
 
     def set(self, key: str, value: Any, timeout: int | None = None) -> None:
         """Synchronously store a notification cache value.
@@ -63,7 +66,10 @@ class NotificationsCacheManager(BaseDjangoRedisManager):
             value: Value to store in Redis.
             timeout: Optional TTL in seconds.
         """
-        async_to_sync(self.aset)(key, value, timeout)
+        if self._is_disabled():
+            return
+        with self.sync_string() as s:
+            s.set(self.make_key(key), value, ttl=timeout)
 
 
 def get_notifications_cache_manager() -> NotificationsCacheManager:

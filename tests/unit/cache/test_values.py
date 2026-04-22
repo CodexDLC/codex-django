@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from decimal import Decimal
+from enum import Enum
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
+from django.utils.translation import gettext_lazy
 
 from codex_django.cache.values import CacheCoder
 
@@ -21,6 +24,11 @@ def test_datetime_roundtrip() -> None:
 def test_date_roundtrip() -> None:
     value = date(2026, 4, 17)
     assert CacheCoder.load_date(CacheCoder.dump_date(value)) == value
+
+
+def test_time_roundtrip() -> None:
+    value = time(12, 30, 45)
+    assert CacheCoder.load_time(CacheCoder.dump_time(value)) == value
 
 
 def test_timedelta_roundtrip() -> None:
@@ -48,6 +56,21 @@ def test_bytes_roundtrip() -> None:
     assert CacheCoder.load_bytes(CacheCoder.dump_bytes(value)) == value
 
 
+def test_bool_none_enum_path_and_lazy_dump() -> None:
+    class Status(Enum):
+        ACTIVE = "active"
+
+    assert CacheCoder.dump(True) == "1"
+    assert CacheCoder.dump(False) == "0"
+    assert CacheCoder.load_bool("1") is True
+    assert CacheCoder.load_bool("0") is False
+    assert CacheCoder.dump(None) == ""
+    assert CacheCoder.dump(Status.ACTIVE) == "active"
+    path = Path("docs/readme.md")
+    assert CacheCoder.dump(path) == str(path)
+    assert CacheCoder.dump(gettext_lazy("Hello")) == "Hello"
+
+
 def test_dump_recurses_into_nested_structures() -> None:
     dt = datetime(2026, 4, 17, tzinfo=UTC)
     uid = uuid4()
@@ -71,5 +94,5 @@ def test_dump_leaves_unknown_types_as_is() -> None:
 
 
 def test_dump_primitives_passthrough() -> None:
-    for v in ("x", 1, 1.5, True, None):
+    for v in ("x", 1, 1.5):
         assert CacheCoder.dump(v) == v

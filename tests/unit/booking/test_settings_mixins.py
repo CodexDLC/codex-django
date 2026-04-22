@@ -78,18 +78,19 @@ def test_booking_settings_sync_writes_serialized_payload_to_manager():
     settings.to_dict = MagicMock(return_value={"step_minutes": "30"})  # type: ignore[method-assign]
     manager = MagicMock()
     manager.make_key.return_value = "booking:settings"
-    sync_set = MagicMock()
+    sync_string = MagicMock()
+    sync_context = MagicMock()
+    sync_context.__enter__.return_value = sync_string
+    manager.sync_string.return_value = sync_context
 
     with (
         override_settings(DEBUG=False),
         patch("codex_django.core.redis.managers.booking.get_booking_cache_manager", return_value=manager),
-        patch("asgiref.sync.async_to_sync", return_value=sync_set) as mock_async_to_sync,
     ):
         settings.sync_booking_settings_to_redis()
 
     manager.make_key.assert_called_once_with("settings")
-    mock_async_to_sync.assert_called_once_with(manager.string.set)
-    sync_set.assert_called_once_with("booking:settings", "{'step_minutes': '30'}")
+    sync_string.set.assert_called_once_with("booking:settings", "{'step_minutes': '30'}")
 
 
 def test_booking_settings_sync_skips_empty_payload():

@@ -5,8 +5,6 @@ import secrets
 from collections.abc import Mapping
 from typing import Any
 
-from asgiref.sync import async_to_sync
-
 from codex_django.core.redis.managers.base import BaseDjangoRedisManager
 
 
@@ -70,7 +68,8 @@ class JsonActionTokenRedisManager(BaseDjangoRedisManager):
         if timeout is None:
             timeout = self.default_ttl_seconds
 
-        await self.string.set(self.make_key(token), json.dumps(self.validate_payload(payload)), ttl=timeout)
+        async with self.async_string() as s:
+            await s.set(self.make_key(token), json.dumps(self.validate_payload(payload)), ttl=timeout)
         return token
 
     async def aget_token_data(self, token: str) -> dict[str, Any] | None:
@@ -86,7 +85,10 @@ class JsonActionTokenRedisManager(BaseDjangoRedisManager):
         """
         if self._is_disabled():
             return None
-        raw_data = await self.string.get(self.make_key(token))
+
+        async with self.async_string() as s:
+            raw_data = await s.get(self.make_key(token))
+
         if not raw_data:
             return None
         try:
@@ -105,7 +107,8 @@ class JsonActionTokenRedisManager(BaseDjangoRedisManager):
         """
         if self._is_disabled():
             return
-        await self.string.delete(self.make_key(token))
+        async with self.async_string() as s:
+            await s.delete(self.make_key(token))
 
     def create_token(
         self,
@@ -125,7 +128,19 @@ class JsonActionTokenRedisManager(BaseDjangoRedisManager):
         Returns:
             The generated URL-safe action token.
         """
-        return async_to_sync(self.acreate_token)(payload, ttl_seconds=ttl_seconds, ttl_hours=ttl_hours)
+        token = self.make_token()
+        if self._is_disabled():
+            return token
+
+        timeout = ttl_seconds
+        if timeout is None and ttl_hours is not None:
+            timeout = ttl_hours * 60 * 60
+        if timeout is None:
+            timeout = self.default_ttl_seconds
+
+        with self.sync_string() as s:
+            s.set(self.make_key(token), json.dumps(self.validate_payload(payload)), ttl=timeout)
+        return token
 
     def get_token_data(self, token: str) -> dict[str, Any] | None:
         """Synchronously return decoded token payload data.
@@ -137,7 +152,21 @@ class JsonActionTokenRedisManager(BaseDjangoRedisManager):
             The decoded payload mapping, or ``None`` when the token is
             missing, expired, disabled, or invalid.
         """
-        return async_to_sync(self.aget_token_data)(token)
+        if self._is_disabled():
+            return None
+
+        with self.sync_string() as s:
+            raw_data = s.get(self.make_key(token))
+
+        if not raw_data:
+            return None
+        try:
+            data = json.loads(raw_data)
+        except (json.JSONDecodeError, TypeError):
+            return None
+        if not isinstance(data, dict):
+            return None
+        return data
 
     def delete_token(self, token: str) -> None:
         """Synchronously delete token payload data.
@@ -145,7 +174,10 @@ class JsonActionTokenRedisManager(BaseDjangoRedisManager):
         Args:
             token: Action token whose stored payload should be removed.
         """
-        async_to_sync(self.adelete_token)(token)
+        if self._is_disabled():
+            return
+        with self.sync_string() as s:
+            s.delete(self.make_key(token))
 
 
 def get_json_action_token_manager(prefix: str = "auth:action") -> JsonActionTokenRedisManager:

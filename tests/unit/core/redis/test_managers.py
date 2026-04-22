@@ -14,17 +14,32 @@ pytestmark = [pytest.mark.unit, pytest.mark.django_db]
 
 
 @pytest.fixture
-def mock_redis_from_url():
-    """Mock Redis.from_url to avoid actually connecting to localhost during unit tests."""
-    with patch("codex_django.core.redis.managers.base.Redis.from_url", return_value=AsyncMock()):
-        yield
+def mock_redis_factory():
+    """Return a factory that produces an AsyncMock/MagicMock."""
+    return lambda: AsyncMock()
 
 
 @pytest.fixture
-def seo_manager(mock_redis_from_url):
+def seo_manager():
     mgr = SeoRedisManager()
+    # Mock context managers
+    mgr.async_hash = MagicMock()
+    mgr.async_string = MagicMock()
+    mgr.sync_hash = MagicMock()
+    mgr.sync_string = MagicMock()
+
+    # Separate mocks for async and sync operations
     mgr.hash = AsyncMock()
     mgr.string = AsyncMock()
+    mgr.hash_sync = MagicMock()
+    mgr.string_sync = MagicMock()
+
+    # Configure context managers
+    mgr.async_hash.return_value.__aenter__.return_value = mgr.hash
+    mgr.async_string.return_value.__aenter__.return_value = mgr.string
+    mgr.sync_hash.return_value.__enter__.return_value = mgr.hash_sync
+    mgr.sync_string.return_value.__enter__.return_value = mgr.string_sync
+
     return mgr
 
 
@@ -37,7 +52,7 @@ async def test_seo_manager_aget_page(seo_manager):
 
 
 def test_seo_manager_get_page(seo_manager):
-    seo_manager.hash.get_all.return_value = {"title": "Test Title"}
+    seo_manager.hash_sync.get_all.return_value = {"title": "Test Title"}
     result = seo_manager.get_page("home")
     assert result == {"title": "Test Title"}
 
@@ -58,19 +73,24 @@ async def test_seo_manager_aset_page_skips_empty_mapping(seo_manager):
 
 def test_seo_manager_set_page(seo_manager):
     seo_manager.set_page("home", {"title": "New"}, timeout=3600)
-    seo_manager.hash.set_fields.assert_called_once_with(seo_manager.make_key("static_page:home"), {"title": "New"})
-    seo_manager.string.expire.assert_called_once_with(seo_manager.make_key("static_page:home"), 3600)
+    seo_manager.hash_sync.set_fields.assert_called_once_with(seo_manager.make_key("static_page:home"), {"title": "New"})
+    seo_manager.string_sync.expire.assert_called_once_with(seo_manager.make_key("static_page:home"), 3600)
 
 
 def test_seo_manager_invalidate_page(seo_manager):
     seo_manager.invalidate_page("home")
-    seo_manager.string.delete.assert_called_once_with(seo_manager.make_key("static_page:home"))
+    seo_manager.string_sync.delete.assert_called_once_with(seo_manager.make_key("static_page:home"))
 
 
 @pytest.fixture
-def notif_manager(mock_redis_from_url):
+def notif_manager():
     mgr = NotificationsCacheManager()
+    mgr.async_string = MagicMock()
+    mgr.sync_string = MagicMock()
     mgr.string = AsyncMock()
+    mgr.string_sync = MagicMock()
+    mgr.async_string.return_value.__aenter__.return_value = mgr.string
+    mgr.sync_string.return_value.__enter__.return_value = mgr.string_sync
     return mgr
 
 
@@ -83,7 +103,7 @@ async def test_notif_manager_aget(notif_manager):
 
 
 def test_notif_manager_get(notif_manager):
-    notif_manager.string.get.return_value = "val"
+    notif_manager.string_sync.get.return_value = "val"
     assert notif_manager.get("key") == "val"
 
 
@@ -95,13 +115,18 @@ async def test_notif_manager_aset(notif_manager):
 
 def test_notif_manager_set(notif_manager):
     notif_manager.set("key", "val", timeout=10)
-    notif_manager.string.set.assert_called_once_with(notif_manager.make_key("key"), "val", ttl=10)
+    notif_manager.string_sync.set.assert_called_once_with(notif_manager.make_key("key"), "val", ttl=10)
 
 
 @pytest.fixture
-def settings_manager(mock_redis_from_url):
+def settings_manager():
     mgr = DjangoSiteSettingsManager()
+    mgr.async_hash = MagicMock()
+    mgr.sync_hash = MagicMock()
     mgr.hash = AsyncMock()
+    mgr.hash_sync = MagicMock()
+    mgr.async_hash.return_value.__aenter__.return_value = mgr.hash
+    mgr.sync_hash.return_value.__enter__.return_value = mgr.hash_sync
     return mgr
 
 
@@ -113,13 +138,13 @@ async def test_settings_manager_aload_cached(settings_manager):
 
 
 def test_settings_manager_load_cached(settings_manager):
-    settings_manager.hash.get_all.return_value = {"sitename": "My Site"}
+    settings_manager.hash_sync.get_all.return_value = {"sitename": "My Site"}
     res = settings_manager.load_cached(None)
     assert res == {"sitename": "My Site"}
 
 
 def test_settings_manager_load_cached_populates_from_db(settings_manager):
-    settings_manager.hash.get_all.return_value = None
+    settings_manager.hash_sync.get_all.return_value = None
     instance = MagicMock()
     instance.to_dict.return_value = {"sitename": "From DB"}
     model_cls = MagicMock()
@@ -129,14 +154,14 @@ def test_settings_manager_load_cached_populates_from_db(settings_manager):
 
     assert res == {"sitename": "From DB"}
     model_cls.objects.first.assert_called_once_with()
-    settings_manager.hash.set_fields.assert_called_once_with(
+    settings_manager.hash_sync.set_fields.assert_called_once_with(
         settings_manager.make_key("site_settings"),
         {"sitename": "From DB"},
     )
 
 
 def test_settings_manager_load_cached_returns_empty_without_to_dict(settings_manager):
-    settings_manager.hash.get_all.return_value = None
+    settings_manager.hash_sync.get_all.return_value = None
     instance = MagicMock(spec=[])
     model_cls = MagicMock()
     model_cls.objects.first.return_value = instance
@@ -156,16 +181,23 @@ async def test_settings_manager_asave_instance(settings_manager):
 
 
 def test_settings_manager_save_instance(settings_manager):
-    mock_instance = MagicMock()
-    mock_instance.to_dict.return_value = {"k": "v"}
-    settings_manager.save_instance(mock_instance)
-    settings_manager.hash.set_fields.assert_called_once_with(settings_manager.make_key("site_settings"), {"k": "v"})
+    instance = MagicMock()
+    instance.to_dict.return_value = {"k": "v"}
+    settings_manager.save_instance(instance)
+    settings_manager.hash_sync.set_fields.assert_called_once_with(
+        settings_manager.make_key("site_settings"), {"k": "v"}
+    )
 
 
 @pytest.fixture
-def static_content_manager(mock_redis_from_url):
+def static_content_manager():
     mgr = StaticContentManager()
+    mgr.async_hash = MagicMock()
+    mgr.sync_hash = MagicMock()
     mgr.hash = AsyncMock()
+    mgr.hash_sync = MagicMock()
+    mgr.async_hash.return_value.__aenter__.return_value = mgr.hash
+    mgr.sync_hash.return_value.__enter__.return_value = mgr.hash_sync
     return mgr
 
 
@@ -177,13 +209,13 @@ async def test_static_content_manager_aload_cached(static_content_manager):
 
 
 def test_static_content_manager_load_cached(static_content_manager):
-    static_content_manager.hash.get_all.return_value = {"hero_title": "Welcome!"}
+    static_content_manager.hash_sync.get_all.return_value = {"hero_title": "Welcome!"}
     res = static_content_manager.load_cached(None)
     assert res == {"hero_title": "Welcome!"}
 
 
 def test_static_content_manager_load_cached_populates_from_db(static_content_manager):
-    static_content_manager.hash.get_all.return_value = None
+    static_content_manager.hash_sync.get_all.return_value = None
     row1 = MagicMock(key="hero_title", content="Welcome!")
     row2 = MagicMock(key="cta_label", content="Book now")
     model_cls = MagicMock()
@@ -192,14 +224,14 @@ def test_static_content_manager_load_cached_populates_from_db(static_content_man
     res = static_content_manager.load_cached(model_cls)
 
     assert res == {"hero_title": "Welcome!", "cta_label": "Book now"}
-    static_content_manager.hash.set_fields.assert_called_once_with(
+    static_content_manager.hash_sync.set_fields.assert_called_once_with(
         static_content_manager.make_key("static_content"),
         {"hero_title": "Welcome!", "cta_label": "Book now"},
     )
 
 
 def test_static_content_manager_load_cached_skips_empty_db_result(static_content_manager):
-    static_content_manager.hash.get_all.return_value = None
+    static_content_manager.hash_sync.get_all.return_value = None
     model_cls = MagicMock()
     model_cls.objects.all.return_value = []
 
@@ -220,7 +252,7 @@ async def test_static_content_manager_asave_mapping(static_content_manager):
 
 def test_static_content_manager_save_mapping(static_content_manager):
     static_content_manager.save_mapping({"hero_title": "Welcome!"})
-    static_content_manager.hash.set_fields.assert_called_once_with(
+    static_content_manager.hash_sync.set_fields.assert_called_once_with(
         static_content_manager.make_key("static_content"),
         {"hero_title": "Welcome!"},
     )
@@ -233,9 +265,14 @@ async def test_static_content_manager_asave_mapping_skips_empty_payload(static_c
 
 
 @pytest.fixture
-def booking_manager(mock_redis_from_url):
+def booking_manager():
     mgr = BookingCacheManager()
+    mgr.async_string = MagicMock()
+    mgr.sync_string = MagicMock()
     mgr.string = AsyncMock()
+    mgr.string_sync = MagicMock()
+    mgr.async_string.return_value.__aenter__.return_value = mgr.string
+    mgr.sync_string.return_value.__enter__.return_value = mgr.string_sync
     return mgr
 
 
@@ -258,7 +295,7 @@ async def test_booking_manager_aget_busy_decodes_json(booking_manager):
 def test_booking_manager_set_busy(booking_manager):
     booking_manager.set_busy("42", "2026-03-29", [["10:00", "11:00"]], timeout=900)
 
-    booking_manager.string.set.assert_called_once_with(
+    booking_manager.string_sync.set.assert_called_once_with(
         booking_manager.make_key("busy:42:2026-03-29"),
         '[["10:00", "11:00"]]',
         ttl=900,
@@ -267,13 +304,18 @@ def test_booking_manager_set_busy(booking_manager):
 
 def test_booking_manager_invalidate_master_date(booking_manager):
     booking_manager.invalidate_master_date("42", "2026-03-29")
-    booking_manager.string.delete.assert_called_once_with(booking_manager.make_key("busy:42:2026-03-29"))
+    booking_manager.string_sync.delete.assert_called_once_with(booking_manager.make_key("busy:42:2026-03-29"))
 
 
 @pytest.fixture
-def fixtures_manager(mock_redis_from_url):
+def fixtures_manager():
     mgr = FixtureHashManager()
+    mgr.async_string = MagicMock()
+    mgr.sync_string = MagicMock()
     mgr.string = AsyncMock()
+    mgr.string_sync = MagicMock()
+    mgr.async_string.return_value.__aenter__.return_value = mgr.string
+    mgr.sync_string.return_value.__enter__.return_value = mgr.string_sync
     return mgr
 
 
@@ -284,7 +326,7 @@ async def test_fixtures_manager_aget_hash(fixtures_manager):
 
 
 def test_fixtures_manager_get_hash(fixtures_manager):
-    fixtures_manager.string.get.return_value = "hash123"
+    fixtures_manager.string_sync.get.return_value = "hash123"
     assert fixtures_manager.get_hash("fix1") == "hash123"
 
 
@@ -296,19 +338,26 @@ async def test_fixtures_manager_aset_hash(fixtures_manager):
 
 def test_fixtures_manager_set_hash(fixtures_manager):
     fixtures_manager.set_hash("fix1", "hash123")
-    fixtures_manager.string.set.assert_called_once_with(fixtures_manager.make_key("fixture:fix1"), "hash123")
+    fixtures_manager.string_sync.set.assert_called_once_with(fixtures_manager.make_key("fixture:fix1"), "hash123")
 
 
 @pytest.fixture
-def action_token_manager(mock_redis_from_url):
+def action_token_manager():
     mgr = JsonActionTokenRedisManager()
+    mgr.async_string = MagicMock()
+    mgr.sync_string = MagicMock()
     mgr.string = AsyncMock()
+    mgr.string_sync = MagicMock()
+    mgr.async_string.return_value.__aenter__.return_value = mgr.string
+    mgr.sync_string.return_value.__enter__.return_value = mgr.string_sync
     return mgr
 
 
 @pytest.mark.asyncio
 async def test_action_token_manager_acreate_token(action_token_manager):
-    with patch.object(action_token_manager, "make_token", return_value="token123"):
+    with patch(
+        "codex_django.system.redis.managers.tokens.JsonActionTokenRedisManager.make_token", return_value="token123"
+    ):
         token = await action_token_manager.acreate_token({"appointment_id": 1}, ttl_hours=2)
 
     assert token == "token123"
@@ -320,11 +369,13 @@ async def test_action_token_manager_acreate_token(action_token_manager):
 
 
 def test_action_token_manager_create_token(action_token_manager):
-    with patch.object(action_token_manager, "make_token", return_value="token123"):
+    with patch(
+        "codex_django.system.redis.managers.tokens.JsonActionTokenRedisManager.make_token", return_value="token123"
+    ):
         token = action_token_manager.create_token({"appointment_id": 1}, ttl_seconds=60)
 
     assert token == "token123"
-    action_token_manager.string.set.assert_called_once_with(
+    action_token_manager.string_sync.set.assert_called_once_with(
         action_token_manager.make_key("token123"),
         '{"appointment_id": 1}',
         ttl=60,
@@ -354,7 +405,7 @@ async def test_action_token_manager_aget_token_data_returns_none_for_non_mapping
 
 
 def test_action_token_manager_get_token_data(action_token_manager):
-    action_token_manager.string.get.return_value = '{"appointment_id": 1}'
+    action_token_manager.string_sync.get.return_value = '{"appointment_id": 1}'
 
     assert action_token_manager.get_token_data("token123") == {"appointment_id": 1}
 
@@ -369,7 +420,7 @@ async def test_action_token_manager_adelete_token(action_token_manager):
 def test_action_token_manager_delete_token(action_token_manager):
     action_token_manager.delete_token("token123")
 
-    action_token_manager.string.delete.assert_called_once_with(action_token_manager.make_key("token123"))
+    action_token_manager.string_sync.delete.assert_called_once_with(action_token_manager.make_key("token123"))
 
 
 @pytest.mark.asyncio
@@ -377,7 +428,9 @@ async def test_action_token_manager_disabled_returns_token_without_storing(actio
     settings.DEBUG = True
     settings.CODEX_REDIS_ENABLED = False
 
-    with patch.object(action_token_manager, "make_token", return_value="token123"):
+    with patch(
+        "codex_django.system.redis.managers.tokens.JsonActionTokenRedisManager.make_token", return_value="token123"
+    ):
         token = await action_token_manager.acreate_token({"appointment_id": 1})
 
     assert token == "token123"

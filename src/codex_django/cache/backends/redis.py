@@ -31,14 +31,16 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from importlib import import_module
-from typing import Any
+from typing import Any, cast
 
-from asgiref.sync import async_to_sync
+from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT, BaseCache
 from django.core.exceptions import ImproperlyConfigured
+from redis import Redis as SyncRedis
+from redis.asyncio import Redis as AsyncRedis
 
 from codex_django.cache.serializers import JsonSerializer, Serializer
-from codex_django.core.redis.django_adapter import build_redis_service
+from codex_django.core.redis.managers.base import BaseDjangoRedisManager
 
 _UNSET = object()
 
@@ -60,19 +62,30 @@ class RedisCache(BaseCache):
 
     def __init__(self, server: str | None, params: dict[str, Any]) -> None:
         super().__init__(params)
-        self._location = server or None
+        self._location = str(server or getattr(settings, "REDIS_URL", "redis://localhost:6379/0"))
         options = params.get("OPTIONS") or {}
         serializer_path = options.get("SERIALIZER")
         self._serializer: Serializer = _import_serializer(serializer_path) if serializer_path else JsonSerializer()
-        self._service: Any = None
+        self._manager: BaseDjangoRedisManager | None = None
 
     # ---- infrastructure ---------------------------------------------------
 
     @property
-    def _redis(self) -> Any:
-        if self._service is None:
-            self._service = build_redis_service(self._location)
-        return self._service
+    def redis_manager(self) -> BaseDjangoRedisManager:
+        if self._manager is None:
+
+            def async_factory() -> AsyncRedis:
+                return cast(AsyncRedis, AsyncRedis.from_url(self._location, decode_responses=True))
+
+            def sync_factory() -> SyncRedis:
+                return SyncRedis.from_url(self._location, decode_responses=True)
+
+            self._manager = BaseDjangoRedisManager(
+                prefix=self.key_prefix,
+                async_client_factory=async_factory,
+                sync_client_factory=sync_factory,
+            )
+        return self._manager
 
     def _resolve_ttl(self, timeout: Any) -> int | None | Any:
         """Return ``None`` (persist), ``0`` (delete), or positive seconds.
@@ -105,7 +118,8 @@ class RedisCache(BaseCache):
     async def aget(self, key: Any, default: Any = None, version: Any = None) -> Any:
         real_key = self.make_key(key, version=version)
         self.validate_key(real_key)
-        raw = await self._redis.string.get(real_key)
+        async with self.redis_manager.async_string() as s:
+            raw = await s.get(real_key)
         return self._load(raw, default)
 
     async def aset(
@@ -119,10 +133,12 @@ class RedisCache(BaseCache):
         self.validate_key(real_key)
         ttl = self._resolve_ttl(timeout)
         if ttl == 0:
-            await self._redis.string.delete(real_key)
+            async with self.redis_manager.async_string() as s:
+                await s.delete(real_key)
             return
         payload = self._dump(value)
-        await self._redis.string.set(real_key, payload, ttl=ttl)
+        async with self.redis_manager.async_string() as s:
+            await s.set(real_key, payload, ttl=ttl)
 
     async def aadd(
         self,
@@ -137,21 +153,27 @@ class RedisCache(BaseCache):
         if ttl == 0:
             return False
         payload = self._dump(value)
-        return bool(await self._redis.string.setnx(real_key, payload, ttl=ttl))
+        async with self.redis_manager.async_string() as s:
+            # Use raw client for setnx + ex since operations wrapper might not support atomic setnx with ex
+            # Actually StringOperations set_nx doesn't take ttl in some versions, or maybe it uses set(nx=True)
+            # We'll use the raw client exposed by operation or directly if not available.
+            return bool(await s.client.set(real_key, payload, nx=True, ex=ttl))
 
     async def adelete(self, key: Any, version: Any = None) -> bool:
         real_key = self.make_key(key, version=version)
         self.validate_key(real_key)
-        existed = await self._redis.string.exists(real_key)
-        if not existed:
-            return False
-        await self._redis.string.delete(real_key)
+        async with self.redis_manager.async_string() as s:
+            existed = await s.exists(real_key)
+            if not existed:
+                return False
+            await s.delete(real_key)
         return True
 
     async def ahas_key(self, key: Any, version: Any = None) -> bool:
         real_key = self.make_key(key, version=version)
         self.validate_key(real_key)
-        return bool(await self._redis.string.exists(real_key))
+        async with self.redis_manager.async_string() as s:
+            return bool(await s.exists(real_key))
 
     async def atouch(
         self,
@@ -162,16 +184,15 @@ class RedisCache(BaseCache):
         real_key = self.make_key(key, version=version)
         self.validate_key(real_key)
         ttl = self._resolve_ttl(timeout)
-        if ttl == 0:
-            existed = await self._redis.string.exists(real_key)
-            if existed:
-                await self._redis.string.delete(real_key)
-            return bool(existed)
-        if ttl is None:
-            # Persist: drop TTL via PERSIST — but redis-py exposes it through
-            # the client. Use the raw client to avoid widening the platform API.
-            return bool(await self._redis.string.client.persist(real_key))
-        return bool(await self._redis.string.expire(real_key, ttl))
+        async with self.redis_manager.async_string() as s:
+            if ttl == 0:
+                existed = await s.exists(real_key)
+                if existed:
+                    await s.delete(real_key)
+                return bool(existed)
+            if ttl is None:
+                return bool(await s.client.persist(real_key))
+            return bool(await s.expire(real_key, ttl))
 
     async def aget_many(self, keys: Iterable[Any], version: Any = None) -> dict[Any, Any]:
         key_list = list(keys)
@@ -180,7 +201,8 @@ class RedisCache(BaseCache):
         real_keys = [self.make_key(k, version=version) for k in key_list]
         for real in real_keys:
             self.validate_key(real)
-        raws = await self._redis.string.mget(*real_keys)
+        async with self.redis_manager.async_string() as s:
+            raws = await s.mget(*real_keys)
         result: dict[Any, Any] = {}
         for original, raw in zip(key_list, raws, strict=True):
             if raw is None:
@@ -207,9 +229,10 @@ class RedisCache(BaseCache):
     async def aincr(self, key: Any, delta: int = 1, version: Any = None) -> int:
         real_key = self.make_key(key, version=version)
         self.validate_key(real_key)
-        if not await self._redis.string.exists(real_key):
-            raise ValueError(f"Key '{key}' not found")
-        return int(await self._redis.string.incrby(real_key, delta))
+        async with self.redis_manager.async_string() as s:
+            if not await s.exists(real_key):
+                raise ValueError(f"Key '{key}' not found")
+            return int(await s.incr(real_key, delta))
 
     async def adecr(self, key: Any, delta: int = 1, version: Any = None) -> int:
         return await self.aincr(key, -delta, version=version)
@@ -220,12 +243,26 @@ class RedisCache(BaseCache):
                 "codex_django RedisCache.clear() requires CACHES['default']['KEY_PREFIX'] "
                 "to be set; refusing to run an unbounded SCAN+DEL."
             )
-        await self._redis.string.delete_by_pattern(f"{self.key_prefix}:*")
+        async with self.redis_manager.async_string() as s:
+            # We'll collect and delete manually or use raw client's eval if needed,
+            # but usually async clients have scan_iter
+            cursor = 0
+            pattern = f"{self.key_prefix}:*"
+            while True:
+                cursor, keys = await s.client.scan(cursor=cursor, match=pattern, count=100)
+                if keys:
+                    await s.client.delete(*keys)
+                if cursor == 0:
+                    break
 
     # ---- sync wrappers ----------------------------------------------------
 
     def get(self, key: Any, default: Any = None, version: Any = None) -> Any:
-        return async_to_sync(self.aget)(key, default, version)
+        real_key = self.make_key(key, version=version)
+        self.validate_key(real_key)
+        with self.redis_manager.sync_string() as s:
+            raw = s.get(real_key)
+        return self._load(raw, default)
 
     def set(
         self,
@@ -234,7 +271,16 @@ class RedisCache(BaseCache):
         timeout: Any = DEFAULT_TIMEOUT,
         version: Any = None,
     ) -> None:
-        async_to_sync(self.aset)(key, value, timeout, version)
+        real_key = self.make_key(key, version=version)
+        self.validate_key(real_key)
+        ttl = self._resolve_ttl(timeout)
+        if ttl == 0:
+            with self.redis_manager.sync_string() as s:
+                s.delete(real_key)
+            return
+        payload = self._dump(value)
+        with self.redis_manager.sync_string() as s:
+            s.set(real_key, payload, ttl=ttl)
 
     def add(
         self,
@@ -243,13 +289,30 @@ class RedisCache(BaseCache):
         timeout: Any = DEFAULT_TIMEOUT,
         version: Any = None,
     ) -> bool:
-        return async_to_sync(self.aadd)(key, value, timeout, version)
+        real_key = self.make_key(key, version=version)
+        self.validate_key(real_key)
+        ttl = self._resolve_ttl(timeout)
+        if ttl == 0:
+            return False
+        payload = self._dump(value)
+        with self.redis_manager.sync_string() as s:
+            return bool(s.client.set(real_key, payload, nx=True, ex=ttl))
 
     def delete(self, key: Any, version: Any = None) -> bool:
-        return async_to_sync(self.adelete)(key, version)
+        real_key = self.make_key(key, version=version)
+        self.validate_key(real_key)
+        with self.redis_manager.sync_string() as s:
+            existed = s.exists(real_key)
+            if not existed:
+                return False
+            s.delete(real_key)
+        return True
 
     def has_key(self, key: Any, version: Any = None) -> bool:
-        return async_to_sync(self.ahas_key)(key, version)
+        real_key = self.make_key(key, version=version)
+        self.validate_key(real_key)
+        with self.redis_manager.sync_string() as s:
+            return bool(s.exists(real_key))
 
     def touch(
         self,
@@ -257,10 +320,34 @@ class RedisCache(BaseCache):
         timeout: Any = DEFAULT_TIMEOUT,
         version: Any = None,
     ) -> bool:
-        return async_to_sync(self.atouch)(key, timeout, version)
+        real_key = self.make_key(key, version=version)
+        self.validate_key(real_key)
+        ttl = self._resolve_ttl(timeout)
+        with self.redis_manager.sync_string() as s:
+            if ttl == 0:
+                existed = s.exists(real_key)
+                if existed:
+                    s.delete(real_key)
+                return bool(existed)
+            if ttl is None:
+                return bool(s.client.persist(real_key))
+            return bool(s.expire(real_key, ttl))
 
     def get_many(self, keys: Iterable[Any], version: Any = None) -> dict[Any, Any]:
-        return async_to_sync(self.aget_many)(keys, version)
+        key_list = list(keys)
+        if not key_list:
+            return {}
+        real_keys = [self.make_key(k, version=version) for k in key_list]
+        for real in real_keys:
+            self.validate_key(real)
+        with self.redis_manager.sync_string() as s:
+            raws = s.mget(*real_keys)
+        result: dict[Any, Any] = {}
+        for original, raw in zip(key_list, raws, strict=True):
+            if raw is None:
+                continue
+            result[original] = self._serializer.loads(raw)
+        return result
 
     def set_many(
         self,
@@ -268,16 +355,40 @@ class RedisCache(BaseCache):
         timeout: Any = DEFAULT_TIMEOUT,
         version: Any = None,
     ) -> list[Any]:
-        return async_to_sync(self.aset_many)(mapping, timeout, version)
+        if not mapping:
+            return []
+        for original in mapping:
+            self.set(original, mapping[original], timeout=timeout, version=version)
+        return []
 
     def delete_many(self, keys: Iterable[Any], version: Any = None) -> None:
-        async_to_sync(self.adelete_many)(keys, version)
+        for key in keys:
+            self.delete(key, version=version)
 
     def incr(self, key: Any, delta: int = 1, version: Any = None) -> int:
-        return async_to_sync(self.aincr)(key, delta, version)
+        real_key = self.make_key(key, version=version)
+        self.validate_key(real_key)
+        with self.redis_manager.sync_string() as s:
+            if not s.exists(real_key):
+                raise ValueError(f"Key '{key}' not found")
+            return int(s.incr(real_key, delta))
 
     def decr(self, key: Any, delta: int = 1, version: Any = None) -> int:
-        return async_to_sync(self.adecr)(key, delta, version)
+        return self.incr(key, -delta, version=version)
 
     def clear(self) -> None:
-        async_to_sync(self.aclear)()
+        if not self.key_prefix:
+            raise ImproperlyConfigured(
+                "codex_django RedisCache.clear() requires CACHES['default']['KEY_PREFIX'] "
+                "to be set; refusing to run an unbounded SCAN+DEL."
+            )
+        with self.redis_manager.sync_string() as s:
+            client: Any = s.client
+            cursor = 0
+            pattern = f"{self.key_prefix}:*"
+            while True:
+                cursor, keys = client.scan(cursor=cursor, match=pattern, count=100)
+                if keys:
+                    client.delete(*keys)
+                if cursor == 0:
+                    break

@@ -12,8 +12,6 @@ Invalidation is surgical: master_id + date.
 import json
 from typing import Any
 
-from asgiref.sync import async_to_sync
-
 from codex_django.core.redis.managers.base import BaseDjangoRedisManager
 
 
@@ -44,7 +42,8 @@ class BookingCacheManager(BaseDjangoRedisManager):
         """
         if self._is_disabled():
             return None
-        raw = await self.string.get(self.make_key(f"busy:{master_id}:{date_str}"))
+        async with self.async_string() as string:
+            raw = await string.get(self.make_key(f"busy:{master_id}:{date_str}"))
         if raw is None:
             return None
         return json.loads(raw)  # type: ignore[no-any-return]
@@ -67,13 +66,15 @@ class BookingCacheManager(BaseDjangoRedisManager):
         if self._is_disabled():
             return
         key = self.make_key(f"busy:{master_id}:{date_str}")
-        await self.string.set(key, json.dumps(intervals), ttl=timeout)
+        async with self.async_string() as string:
+            await string.set(key, json.dumps(intervals), ttl=timeout)
 
     async def ainvalidate_master_date(self, master_id: str, date_str: str) -> None:
         """Delete cached busy intervals for a specific resource-day pair."""
         if self._is_disabled():
             return
-        await self.string.delete(self.make_key(f"busy:{master_id}:{date_str}"))
+        async with self.async_string() as string:
+            await string.delete(self.make_key(f"busy:{master_id}:{date_str}"))
 
     # ------------------------------------------------------------------
     # Sync wrappers
@@ -89,7 +90,13 @@ class BookingCacheManager(BaseDjangoRedisManager):
         Returns:
             Cached intervals or ``None`` when the cache entry does not exist.
         """
-        return async_to_sync(self.aget_busy)(master_id, date_str)
+        if self._is_disabled():
+            return None
+        with self.sync_string() as string:
+            raw = string.get(self.make_key(f"busy:{master_id}:{date_str}"))
+        if raw is None:
+            return None
+        return json.loads(raw)  # type: ignore[no-any-return]
 
     def set_busy(
         self,
@@ -106,7 +113,11 @@ class BookingCacheManager(BaseDjangoRedisManager):
             intervals: Busy intervals encoded as ``[[start_iso, end_iso], ...]``.
             timeout: Cache lifetime in seconds.
         """
-        async_to_sync(self.aset_busy)(master_id, date_str, intervals, timeout)
+        if self._is_disabled():
+            return
+        key = self.make_key(f"busy:{master_id}:{date_str}")
+        with self.sync_string() as string:
+            string.set(key, json.dumps(intervals), ttl=timeout)
 
     def invalidate_master_date(self, master_id: str, date_str: str) -> None:
         """Synchronously invalidate busy-slot cache for one resource-day pair.
@@ -115,7 +126,10 @@ class BookingCacheManager(BaseDjangoRedisManager):
             master_id: Resource identifier used in booking availability.
             date_str: ISO-like date string for the cached day bucket.
         """
-        async_to_sync(self.ainvalidate_master_date)(master_id, date_str)
+        if self._is_disabled():
+            return
+        with self.sync_string() as string:
+            string.delete(self.make_key(f"busy:{master_id}:{date_str}"))
 
 
 def get_booking_cache_manager() -> BookingCacheManager:

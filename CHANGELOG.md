@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2026-04-22
+
+### Changed
+
+- **Breaking:** Reworked `BaseDjangoRedisManager` around per-operation client factories and four explicit context managers: `async_string()`, `async_hash()`, `sync_string()`, and `sync_hash()`. The old manager-level `self._client`, `self.string`, and `self.hash` surfaces are no longer part of the public contract.
+- Redis-backed cache, session, dashboard, SEO, site-settings, static-content, booking, notification, fixture-hash, and action-token paths now use native sync Redis clients for sync Django code and async Redis clients for async code. This removes `async_to_sync` from Redis-backed Django hot paths and prevents cross-event-loop Redis client reuse.
+- `DashboardSelector` now resolves `DashboardRedisManager` lazily through a cached factory instead of constructing a Redis manager at module import time.
+- Bumped `codex-platform` to `>=0.4.0` for sync Redis operation wrappers.
+
+### Added
+
+- Extended `CacheCoder` with explicit support for `bool`, `None`, `Enum`, `Path`, Django lazy strings, and `time`, while preserving the no-type-marker Redis payload policy.
+- Added typed Redis hash restore for `DjangoSiteSettingsManager`, decoding cached values according to Django model field types including booleans, nullable fields, dates/times, decimals, UUIDs, integers, floats, and JSON fields.
+- Added unit coverage for Redis client factory injection/cleanup, sync cache and session paths, dashboard cache invalidation, typed site-settings restore, and the expanded `CacheCoder` surface.
+
+### Fixed
+
+- Fixed Redis manager failures caused by missing `_client` attributes in dashboard/cache paths.
+- Fixed event-loop reuse failures caused by live async Redis clients crossing `async_to_sync` boundaries.
+- Fixed Redis `HSET` data errors for site-settings values such as booleans and `None` by encoding hash payloads before writing.
+
 ## [0.5.3] - 2026-04-19
 
 ### Fixed

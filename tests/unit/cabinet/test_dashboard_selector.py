@@ -2,7 +2,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from codex_django.cabinet.selector.dashboard import DashboardSelector, ListAdapter, MetricAdapter, TableAdapter
+from codex_django.cabinet.selector.dashboard import (
+    DashboardSelector,
+    ListAdapter,
+    MetricAdapter,
+    TableAdapter,
+    get_dashboard_redis_manager,
+)
 from codex_django.cabinet.types import ListItem, ListWidgetData, MetricWidgetData, TableColumn, TableWidgetData
 
 pytestmark = pytest.mark.unit
@@ -12,6 +18,7 @@ pytestmark = pytest.mark.unit
 def clear_providers():
     """Clear registered providers before each test."""
     DashboardSelector._providers = []
+    get_dashboard_redis_manager.cache_clear()
 
 
 def test_selector_extend_with_function():
@@ -95,7 +102,8 @@ def test_selector_uses_cached_value_before_calling_provider():
 
     DashboardSelector.extend(provider, cache_key="cached_kpi", cache_ttl=300)
 
-    with patch("codex_django.cabinet.selector.dashboard._manager") as manager:
+    with patch("codex_django.cabinet.selector.dashboard.get_dashboard_redis_manager") as get_manager:
+        manager = get_manager.return_value
         manager.get.return_value = {"kpi": 99}
 
         context = DashboardSelector.get_context(MagicMock())
@@ -112,7 +120,8 @@ def test_selector_populates_cache_after_provider_call():
 
     DashboardSelector.extend(provider, cache_key="fresh_kpi", cache_ttl=180)
 
-    with patch("codex_django.cabinet.selector.dashboard._manager") as manager:
+    with patch("codex_django.cabinet.selector.dashboard.get_dashboard_redis_manager") as get_manager:
+        manager = get_manager.return_value
         manager.get.return_value = None
 
         context = DashboardSelector.get_context(MagicMock())
@@ -128,7 +137,8 @@ def test_selector_with_zero_cache_ttl_skips_cache_layer():
 
     DashboardSelector.extend(provider, cache_key="live", cache_ttl=0)
 
-    with patch("codex_django.cabinet.selector.dashboard._manager") as manager:
+    with patch("codex_django.cabinet.selector.dashboard.get_dashboard_redis_manager") as get_manager:
+        manager = get_manager.return_value
         context = DashboardSelector.get_context(MagicMock())
 
     assert context == {"live": True}
@@ -152,14 +162,23 @@ def test_selector_merges_multiple_provider_contexts_in_order():
 
 
 def test_selector_invalidate_delegates_to_manager():
-    with patch("codex_django.cabinet.selector.dashboard._manager") as manager:
+    with patch("codex_django.cabinet.selector.dashboard.get_dashboard_redis_manager") as get_manager:
+        manager = get_manager.return_value
         DashboardSelector.invalidate("booking_kpi")
 
     manager.invalidate.assert_called_once_with("booking_kpi")
 
 
 def test_selector_invalidate_all_delegates_to_manager():
-    with patch("codex_django.cabinet.selector.dashboard._manager") as manager:
+    with patch("codex_django.cabinet.selector.dashboard.get_dashboard_redis_manager") as get_manager:
+        manager = get_manager.return_value
         DashboardSelector.invalidate_all()
 
     manager.invalidate_all.assert_called_once_with()
+
+
+def test_dashboard_manager_factory_is_lazy_singleton():
+    first = get_dashboard_redis_manager()
+    second = get_dashboard_redis_manager()
+
+    assert first is second

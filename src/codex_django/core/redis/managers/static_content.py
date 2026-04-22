@@ -2,7 +2,6 @@
 
 from typing import Any
 
-from asgiref.sync import async_to_sync
 from django.db import models
 
 from codex_django.core.redis.managers.base import BaseDjangoRedisManager
@@ -19,28 +18,36 @@ class StaticContentManager(BaseDjangoRedisManager):
         """Load cached static content from Redis asynchronously."""
         if self._is_disabled():
             return {}
-        result = await self.hash.get_all(self.make_key(self.cache_key))
+        async with self.async_hash() as h:
+            result = await h.get_all(self.make_key(self.cache_key))
         return result or {}
 
     def load_cached(self, model_cls: type[models.Model]) -> dict[str, str]:
         """Load cached static content or populate it from the database."""
-        data = async_to_sync(self.aload_cached)(model_cls)
+        if self._is_disabled():
+            return {}
+        with self.sync_hash() as h:
+            data = h.get_all(self.make_key(self.cache_key))
         if not data:
             rows = model_cls.objects.all()  # type: ignore[attr-defined]
             data = {str(obj.key): str(obj.content) for obj in rows}
             if data:
                 self.save_mapping(data)
-        return data
+        return data or {}
 
     async def asave_mapping(self, data: dict[str, str]) -> None:
         """Persist a static-content mapping to Redis asynchronously."""
         if self._is_disabled() or not data:
             return
-        await self.hash.set_fields(self.make_key(self.cache_key), data)
+        async with self.async_hash() as h:
+            await h.set_fields(self.make_key(self.cache_key), data)
 
     def save_mapping(self, data: dict[str, str]) -> None:
         """Synchronously persist a static-content mapping to Redis."""
-        async_to_sync(self.asave_mapping)(data)
+        if self._is_disabled() or not data:
+            return
+        with self.sync_hash() as h:
+            h.set_fields(self.make_key(self.cache_key), data)
 
 
 def get_static_content_manager() -> StaticContentManager:

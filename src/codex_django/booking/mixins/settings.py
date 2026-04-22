@@ -156,9 +156,8 @@ class BookingSettingsSyncMixin(LifecycleModelMixin, models.Model):
                 data = self.to_dict()
                 if data:
                     key = manager.make_key("settings")
-                    from asgiref.sync import async_to_sync
-
-                    async_to_sync(manager.string.set)(key, str(data))
+                    with manager.sync_string() as string:
+                        string.set(key, str(data))
         except Exception:
             log.warning("Failed to sync booking settings to Redis", exc_info=True)
 

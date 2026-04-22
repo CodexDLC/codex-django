@@ -33,13 +33,19 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable
+from functools import lru_cache
 from typing import Any, TypeVar, cast, overload
 
 from ..redis.managers.dashboard import DashboardRedisManager
 from ..types import ListWidgetData, MetricWidgetData, TableWidgetData
 
-_manager = DashboardRedisManager()
 ProviderFn = Callable[[Any], dict[str, Any]]
+
+
+@lru_cache(maxsize=1)
+def get_dashboard_redis_manager() -> DashboardRedisManager:
+    """Return the dashboard cache manager lazily."""
+    return DashboardRedisManager()
 
 
 class DashboardAdapter(ABC):
@@ -184,20 +190,21 @@ class DashboardSelector:
             # Real-time: skip cache entirely
             return cast(dict[str, Any], provider["fn"](request))
 
-        cached = _manager.get(cache_key)
+        manager = get_dashboard_redis_manager()
+        cached = manager.get(cache_key)
         if cached is not None:
             return cached
 
         data = cast(dict[str, Any], provider["fn"](request))
-        _manager.set(cache_key, data, ttl=cache_ttl)
+        manager.set(cache_key, data, ttl=cache_ttl)
         return data
 
     @classmethod
     def invalidate(cls, cache_key: str) -> None:
         """Invalidate cache for a specific provider. Call from model signals."""
-        _manager.invalidate(cache_key)
+        get_dashboard_redis_manager().invalidate(cache_key)
 
     @classmethod
     def invalidate_all(cls) -> None:
         """Invalidate all dashboard provider caches."""
-        _manager.invalidate_all()
+        get_dashboard_redis_manager().invalidate_all()

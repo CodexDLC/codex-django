@@ -1,5 +1,5 @@
 from decimal import Decimal
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from django.test import override_settings
@@ -9,57 +9,99 @@ from codex_django.cabinet.redis.managers.dashboard import DashboardRedisManager
 
 @pytest.fixture
 def manager():
-    with patch("codex_django.core.redis.managers.base.Redis.from_url", return_value=AsyncMock()):
-        mgr = DashboardRedisManager()
-    mgr._client = AsyncMock()
-    return mgr
+    mgr = DashboardRedisManager()
+
+    async_string = AsyncMock()
+    async_context = AsyncMock()
+    async_context.__aenter__.return_value = async_string
+    mgr.async_string = MagicMock(return_value=async_context)  # type: ignore[method-assign]
+
+    sync_string = MagicMock()
+    sync_context = MagicMock()
+    sync_context.__enter__.return_value = sync_string
+    mgr.sync_string = MagicMock(return_value=sync_context)  # type: ignore[method-assign]
+
+    return mgr, async_string, sync_string
 
 
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_dashboard_manager_aget_returns_deserialized_payload(manager):
-    manager._client.get.return_value = '{"revenue":"10.50","count":2}'
+    mgr, async_string, _ = manager
+    async_string.get.return_value = '{"revenue":"10.50","count":2}'
 
-    result = await manager.aget("kpi")
+    result = await mgr.aget("kpi")
 
     assert result == {"revenue": "10.50", "count": 2}
-    manager._client.get.assert_called_once_with(manager.make_key("kpi"))
+    async_string.get.assert_awaited_once_with(mgr.make_key("kpi"))
 
 
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_dashboard_manager_aget_returns_none_for_invalid_json(manager):
-    manager._client.get.return_value = "{bad json"
+    mgr, async_string, _ = manager
+    async_string.get.return_value = "{bad json"
 
-    assert await manager.aget("kpi") is None
+    assert await mgr.aget("kpi") is None
 
 
 @pytest.mark.unit
 def test_dashboard_manager_set_serializes_decimal_payload(manager):
-    manager.set("kpi", {"total": Decimal("99.50")}, ttl=300)
+    mgr, _, sync_string = manager
 
-    manager._client.set.assert_called_once()
-    args = manager._client.set.await_args.args
-    assert args[0] == manager.make_key("kpi")
+    mgr.set("kpi", {"total": Decimal("99.50")}, ttl=300)
+
+    sync_string.set.assert_called_once()
+    args = sync_string.set.call_args.args
+    assert args[0] == mgr.make_key("kpi")
     assert args[1] == '{"total": "99.50"}'
-    assert manager._client.set.await_args.kwargs == {"ex": 300}
+    assert sync_string.set.call_args.kwargs == {"ttl": 300}
 
 
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_dashboard_manager_invalidate_all_deletes_found_keys(manager):
-    manager._client.keys.return_value = ["p1", "p2"]
+    mgr, async_string, _ = manager
 
-    await manager.ainvalidate_all()
+    await mgr.ainvalidate_all()
 
-    manager._client.keys.assert_called_once_with(manager.make_key("*"))
-    manager._client.delete.assert_called_once_with("p1", "p2")
+    async_string.delete_by_pattern.assert_awaited_once_with(mgr.make_key("*"))
 
 
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_dashboard_manager_disabled_in_debug_skips_reads(manager):
+    mgr, async_string, _ = manager
     with override_settings(DEBUG=True, CODEX_REDIS_ENABLED=False):
-        assert await manager.aget("kpi") is None
+        assert await mgr.aget("kpi") is None
 
-    manager._client.get.assert_not_called()
+    async_string.get.assert_not_called()
+
+
+@pytest.mark.unit
+def test_dashboard_manager_sync_get_and_invalidate_paths(manager):
+    mgr, _, sync_string = manager
+    sync_string.get.return_value = '{"revenue":"10.50","count":2}'
+
+    assert mgr.get("kpi") == {"revenue": "10.50", "count": 2}
+    sync_string.get.assert_called_once_with(mgr.make_key("kpi"))
+
+    sync_string.get.return_value = "{bad json"
+    assert mgr.get("kpi") is None
+
+    mgr.invalidate("kpi")
+    sync_string.delete.assert_called_once_with(mgr.make_key("kpi"))
+
+
+@pytest.mark.unit
+def test_dashboard_manager_sync_invalidate_all_deletes_found_keys(manager):
+    mgr, _, _ = manager
+    client = MagicMock()
+    client.keys.return_value = ["p1", "p2"]
+    mgr._sync_factory = MagicMock(return_value=client)  # type: ignore[method-assign]
+
+    mgr.invalidate_all()
+
+    client.keys.assert_called_once_with(mgr.make_key("*"))
+    client.delete.assert_called_once_with("p1", "p2")
+    client.close.assert_called_once()

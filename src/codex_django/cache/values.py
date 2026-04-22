@@ -20,10 +20,15 @@ does not preserve Python types.
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
+from enum import Enum
+from pathlib import Path
 from typing import Any
 from uuid import UUID
+
+from django.utils.encoding import force_str
+from django.utils.functional import Promise
 
 
 class CacheCoder:
@@ -52,6 +57,16 @@ class CacheCoder:
     @staticmethod
     def load_date(raw: str) -> date:
         return date.fromisoformat(raw)
+
+    # ---- time ----------------------------------------------------------
+
+    @staticmethod
+    def dump_time(value: time) -> str:
+        return value.isoformat()
+
+    @staticmethod
+    def load_time(raw: str) -> time:
+        return time.fromisoformat(raw)
 
     # ---- timedelta -----------------------------------------------------
 
@@ -104,6 +119,20 @@ class CacheCoder:
     def load_bytes(raw: str) -> bytes:
         return bytes.fromhex(raw)
 
+    # ---- scalar helpers ------------------------------------------------
+
+    @staticmethod
+    def dump_bool(value: bool) -> str:
+        return "1" if value else "0"
+
+    @staticmethod
+    def load_bool(raw: str) -> bool:
+        return raw == "1"
+
+    @staticmethod
+    def dump_none() -> str:
+        return ""
+
     # ---- generic recursive dump ---------------------------------------
 
     @classmethod
@@ -114,12 +143,24 @@ class CacheCoder:
         unknown type is returned as-is — JSON serialization will raise
         ``TypeError`` on it later, which is the intended strict-mode signal.
         """
-        if isinstance(value, str | int | float | bool) or value is None:
+        if isinstance(value, bool):
+            return cls.dump_bool(value)
+        if value is None:
+            return cls.dump_none()
+        if isinstance(value, str | int | float):
             return value
+        if isinstance(value, Enum):
+            return cls.dump(value.value)
+        if isinstance(value, Promise):
+            return force_str(value)
+        if isinstance(value, Path):
+            return str(value)
         if isinstance(value, datetime):
             return cls.dump_datetime(value)
         if isinstance(value, date):
             return cls.dump_date(value)
+        if isinstance(value, time):
+            return cls.dump_time(value)
         if isinstance(value, timedelta):
             return cls.dump_timedelta(value)
         if isinstance(value, Decimal):
