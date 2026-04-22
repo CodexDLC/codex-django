@@ -1,6 +1,6 @@
 """Public cabinet integration API."""
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from .notifications import notification_registry
 from .presenters import ModalPresenter, present_modal_state
@@ -116,6 +116,9 @@ __all__ = [
     "NavAction",
     "DashboardWidget",
 ]
+
+if TYPE_CHECKING:
+    from .mixins import CabinetModuleMixin, CabinetTemplateView, OwnerRequiredMixin, StaffRequiredMixin
 
 
 def __getattr__(name: str) -> Any:

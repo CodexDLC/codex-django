@@ -17,10 +17,13 @@ Install only the package and the extras your Django project actually uses:
 ```bash
 pip install codex-django
 pip install "codex-django[cli]"
+pip install "codex-django[admin,observability]"
 pip install "codex-django[dev]"
 ```
 
 This mode is for teams consuming the runtime modules such as `core`, `system`, `booking`, `notifications`, and `cabinet`.
+The base install intentionally avoids debug toolbar, admin-theme, and metrics packages; install `admin` for `django-unfold`,
+`observability` for `django-prometheus`, and `dev` for contributor/debug tooling.
 
 ## Scaffold Mode
 
@@ -43,10 +46,11 @@ Treat it as project-construction tooling that depends on `codex-django`, not as 
 When you are changing `codex-django` itself, sync the full development environment:
 
 ```bash
-uv sync --extra dev
+uv sync --extra maintainer
 uv run pytest
 uv run mypy src/
 uv run pre-commit run --all-files
+uv run python tools/dev/check.py --ci
 uv build --no-sources
 ```
 

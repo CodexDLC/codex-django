@@ -289,28 +289,31 @@ dependencies = [
     { name = "codex-services" },
     { name = "django" },
     { name = "django-allauth" },
-    { name = "django-debug-toolbar" },
     { name = "django-encrypted-model-fields" },
     { name = "django-extensions" },
     { name = "django-import-export" },
     { name = "django-lifecycle" },
     { name = "django-modeltranslation" },
     { name = "django-ninja" },
-    { name = "django-prometheus" },
-    { name = "django-unfold" },
     { name = "loguru" },
     { name = "pillow" },
     { name = "redis" },
 ]
 
 [package.optional-dependencies]
+admin = [
+    { name = "django-unfold" },
+]
 cli = [
     { name = "codex-django-cli" },
 ]
 dev = [
     { name = "arq" },
     { name = "codex-django-cli" },
+    { name = "django-debug-toolbar" },
+    { name = "django-prometheus" },
     { name = "django-stubs" },
+    { name = "django-unfold" },
     { name = "mypy" },
     { name = "pre-commit" },
     { name = "pytest" },
@@ -331,7 +334,10 @@ maintainer = [
     { name = "bandit" },
     { name = "codex-django-cli" },
     { name = "detect-secrets" },
+    { name = "django-debug-toolbar" },
+    { name = "django-prometheus" },
     { name = "django-stubs" },
+    { name = "django-unfold" },
     { name = "mypy" },
     { name = "pip-audit" },
     { name = "pre-commit" },
@@ -340,6 +346,9 @@ maintainer = [
     { name = "pytest-cov" },
     { name = "pytest-django" },
     { name = "ruff" },
+]
+observability = [
+    { name = "django-prometheus" },
 ]
 
 [package.metadata]
@@ -356,17 +365,22 @@ requires-dist = [
     { name = "detect-secrets", marker = "extra == 'maintainer'", specifier = ">=1.5" },
     { name = "django", specifier = ">=5.0" },
     { name = "django-allauth", specifier = ">=0.61.0" },
-    { name = "django-debug-toolbar", specifier = ">=4.3.0" },
+    { name = "django-debug-toolbar", marker = "extra == 'dev'", specifier = ">=4.3.0" },
+    { name = "django-debug-toolbar", marker = "extra == 'maintainer'", specifier = ">=4.3.0" },
     { name = "django-encrypted-model-fields", specifier = ">=0.6" },
     { name = "django-extensions", specifier = ">=3.2.0" },
     { name = "django-import-export", specifier = ">=4.0.0" },
     { name = "django-lifecycle", specifier = ">=1.2.0" },
     { name = "django-modeltranslation", specifier = ">=0.19.0" },
     { name = "django-ninja", specifier = ">=1.1.0" },
-    { name = "django-prometheus", specifier = ">=2.3.0" },
+    { name = "django-prometheus", marker = "extra == 'dev'", specifier = ">=2.3.0" },
+    { name = "django-prometheus", marker = "extra == 'maintainer'", specifier = ">=2.3.0" },
+    { name = "django-prometheus", marker = "extra == 'observability'", specifier = ">=2.3.0" },
     { name = "django-stubs", marker = "extra == 'dev'", specifier = ">=5.0" },
     { name = "django-stubs", marker = "extra == 'maintainer'", specifier = ">=5.0" },
-    { name = "django-unfold", specifier = ">=0.20.0" },
+    { name = "django-unfold", marker = "extra == 'admin'", specifier = ">=0.20.0" },
+    { name = "django-unfold", marker = "extra == 'dev'", specifier = ">=0.20.0" },
+    { name = "django-unfold", marker = "extra == 'maintainer'", specifier = ">=0.20.0" },
     { name = "loguru", specifier = ">=0.7.0" },
     { name = "mike", marker = "extra == 'docs'", specifier = ">=2.0" },
     { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.5" },
@@ -391,7 +405,7 @@ requires-dist = [
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4" },
     { name = "ruff", marker = "extra == 'maintainer'", specifier = ">=0.4" },
 ]
-provides-extras = ["cli", "dev", "docs", "maintainer"]
+provides-extras = ["admin", "cli", "dev", "docs", "maintainer", "observability"]
 
 [[package]]
 name = "codex-django-cli"

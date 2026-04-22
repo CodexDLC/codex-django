@@ -17,10 +17,13 @@
 ```bash
 pip install codex-django
 pip install "codex-django[cli]"
+pip install "codex-django[admin,observability]"
 pip install "codex-django[dev]"
 ```
 
 Этот режим нужен командам, которые используют runtime-модули `core`, `system`, `booking`, `notifications` и `cabinet`.
+Базовая установка намеренно не тянет debug toolbar, admin theme и metrics-пакеты; ставьте `admin` для `django-unfold`,
+`observability` для `django-prometheus`, а `dev` для contributor/debug tooling.
 
 ## Scaffold Mode
 
@@ -43,10 +46,11 @@ CLI больше не является частью runtime-дистрибути
 Если вы меняете сам `codex-django`, поднимайте полное development-окружение:
 
 ```bash
-uv sync --extra dev
+uv sync --extra maintainer
 uv run pytest
 uv run mypy src/
 uv run pre-commit run --all-files
+uv run python tools/dev/check.py --ci
 uv build --no-sources
 ```
 

@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - Redis-backed cache, session, dashboard, SEO, site-settings, static-content, booking, notification, fixture-hash, and action-token paths now use native sync Redis clients for sync Django code and async Redis clients for async code. This removes `async_to_sync` from Redis-backed Django hot paths and prevents cross-event-loop Redis client reuse.
 - `DashboardSelector` now resolves `DashboardRedisManager` lazily through a cached factory instead of constructing a Redis manager at module import time.
 - Bumped `codex-platform` to `>=0.4.0` for sync Redis operation wrappers.
+- Moved `django-unfold` and `django-prometheus` out of core dependencies into `admin` and `observability` extras, and kept `django-debug-toolbar` in the `dev` extra only.
 
 ### Added
 

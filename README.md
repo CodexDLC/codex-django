@@ -21,6 +21,9 @@ pip install codex-django
 # Runtime + companion CLI package
 pip install "codex-django[cli]"
 
+# Optional admin theme and Prometheus integration
+pip install "codex-django[admin,observability]"
+
 # Runtime + CLI + day-to-day development toolchain
 pip install "codex-django[dev]"
 ```
@@ -44,10 +47,11 @@ Temporary compatibility shims remain under `codex_django.cli`, but the real CLI 
 ## Development
 
 ```bash
-uv sync --extra dev
+uv sync --extra maintainer
 uv run pytest
 uv run mypy src/
 uv run pre-commit run --all-files
+uv run python tools/dev/check.py --ci
 uv build --no-sources
 ```
 
