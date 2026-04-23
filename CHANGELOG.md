@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - Cabinet head templates now automatically load `cabinet/css/app_cabinet.css` when a consumer project provides it. The project theme layer is inserted after the codex-django cabinet defaults and before `cabinet_css` / `extra_css`, so app branding and `.cab-wrapper--client` themes work without local `_head.html` overrides.
+- Updated GitHub Actions workflows to `actions/checkout@v6` and `actions/setup-python@v6` so CI, docs, and publish jobs no longer target the deprecated Node.js 20 action runtime.
 
 ## [0.6.1] - 2026-04-23
 
