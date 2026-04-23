@@ -1,18 +1,19 @@
 {# [LIBRARY] Client sidebar — navigation from context variable cabinet_sidebar #}
 {# DO NOT use {% block %} here — this is an {% include %}, blocks are ignored. #}
-{% load i18n %}
+{% load i18n cabinet_tags %}
 
 {# ─── LOGO ─── #}
 <div class="cab-sidebar__logo">
-  <span class="cab-sidebar__logo-icon bi bi-grid-3x3-gap-fill"></span>
-  <span class="cab-sidebar__logo-name">{{ SITE_NAME|default:'App' }}</span>
+  <span class="cab-sidebar__logo-icon bi {% firstof cabinet_branding.icon 'bi-grid-3x3-gap-fill' %}"></span>
+  <span class="cab-sidebar__logo-name">{% firstof cabinet_branding.label SITE_NAME "App" %}</span>
 </div>
 
 {# ─── NAV (populated by context_processors → cabinet_sidebar) ─── #}
 <nav class="cab-sidebar__nav">
   <ul class="cab-nav">
     {% for item in cabinet_sidebar %}
-      {% include "cabinet/includes/_nav_item.html" with item=item %}
+      {% sidebar_badge item.badge_key as badge_val %}
+      {% include "cabinet/includes/_nav_item.html" with item=item badge=badge_val %}
     {% endfor %}
   </ul>
 </nav>

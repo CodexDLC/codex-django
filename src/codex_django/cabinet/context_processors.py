@@ -54,6 +54,10 @@ def _cabinet_shell_urls() -> dict[str, str | None]:
     }
 
 
+def _can_use_staff_switch(request: HttpRequest) -> bool:
+    return bool(getattr(request.user, "is_staff", False) or getattr(request.user, "is_superuser", False))
+
+
 def cabinet(request: HttpRequest) -> dict[str, Any]:
     if not request.user.is_authenticated:
         return {
@@ -100,6 +104,10 @@ def cabinet(request: HttpRequest) -> dict[str, Any]:
 
     settings_data = SiteSettingsService.get_all_settings()
 
+    shell_urls = _cabinet_shell_urls()
+    if space == "client" and not _can_use_staff_switch(request):
+        shell_urls["cabinet_staff_switch_url"] = None
+
     return {
         "cabinet_sidebar": sidebar_items,
         "cabinet_shortcuts": shortcuts,
@@ -121,7 +129,7 @@ def cabinet(request: HttpRequest) -> dict[str, Any]:
             if space == "staff"
             else []
         ),
-        **_cabinet_shell_urls(),
+        **shell_urls,
     }
 
 

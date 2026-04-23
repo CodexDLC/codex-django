@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.3] - 2026-04-23
+
+### Fixed
+
+- Aligned the client cabinet shell with the staff shell branding contract: client sidebars now use `cabinet_branding.icon` / `cabinet_branding.label` with safe fallbacks and support `SidebarItem.badge_key`.
+- Updated the client cabinet base layout to use branding-aware document titles and to support mobile sidebar open/backdrop state without changing desktop collapse persistence.
+- Restricted client topbar staff/admin switch URLs for non-staff users while preserving the switch for staff users viewing the client space.
+- Moved client notification topbar hardcoded hover/background/text colors into cabinet CSS classes backed by `--cab-*` theme tokens.
+
 ## [0.6.2] - 2026-04-23
 
 ### Added

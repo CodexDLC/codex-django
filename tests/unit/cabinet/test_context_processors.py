@@ -8,7 +8,8 @@ import pytest
 from django.template.loader import render_to_string
 from django.test import RequestFactory, override_settings
 
-from codex_django.cabinet.registry import CabinetRegistry
+from codex_django.cabinet.context_processors import cabinet
+from codex_django.cabinet.registry import CabinetRegistry, configure_space
 from codex_django.cabinet.types import CabinetSection, SidebarItem, TopbarEntry
 
 
@@ -23,9 +24,23 @@ def _make_auth_request(perms: tuple = (), path: str = "/cabinet/"):
     factory = RequestFactory()
     request = factory.get(path)
     user = MagicMock(is_authenticated=True)
+    user.is_staff = False
+    user.is_superuser = False
     user.has_perm = lambda p: p in perms
     request.user = user
     return request
+
+
+def _make_user(is_staff: bool = False, is_superuser: bool = False):
+    user = MagicMock(is_authenticated=True)
+    user.is_staff = is_staff
+    user.is_superuser = is_superuser
+    user.has_perm.return_value = True
+    user.username = "tester"
+    user.first_name = ""
+    user.last_name = ""
+    user.get_full_name.return_value = ""
+    return user
 
 
 @pytest.mark.unit
@@ -183,3 +198,120 @@ class TestCabinetContextProcessorAuthenticated:
         assert 'href="/"' in html
         assert 'href="/cabinet/my/"' in html
         assert 'href="/accounts/logout/"' in html
+
+    def test_configure_space_client_branding_reaches_client_context(self):
+        registry = CabinetRegistry()
+        request = _make_auth_request(path="/cabinet/my/")
+
+        with (
+            patch("codex_django.cabinet.registry.cabinet_registry", registry),
+            patch("codex_django.cabinet.context_processors.cabinet_registry", registry),
+            patch("codex_django.cabinet.services.site_settings.SiteSettingsService.get_all_settings") as mock_get,
+        ):
+            configure_space(space="client", label="LILY", icon="bi-flower1")
+            mock_get.return_value = {}
+            result = cabinet(request)
+
+        assert result["cabinet_space"] == "client"
+        assert result["cabinet_branding"] == {"label": "LILY", "icon": "bi-flower1"}
+
+    def test_client_sidebar_renders_branding_and_badge_key(self):
+        html = render_to_string(
+            "cabinet/includes/_sidebar_client.html",
+            {
+                "SITE_NAME": "Fallback",
+                "cabinet_branding": {"label": "LILY", "icon": "bi-flower1"},
+                "cabinet_sidebar": [
+                    SidebarItem(
+                        label="Messages",
+                        url="/cabinet/my/messages/",
+                        icon="bi-chat",
+                        badge_key="unread_messages_count",
+                    )
+                ],
+                "unread_messages_count": 7,
+            },
+        )
+
+        assert "bi-flower1" in html
+        assert "LILY" in html
+        assert ">App<" not in html
+        assert '<span class="cab-nav__badge">7</span>' in html
+
+    def test_non_staff_client_context_hides_staff_switch_url(self):
+        registry = CabinetRegistry()
+        request = _make_auth_request(path="/cabinet/my/")
+        request.user = _make_user(is_staff=False, is_superuser=False)
+
+        with (
+            patch("codex_django.cabinet.context_processors.cabinet_registry", registry),
+            patch("codex_django.cabinet.services.site_settings.SiteSettingsService.get_all_settings") as mock_get,
+        ):
+            mock_get.return_value = {}
+            result = cabinet(request)
+
+        html = render_to_string(
+            "cabinet/includes/_topbar_client.html",
+            {
+                "request": request,
+                "notification_items": [],
+                "cabinet_client_dropdown_items": [],
+                "cabinet_logout_url": "/accounts/logout/",
+                "cabinet_staff_switch_url": result["cabinet_staff_switch_url"],
+            },
+        )
+
+        assert result["cabinet_staff_switch_url"] is None
+        assert "Staff area" not in html
+
+    def test_staff_client_context_keeps_staff_switch_url(self):
+        registry = CabinetRegistry()
+        request = _make_auth_request(path="/cabinet/my/")
+        request.user = _make_user(is_staff=True)
+
+        with (
+            patch("codex_django.cabinet.context_processors.cabinet_registry", registry),
+            patch("codex_django.cabinet.services.site_settings.SiteSettingsService.get_all_settings") as mock_get,
+        ):
+            mock_get.return_value = {}
+            result = cabinet(request)
+
+        html = render_to_string(
+            "cabinet/includes/_topbar_client.html",
+            {
+                "request": request,
+                "notification_items": [],
+                "cabinet_client_dropdown_items": [],
+                "cabinet_logout_url": "/accounts/logout/",
+                "cabinet_staff_switch_url": result["cabinet_staff_switch_url"],
+            },
+        )
+
+        assert result["cabinet_staff_switch_url"] == "/cabinet/"
+        assert 'href="/cabinet/"' in html
+        assert "Staff area" in html
+
+    @override_settings(STATIC_URL="/static/")
+    def test_client_base_contains_mobile_sidebar_state_and_branding_title(self):
+        request = _make_auth_request(path="/cabinet/my/")
+        request.user = _make_user()
+
+        html = render_to_string(
+            "cabinet/base_client.html",
+            {
+                "request": request,
+                "cabinet_branding": {"label": "LILY", "icon": "bi-flower1"},
+                "cabinet_sidebar": [],
+                "cabinet_tabs": [],
+                "notification_items": [],
+                "cabinet_client_dropdown_items": [],
+                "cabinet_staff_switch_url": None,
+                "cabinet_logout_url": "/accounts/logout/",
+            },
+        )
+
+        assert "sidebarMobileOpen: false" in html
+        assert "'cab-sidebar--open': sidebarMobileOpen" in html
+        assert "cab-backdrop" in html
+        assert '@click="sidebarMobileOpen = true"' in html
+        assert "— LILY</title>" in html

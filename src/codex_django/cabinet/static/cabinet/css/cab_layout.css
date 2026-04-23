@@ -190,6 +190,33 @@
   z-index: 1030;
 }
 
+.cab-notification-menu {
+  border-radius: 12px;
+  overflow: hidden;
+  width: 320px;
+}
+
+.cab-notification-menu__header {
+  background: var(--cab-content-bg);
+}
+
+.cab-notification-menu__title,
+.cab-notification-menu__item {
+  color: var(--cab-text);
+}
+
+.cab-notification-menu__title {
+  font-size: 0.875rem;
+}
+
+.cab-notification-menu__item {
+  transition: background 0.12s;
+}
+
+.cab-notification-menu__item:hover {
+  background: var(--cab-content-bg);
+}
+
 /* ── Content ── */
 .cab-content {
   flex: 1;

@@ -5,19 +5,30 @@
 <html lang="{{ LANGUAGE_CODE|default:'ru' }}">
 <head>
   <meta name="robots" content="noindex, nofollow">
-  <title>{% block title %}{% trans "My Account" %}{% endblock %} — {{ SITE_NAME|default:'App' }}</title>
+  <title>{% block title %}{% trans "My Account" %}{% endblock %} — {% firstof cabinet_branding.label SITE_NAME "App" %}</title>
   {% include "cabinet/includes/_head.html" %}
 </head>
 <body>
 
   <div class="cab-wrapper cab-wrapper--client"
-       x-data="{ sidebarCollapsed: JSON.parse(localStorage.getItem('cab_client_sidebar') ?? 'false') }"
+       x-data="{ sidebarCollapsed: JSON.parse(localStorage.getItem('cab_client_sidebar') ?? 'false'), sidebarMobileOpen: false }"
        x-effect="localStorage.setItem('cab_client_sidebar', sidebarCollapsed)">
 
     {# ─── Client sidebar (from include, populated by context processor) ─── #}
-    <aside class="cab-sidebar" :class="{ 'cab-sidebar--collapsed': sidebarCollapsed }">
+    <aside class="cab-sidebar"
+           :class="{ 'cab-sidebar--collapsed': sidebarCollapsed, 'cab-sidebar--open': sidebarMobileOpen }">
       {% include "cabinet/includes/_sidebar_client.html" %}
     </aside>
+
+    {# Mobile backdrop #}
+    <div class="cab-backdrop d-lg-none"
+         x-show="sidebarMobileOpen"
+         x-transition.opacity
+         @click="sidebarMobileOpen = false"
+         style="position:fixed;
+                inset:0;
+                background:rgba(0,0,0,0.5);
+                z-index:1035"></div>
 
     {# ─── Main area ─── #}
     <div class="cab-main">

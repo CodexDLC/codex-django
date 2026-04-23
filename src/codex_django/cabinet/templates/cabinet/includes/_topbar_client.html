@@ -1,5 +1,12 @@
 {% load i18n cabinet_tags %}
 <header class="cab-topbar">
+  <button class="btn btn-sm d-lg-none d-flex align-items-center justify-content-center"
+          type="button"
+          @click="sidebarMobileOpen = true"
+          aria-label="{% trans 'Open navigation' %}">
+    <span class="bi bi-list fs-5"></span>
+  </button>
+
   <div class="me-auto">
     <h6 class="mb-0 fw-semibold" style="color: var(--cab-text);">
       {% block page_title %}{% firstof cabinet_client_title client_page_title %}{% if not cabinet_client_title and not client_page_title %}{% trans "My Account" %}{% endif %}{% endblock %}
@@ -34,13 +41,13 @@
           <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:.6rem;">{{ notification_total }}</span>
         {% endif %}
       </button>
-      <div class="dropdown-menu dropdown-menu-end shadow p-0" style="width:320px;border-radius:12px;overflow:hidden;">
-        <div class="d-flex align-items-center justify-content-between px-3 py-2 border-bottom" style="background:#f8fafc;">
-          <span class="fw-semibold" style="font-size:.875rem;color:#374151;">{% trans "Notifications" %}</span>
+      <div class="dropdown-menu dropdown-menu-end shadow p-0 cab-notification-menu">
+        <div class="d-flex align-items-center justify-content-between px-3 py-2 border-bottom cab-notification-menu__header">
+          <span class="fw-semibold cab-notification-menu__title">{% trans "Notifications" %}</span>
         </div>
         {% if notification_items %}
           {% for item in notification_items %}
-          <a href="{{ item.url }}" class="d-flex align-items-center gap-3 px-3 py-2 border-bottom text-decoration-none" style="color:#374151;transition:background .12s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+          <a href="{{ item.url }}" class="d-flex align-items-center gap-3 px-3 py-2 border-bottom text-decoration-none cab-notification-menu__item">
             <span class="bi {{ item.icon }} fs-5" style="color:var(--cab-primary,#6366f1);flex-shrink:0;"></span>
             <div class="flex-grow-1">
               <div style="font-size:.85rem;font-weight:600;">{{ item.label }}</div>
