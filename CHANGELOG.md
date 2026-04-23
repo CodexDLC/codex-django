@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.2] - 2026-04-23
+
+### Added
+
+- Added `optional_static_css`, a defensive cabinet template tag that checks Django staticfiles before rendering a stylesheet `<link>`. Library templates can now expose optional project-owned CSS slots without creating 404s in projects that do not ship those assets.
+- Added template coverage for optional static CSS rendering, missing-file behavior, and cabinet head stylesheet ordering.
+
+### Fixed
+
+- Cabinet head templates now automatically load `cabinet/css/app_cabinet.css` when a consumer project provides it. The project theme layer is inserted after the codex-django cabinet defaults and before `cabinet_css` / `extra_css`, so app branding and `.cab-wrapper--client` themes work without local `_head.html` overrides.
+
+## [0.6.1] - 2026-04-23
+
+### Fixed
+
+- Fixed Redis JSON serialization paths for non-primitive values in dashboard, core settings, and system token managers.
+
 ## [0.6.0] - 2026-04-22
 
 ### Changed

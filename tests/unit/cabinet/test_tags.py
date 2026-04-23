@@ -2,7 +2,9 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
+from django.contrib.staticfiles import finders
 from django.template.loader import get_template, render_to_string
+from django.test import override_settings
 
 from codex_django.cabinet.templatetags.cabinet_tags import (
     cab_initials,
@@ -10,6 +12,7 @@ from codex_django.cabinet.templatetags.cabinet_tags import (
     cab_url,
     get_item,
     jsonify,
+    optional_static_css,
     sidebar_badge,
 )
 
@@ -44,6 +47,36 @@ def test_cab_trans():
 def test_cab_url():
     # Defensive reversal test
     assert cab_url("nonexistent") == "#"
+
+
+@pytest.mark.unit
+def test_optional_static_css_returns_empty_when_asset_is_missing(monkeypatch):
+    monkeypatch.setattr(finders, "find", lambda path: None)
+
+    assert optional_static_css("cabinet/css/app_cabinet.css") == ""
+
+
+@pytest.mark.unit
+@override_settings(STATIC_URL="/static/")
+def test_optional_static_css_renders_link_when_asset_exists(monkeypatch):
+    monkeypatch.setattr(finders, "find", lambda path: "/tmp/app_cabinet.css")
+
+    assert (
+        optional_static_css("cabinet/css/app_cabinet.css")
+        == '<link rel="stylesheet" href="/static/cabinet/css/app_cabinet.css">'
+    )
+
+
+@pytest.mark.unit
+@override_settings(STATIC_URL="/static/")
+def test_cabinet_head_loads_optional_app_cabinet_after_library_css(monkeypatch):
+    monkeypatch.setattr(finders, "find", lambda path: "/tmp/app_cabinet.css")
+
+    html = render_to_string("cabinet/includes/_head.html")
+
+    codex_index = html.index("cabinet/css/codex_cabinet.css")
+    app_index = html.index("cabinet/css/app_cabinet.css")
+    assert codex_index < app_index
 
 
 @pytest.mark.unit

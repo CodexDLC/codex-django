@@ -18,6 +18,8 @@ Available tags and filters
   ``USE_I18N = False`` or locale middleware is absent.
 - :func:`cab_url` — defensive ``reverse``; returns ``"#"`` instead of raising
   ``NoReverseMatch`` when a URL name is not registered.
+- :func:`optional_static_css` — render a stylesheet link only when the static
+  asset exists.
 
 Design notes
 ------------
@@ -31,7 +33,10 @@ from dataclasses import asdict, is_dataclass
 from typing import Any
 
 from django import template
+from django.contrib.staticfiles import finders
 from django.core.serializers.json import DjangoJSONEncoder
+from django.templatetags.static import static
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 register = template.Library()
@@ -140,6 +145,19 @@ def is_avatar_url(value: object) -> bool:
 # ---------------------------------------------------------------------------
 # Tags
 # ---------------------------------------------------------------------------
+
+
+@register.simple_tag
+def optional_static_css(path: str) -> str:
+    """Render a stylesheet link only when ``path`` exists in staticfiles.
+
+    Library templates use this for optional project theme layers. Projects
+    that provide the file get a normal ``<link>`` tag, while projects without
+    it do not emit a broken URL.
+    """
+    if finders.find(path) is None:
+        return ""
+    return format_html('<link rel="stylesheet" href="{}">', static(path))
 
 
 @register.simple_tag
