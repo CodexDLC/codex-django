@@ -1,5 +1,13 @@
 {% load i18n cabinet_tags %}
 <header class="cab-topbar">
+  <button class="btn btn-sm d-lg-none d-flex align-items-center justify-content-center"
+          type="button"
+          style="color: var(--cab-text-muted);"
+          @click="sidebarMobileOpen = true"
+          aria-label="{% trans 'Open navigation' %}">
+    <span class="bi bi-list fs-4"></span>
+  </button>
+
   {% regroup cabinet_nav by nav_group as nav_groups_v1 %}
   {% regroup cabinet_topbar_entries by group as nav_groups_v2 %}
 

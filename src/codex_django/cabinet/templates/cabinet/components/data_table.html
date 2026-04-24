@@ -25,7 +25,7 @@
     {% endif %}
   </div>
 
-  <div class="table-responsive">
+  <div class="cab-data-table__desktop table-responsive">
     <table class="table table-hover align-middle mb-0">
       <thead class="table-light">
         <tr>
@@ -88,5 +88,49 @@
         {% endfor %}
       </tbody>
     </table>
+  </div>
+
+  <div class="cab-data-table__cards">
+    {% for row in table.rows %}
+    <article class="cab-data-card">
+      <div class="cab-data-card__fields">
+        {% for col in table.columns %}
+        <div class="cab-data-card__field">
+          <div class="cab-data-card__label">{{ col.label }}</div>
+          <div class="cab-data-card__value text-{{ col.align }}{% if col.muted %} text-muted{% endif %}">
+            {% if col.badge_key %}
+              {% with badge_map=row|get_item:col.badge_key badge_value=row|get_item:col.key status_key=row|get_item:'status' %}
+              <span class="badge bg-{{ badge_map|get_item:status_key|default:'secondary' }}">{{ badge_value }}</span>
+              {% endwith %}
+            {% elif col.bold %}
+              <strong>{{ row|get_item:col.key }}</strong>
+            {% else %}
+              {{ row|get_item:col.key }}
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if table.actions %}
+      <div class="cab-data-card__actions">
+        {% for action in table.actions %}
+        {% with url_val=row|get_item:action.url_key %}
+        <a href="{{ url_val }}"
+           class="btn btn-sm {% if action.style == 'link' %}btn-outline-secondary{% else %}{{ action.style }}{% endif %}">
+          {% if action.icon %}<i class="bi {{ action.icon }}"></i>{% endif %}
+          {{ action.label }}
+        </a>
+        {% endwith %}
+        {% endfor %}
+      </div>
+      {% endif %}
+    </article>
+    {% empty %}
+    <div class="cab-data-card cab-data-card--empty text-center text-muted py-4">
+      <i class="bi bi-inbox fs-4 d-block mb-1"></i>
+      {{ table.empty_message }}
+    </div>
+    {% endfor %}
   </div>
 </div>

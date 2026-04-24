@@ -1,136 +1,31 @@
-{% extends "showcase/cabinet/base_cabinet.html" %}
-{% load showcase_extras %}
+{% extends "cabinet/base_cabinet.html" %}
 
 {% block title %}Analytics{% endblock %}
 
-{% block sidebar_title %}
-<span class="bi bi-graph-up fs-5" style="color: var(--cab-primary);"></span>
-<span class="cab-sidebar__title ms-2 fw-semibold text-white" style="font-size: 1rem; white-space: nowrap;">Analytics</span>
-{% endblock %}
-
-{% block sidebar_nav %}
-<li>
-  <a href="{% url 'codex_showcase:dashboard' %}"
-     class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2 cab-nav__item--active"
-     hx-get="{% url 'codex_showcase:dashboard' %}" hx-target="#cab-content" hx-push-url="true"
-     style="color: var(--cab-sidebar-text); transition: background 0.15s;">
-    <span class="bi bi-grid fs-5 flex-shrink-0"></span>
-    <span class="cab-nav__label ms-3" style="white-space: nowrap;">Dashboard</span>
-  </a>
-</li>
-<li>
-  <a href="{% url 'codex_showcase:reports' %}"
-     class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2"
-     style="color: var(--cab-sidebar-text); transition: background 0.15s;">
-    <span class="bi bi-table fs-5 flex-shrink-0"></span>
-    <span class="cab-nav__label ms-3" style="white-space: nowrap;">Reports</span>
-  </a>
-</li>
-{% endblock %}
-
 {% block cabinet_content %}
-
-{# ── Row 1: KPI ── #}
 <div class="row g-3 mb-4">
-  <div class="col-lg-3 col-sm-6">{% include "showcase/cabinet/widgets/kpi.html" with title="Monthly Revenue" value="$115,500" trend="+12%" trend_label="vs last month" icon="bi-graph-up" %}</div>
-  <div class="col-lg-3 col-sm-6">{% include "showcase/cabinet/widgets/kpi.html" with title="Monthly Appointments" value="47" trend="+8%" trend_label="vs last month" icon="bi-calendar-check" %}</div>
-  <div class="col-lg-3 col-sm-6">{% include "showcase/cabinet/widgets/kpi.html" with title="Total Clients" value="30" trend="+8" trend_label="this week" icon="bi-people" %}</div>
-  <div class="col-lg-3 col-sm-6">{% include "showcase/cabinet/widgets/kpi.html" with title="Average check" value="$2,457" trend="+3%" trend_label="vs last month" icon="bi-receipt" %}</div>
+  {% for data in kpis %}
+  <div class="col-lg-3 col-sm-6">
+    {% include "cabinet/widgets/kpi.html" with data=data %}
+  </div>
+  {% endfor %}
 </div>
 
-{# ── Row 2: Chart + Masters ── #}
 <div class="row g-3 mb-4">
-  <div class="col-lg-8">{% include "showcase/cabinet/widgets/chart.html" with title="Revenue" subtitle="last 7 days" icon="bi-bar-chart-line" chart_id="revenueChart" kpi_value="$115,500" kpi_trend="+12%" kpi_trend_label="vs last month" height="220" %}</div>
-  <div class="col-lg-4">{% include "showcase/cabinet/widgets/list.html" with title="Top Specialists" subtitle="this month" icon="bi-trophy" items=masters %}</div>
+  <div class="col-lg-8">
+    {% include "cabinet/widgets/chart.html" with data=revenue_chart %}
+  </div>
+  <div class="col-lg-4">
+    {% include "cabinet/widgets/list.html" with data=masters %}
+  </div>
 </div>
 
-{# ── Row 3: Donut + Top services ── #}
 <div class="row g-3">
-  <div class="col-lg-4">{% include "showcase/cabinet/widgets/donut.html" with title="Services by categories" icon="bi-pie-chart" chart_id="servicesDonut" size="150" %}</div>
-  <div class="col-lg-8">{% include "showcase/cabinet/widgets/list.html" with title="Top Services" subtitle="this month" icon="bi-star" items=top_services %}</div>
+  <div class="col-lg-4">
+    {% include "cabinet/widgets/donut.html" with data=services_donut %}
+  </div>
+  <div class="col-lg-8">
+    {% include "cabinet/widgets/list.html" with data=top_services %}
+  </div>
 </div>
-
-{% endblock %}
-
-
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-  const primaryColor = '#7c3aed';
-
-  // ── Revenue line chart ──
-  const revenueCtx = document.getElementById('revenueChart');
-  if (revenueCtx) {
-    new Chart(revenueCtx, {
-      type: 'line',
-      data: {
-        labels: ['Mar 17', 'Mar 18', 'Mar 19', 'Mar 20', 'Mar 21', 'Mar 22', 'Today'],
-        datasets: [{
-          data: [12400, 18200, 9800, 22100, 16500, 28400, 19200],
-          borderColor: primaryColor,
-          backgroundColor: 'rgba(124,58,237,0.07)',
-          fill: true,
-          tension: 0.4,
-          pointRadius: 4,
-          pointBackgroundColor: primaryColor,
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-          y: {
-            grid: { color: 'rgba(0,0,0,0.04)' },
-            ticks: {
-              font: { size: 11 },
-              callback: v => new Intl.NumberFormat('en-US', { notation: 'compact' }).format(v) + ' $'
-            }
-          }
-        }
-      }
-    });
-  }
-
-  // ── Services donut ──
-  const donutCtx = document.getElementById('servicesDonut');
-  if (donutCtx) {
-    const labels = ['Manicure', 'Coloring', 'Haircut', 'Care'];
-    const data   = [45, 25, 20, 10];
-    const colors = ['#7c3aed', '#a78bfa', '#c4b5fd', '#ede9fe'];
-
-    new Chart(donutCtx, {
-      type: 'doughnut',
-      data: {
-        labels,
-        datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 4 }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '68%',
-        plugins: { legend: { display: false } }
-      }
-    });
-
-    const legend = document.getElementById('servicesDonut_legend');
-    if (legend) {
-      legend.innerHTML = labels.map((l, i) => `
-        <li class="d-flex align-items-center justify-content-between mb-2" style="font-size:.8rem;">
-          <div class="d-flex align-items-center gap-2">
-            <span style="width:10px;height:10px;border-radius:50%;background:${colors[i]};flex-shrink:0;display:inline-block;"></span>
-            ${l}
-          </div>
-          <span class="fw-semibold">${data[i]}%</span>
-        </li>`).join('');
-    }
-  }
-
-});
-</script>
 {% endblock %}

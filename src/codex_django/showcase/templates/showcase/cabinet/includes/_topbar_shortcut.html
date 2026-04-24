@@ -1,6 +1,0 @@
-<a href="{% url url_name %}"
-   class="btn btn-sm d-flex align-items-center gap-1 {% if active_section == active_key %}fw-semibold{% endif %}"
-   style="color: {% if active_section == active_key %}var(--cab-text){% else %}var(--cab-text-muted){% endif %}; font-size: 0.875rem;">
-  {% if icon %}<span class="bi {{ icon }}"></span>{% endif %}
-  {{ label }}
-</a>

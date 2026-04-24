@@ -1,5 +1,0 @@
-{# Usage: wrap with x-data containing the modal_id variable #}
-<div x-cloak x-show="{{ modal_id }}" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="position-fixed cab-overlay" style="inset:0;background:rgba(15,23,42,.4);z-index:1050;" @click.self="{{ modal_id }}=false">
-  <div x-show="{{ modal_id }}" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="bg-white rounded-4 shadow-lg" style="width:{{ size|default:'420px' }};max-width:92vw;overflow:hidden;" @click.stop>
-  </div>
-</div>

@@ -6,7 +6,7 @@
       <span class="bi {{ data.icon }}" style="color:var(--cab-primary);font-size:1.1rem;"></span>
       {% endif %}
     </div>
-    <div class="fw-bold mb-1" style="font-size:1.9rem;line-height:1.1;">{{ data.value }}{% if data.unit %} {{ data.unit }}{% endif %}</div>
+    <div class="fw-bold mb-1" style="font-size:clamp(1.2rem, 5vw, 1.9rem);line-height:1.1;">{{ data.value }}{% if data.unit %} {{ data.unit }}{% endif %}</div>
     {% if data.trend_value %}
     <div class="d-flex align-items-center gap-1 mt-1" style="font-size:.8rem;">
       {% if data.trend_direction == "up" %}

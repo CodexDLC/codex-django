@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
@@ -140,7 +141,7 @@ class ReportChartData:
 class ReportTableData:
     """Dense report table with optional summary row."""
 
-    columns: list[TableColumn | dict[str, Any]]
+    columns: Sequence[TableColumn | dict[str, Any]]
     rows: list[dict[str, Any]]
     title: str = "Data Breakdown"
     subtitle: str | None = None

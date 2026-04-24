@@ -31,6 +31,7 @@ Available components:
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -148,8 +149,8 @@ class DataTableData:
         return render(request, "booking/appointments.html", {"table": table})
     """
 
-    columns: list[TableColumn]
-    rows: list[dict[str, Any]]
+    columns: Sequence[TableColumn | dict[str, Any]]
+    rows: Sequence[dict[str, Any]]
     filters: list[TableFilter] = field(default_factory=list)
     actions: list[TableAction] = field(default_factory=list)
     search_placeholder: str = ""
@@ -277,8 +278,8 @@ class CalendarGridData:
         return render(request, "booking/schedule.html", {"calendar": calendar})
     """
 
-    cols: list[str | dict[str, Any]]
-    rows: list[str]
+    cols: Sequence[str | dict[str, Any]]
+    rows: Sequence[str | dict[str, Any]]
     events: list[CalendarSlot]
     slot_height_px: int = 40
     new_event_url: str = ""

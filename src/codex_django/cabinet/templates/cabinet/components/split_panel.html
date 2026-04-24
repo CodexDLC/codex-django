@@ -1,5 +1,5 @@
 {% load i18n %}
-{#
+{% comment %}
   split_panel.html — two-column layout: list on left, detail on right via HTMX.
 
   Context:
@@ -12,7 +12,7 @@
 
   Usage:
     {% include "cabinet/components/split_panel.html" with panel=panel %}
-#}
+{% endcomment %}
 <div class="cab-split-panel">
 
   {# Left: list #}

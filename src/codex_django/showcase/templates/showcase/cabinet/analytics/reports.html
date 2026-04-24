@@ -1,46 +1,55 @@
-{% extends "showcase/cabinet/base_cabinet.html" %}
+{% extends "cabinet/base_cabinet.html" %}
+{% load cabinet_tags %}
 
-{% block title %}Reports — Analytics{% endblock %}
-
-{% block sidebar_title %}
-<span class="bi bi-graph-up fs-5" style="color: var(--cab-primary);"></span>
-<span class="cab-sidebar__title ms-2 fw-semibold text-white" style="font-size: 1rem; white-space: nowrap;">Analytics</span>
-{% endblock %}
-
-{% block sidebar_nav %}
-<li>
-  <a href="{% url 'codex_showcase:dashboard' %}" class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2" style="color: var(--cab-sidebar-text); transition: background 0.15s;">
-    <span class="bi bi-grid fs-5 flex-shrink-0"></span>
-    <span class="cab-nav__label ms-3" style="white-space: nowrap;">Dashboard</span>
-  </a>
-</li>
-<li>
-  <a href="{% url 'codex_showcase:reports' %}" class="cab-nav__item cab-nav__item--active d-flex align-items-center px-3 py-2 rounded mx-2" style="color: var(--cab-sidebar-text); transition: background 0.15s;">
-    <span class="bi bi-table fs-5 flex-shrink-0"></span>
-    <span class="cab-nav__label ms-3" style="white-space: nowrap;">Reports</span>
-  </a>
-</li>
-{% endblock %}
+{% block title %}Reports{% endblock %}
 
 {% block cabinet_content %}
-<div x-data="{ showExport: false }">
+<div class="cab-report">
+  <header class="cab-report__header">
+    <div>
+      <h1 class="cab-report__title">{{ report.title }}</h1>
+      <p class="cab-report__summary">{{ report.summary }}</p>
+    </div>
+    <span class="cab-report__period">
+      <i class="bi bi-calendar3"></i>
+      {{ report.period_label }}
+    </span>
+  </header>
 
-{% include "showcase/cabinet/includes/_page_header.html" with title="Reports" subtitle=period_label %}
+  <nav class="cab-report__toolbar" aria-label="Report filters">
+    <div class="cab-report__pills">
+      {% for tab in report.tabs %}
+        <a class="cab-report__pill{% if tab.key == report.active_tab %} is-active{% endif %}"
+           href="?tab={{ tab.key }}&period={{ report.active_period }}">
+          {% if tab.icon %}<i class="bi {{ tab.icon }}"></i>{% endif %}
+          {{ tab.label }}
+        </a>
+      {% endfor %}
+    </div>
+    <div class="cab-report__pills">
+      {% for option in report.period_options %}
+        <a class="cab-report__pill{% if option.key == report.active_period %} is-active{% endif %}"
+           href="?tab={{ report.active_tab }}&period={{ option.key }}">
+          {{ option.label }}
+        </a>
+      {% endfor %}
+    </div>
+  </nav>
 
-{% include "showcase/cabinet/includes/_report_filters.html" %}
+  <section class="cab-report__cards" aria-label="Report summary">
+    {% for card in report.summary_cards %}
+      <article class="cab-report-card">
+        <div>
+          <span class="cab-report-card__label">{{ card.label }}</span>
+          <strong class="cab-report-card__value">{{ card.value }}</strong>
+        </div>
+        {% if card.icon %}<i class="cab-report-card__icon bi {{ card.icon }}"></i>{% endif %}
+        {% if card.hint %}<small class="cab-report-card__hint">{{ card.hint }}</small>{% endif %}
+      </article>
+    {% endfor %}
+  </section>
 
-{# ── KPI strip — reuse dashboard kpi widget ── #}
-<div class="row g-3 mb-4">
-  <div class="col-md-3 col-6">{% include "showcase/cabinet/widgets/kpi.html" with title="Revenue" value=table_summary.total_revenue trend="" trend_label="for "|add:period_label icon="bi-cash-stack" %}</div>
-  <div class="col-md-3 col-6">{% include "showcase/cabinet/widgets/kpi.html" with title="Bookings" value=table_summary.total_bookings trend="" trend_label="working days: "|add:table_summary.working_days icon="bi-calendar-check" %}</div>
-  <div class="col-md-3 col-6">{% include "showcase/cabinet/widgets/kpi.html" with title="Average check" value=table_summary.avg_check trend="" trend_label="per booking" icon="bi-receipt" %}</div>
-  <div class="col-md-3 col-6">{% include "showcase/cabinet/widgets/kpi.html" with title="Best day" value=table_summary.best_day trend=table_summary.best_day_val trend_label="" icon="bi-trophy" %}</div>
-</div>
-
-{# ── Data table — universal widget ── #}
-{% include "showcase/cabinet/widgets/table.html" with columns=columns rows=rows summary=summary_row striped="is_weekend" bar_key="revenue_fmt" bar_max=bar_max %}
-
-{% include "showcase/cabinet/includes/_export_modal.html" %}
-
+  {% include "cabinet/reports/table.html" with table=report.table %}
+  {% include "cabinet/reports/chart.html" with chart=report.chart %}
 </div>
 {% endblock %}

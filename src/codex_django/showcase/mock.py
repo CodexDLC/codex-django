@@ -14,7 +14,29 @@ Replacement pattern (when real models are ready):
 from __future__ import annotations
 
 from datetime import time
-from typing import Any
+from typing import Any, cast
+
+from codex_django.cabinet import (
+    CalendarGridData,
+    CalendarSlot,
+    CardGridData,
+    CardItem,
+    ChartDatasetData,
+    DataTableData,
+    ListItem,
+    ListRow,
+    ListWidgetData,
+    MetricWidgetData,
+    ReportChartData,
+    ReportPageData,
+    ReportSummaryCardData,
+    ReportTabData,
+    ReportTableData,
+    SidebarItem,
+    SplitPanelData,
+    TableColumn,
+    TableFilter,
+)
 
 
 class ShowcaseMockData:
@@ -764,24 +786,165 @@ class ShowcaseMockData:
                 idx += 1
         return color_map
 
+    @classmethod
+    def _showcase_url(cls, name: str) -> str:
+        urls = {
+            "dashboard": "/showcase/dashboard/",
+            "staff": "/showcase/staff/",
+            "clients": "/showcase/clients/",
+            "conversations": "/showcase/conversations/",
+            "booking": "/showcase/booking/",
+            "booking_appointments": "/showcase/booking/appointments/",
+            "booking_new": "/showcase/booking/new/",
+            "reports": "/showcase/analytics/reports/",
+            "catalog": "/showcase/catalog/",
+            "notifications_log": "/showcase/notifications/",
+            "notifications_templates": "/showcase/notifications/templates/",
+            "site_settings": "/showcase/site/settings/",
+        }
+        return urls[name]
+
+    @classmethod
+    def _shell_context(cls, active: str, *, label: str, icon: str = "bi-grid-3x3-gap-fill") -> dict[str, Any]:
+        topbar_entries = [
+            {"group": "admin", "label": "Dashboard", "icon": "bi-graph-up", "url": cls._showcase_url("dashboard")},
+            {"group": "admin", "label": "Staff", "icon": "bi-person-badge", "url": cls._showcase_url("staff")},
+            {"group": "admin", "label": "Clients", "icon": "bi-people", "url": cls._showcase_url("clients")},
+            {"group": "admin", "label": "Reports", "icon": "bi-table", "url": cls._showcase_url("reports")},
+            {"group": "services", "label": "Booking", "icon": "bi-calendar3", "url": cls._showcase_url("booking")},
+            {"group": "services", "label": "Catalog", "icon": "bi-tag", "url": cls._showcase_url("catalog")},
+            {
+                "group": "services",
+                "label": "Notifications",
+                "icon": "bi-bell",
+                "url": cls._showcase_url("notifications_log"),
+            },
+        ]
+        return {
+            "cabinet_branding": {"label": label, "icon": icon},
+            "cabinet_active_topbar": {"label": label, "icon": icon},
+            "cabinet_topbar_entries": topbar_entries,
+            "cabinet_topbar_actions": [],
+            "cabinet_quick_access": [],
+            "cabinet_nav": [],
+            "cabinet_sidebar": [],
+            "cabinet_settings_url": cls._showcase_url("site_settings"),
+            "cabinet_site_url": "/showcase/",
+            "cabinet_logout_url": "",
+            "cabinet_client_switch_url": "",
+            "cabinet_staff_switch_url": "",
+            "active_section": active,
+        }
+
+    @classmethod
+    def _sidebar_item(
+        cls,
+        label: str,
+        url: str,
+        icon: str,
+        *,
+        active: bool = False,
+        badge: int | str | None = None,
+    ) -> SidebarItem:
+        return SidebarItem(label=label, url=url, icon=icon, badge_key=str(badge) if badge else "")
+
     # ── Public classmethods ────────────────────────────────────────────────────
 
     @classmethod
     def get_dashboard_context(cls) -> dict[str, Any]:
-        return {
-            "masters": [
-                {"avatar": "L", "label": "Lily", "value": "19 appointments", "subvalue": "$89,500"},
-                {"avatar": "JM", "label": "Jane Miller", "value": "8 appointments", "subvalue": "$32,400"},
-                {"avatar": "LA", "label": "Linda Adams", "value": "6 appointments", "subvalue": "$24,800"},
-                {"avatar": "CS", "label": "Cosmetologist", "value": "2 appointments", "subvalue": "$8,600"},
-            ],
-            "top_services": [
-                {"label": "Manicure + Gel Polish Premium", "value": "7 sales", "subvalue": "$31,500"},
-                {"label": "Package: Lashes + Brows", "value": "4 sales", "subvalue": "$16,000"},
-                {"label": "Hair Coloring", "value": "3 sales", "subvalue": "$13,500"},
-                {"label": "Smart Pedicure (Full)", "value": "2 sales", "subvalue": "$11,000"},
-            ],
-        }
+        context = cls._shell_context("analytics", label="Analytics", icon="bi-graph-up")
+        context.update(
+            {
+                "cabinet_sidebar": [
+                    cls._sidebar_item("Dashboard", cls._showcase_url("dashboard"), "bi-grid", active=True),
+                    cls._sidebar_item("Reports", cls._showcase_url("reports"), "bi-table"),
+                ],
+                "kpis": [
+                    MetricWidgetData(
+                        "Monthly Revenue",
+                        "$115,500",
+                        trend_value="+12%",
+                        trend_label="vs last month",
+                        trend_direction="up",
+                        icon="bi-graph-up",
+                    ),
+                    MetricWidgetData(
+                        "Monthly Appointments",
+                        "47",
+                        trend_value="+8%",
+                        trend_label="vs last month",
+                        trend_direction="up",
+                        icon="bi-calendar-check",
+                    ),
+                    MetricWidgetData(
+                        "Total Clients",
+                        "30",
+                        trend_value="+8",
+                        trend_label="this week",
+                        trend_direction="up",
+                        icon="bi-people",
+                    ),
+                    MetricWidgetData(
+                        "Average check",
+                        "$2,457",
+                        trend_value="+3%",
+                        trend_label="vs last month",
+                        trend_direction="up",
+                        icon="bi-receipt",
+                    ),
+                ],
+                "revenue_chart": {
+                    "title": "Revenue",
+                    "subtitle": "last 7 days",
+                    "icon": "bi-bar-chart-line",
+                    "type": "line",
+                    "chart_labels": ["Mar 17", "Mar 18", "Mar 19", "Mar 20", "Mar 21", "Mar 22", "Today"],
+                    "datasets": [
+                        {
+                            "data": [12400, 18200, 9800, 22100, 16500, 28400, 19200],
+                            "borderColor": "#6366f1",
+                            "backgroundColor": "rgba(99,102,241,0.08)",
+                            "fill": True,
+                            "tension": 0.4,
+                        }
+                    ],
+                    "kpi_value": "$115,500",
+                    "kpi_trend": "+12%",
+                    "kpi_trend_label": "vs last month",
+                    "height": "220px",
+                },
+                "services_donut": {
+                    "title": "Services by categories",
+                    "icon": "bi-pie-chart",
+                    "chart_labels": ["Manicure", "Coloring", "Haircut", "Care"],
+                    "chart_data": [45, 25, 20, 10],
+                    "colors": ["#6366f1", "#10b981", "#f59e0b", "#3b82f6"],
+                },
+                "masters": ListWidgetData(
+                    title="Top Specialists",
+                    subtitle="this month",
+                    icon="bi-trophy",
+                    items=[
+                        ListItem("Lily", "19 appointments", "L", subvalue="$89,500"),
+                        ListItem("Jane Miller", "8 appointments", "JM", subvalue="$32,400"),
+                        ListItem("Linda Adams", "6 appointments", "LA", subvalue="$24,800"),
+                        ListItem("Cosmetologist", "2 appointments", "CS", subvalue="$8,600"),
+                    ],
+                ),
+                "top_services": ListWidgetData(
+                    title="Top Services",
+                    subtitle="this month",
+                    icon="bi-star",
+                    items=[
+                        ListItem("Manicure + Gel Polish Premium", "7 sales", subvalue="$31,500"),
+                        ListItem("Package: Lashes + Brows", "4 sales", subvalue="$16,000"),
+                        ListItem("Hair Coloring", "3 sales", subvalue="$13,500"),
+                        ListItem("Smart Pedicure (Full)", "2 sales", subvalue="$11,000"),
+                    ],
+                ),
+            }
+        )
+        return context
 
     @classmethod
     def get_staff_context(cls, *, segment: str = "all", q: str = "") -> dict[str, Any]:
@@ -804,15 +967,83 @@ class ShowcaseMockData:
         }
         segments_with_counts = [{**seg, "count": counts.get(seg["key"], 0)} for seg in cls.STAFF_SEGMENTS]
 
-        return {
-            "staff": filtered,
-            "segments": segments_with_counts,
-            "active_segment": segment,
-            "days_all": cls.DAYS,
-            "status_map": cls.STATUS_MAP,
-            "q": q,
-            "total": len(filtered),
-        }
+        cards = CardGridData(
+            items=[
+                CardItem(
+                    id=str(person["pk"]),
+                    title=person["name"],
+                    subtitle=person["role"],
+                    avatar=person["initials"],
+                    badge=cls.STATUS_MAP.get(person["status"], {}).get("label", person["status"]),
+                    badge_style="secondary",
+                    url="#",
+                    meta=[
+                        ("bi-telephone", person["phone"] or "No phone"),
+                        ("bi-briefcase", f"{person['experience']} years"),
+                        (
+                            "bi-eye" if person["visible_on_site"] else "bi-eye-slash",
+                            "Visible" if person["visible_on_site"] else "Hidden",
+                        ),
+                    ],
+                )
+                for person in filtered
+            ],
+            search_placeholder="Search by name or specialization...",
+            empty_message="Staff not found",
+            avatar_size="36",
+        )
+        table = DataTableData(
+            columns=[
+                TableColumn("name", "Name", bold=True),
+                TableColumn("role", "Role", muted=True),
+                TableColumn("status_label", "Status", badge_key="status_colors"),
+                TableColumn("days_label", "Days"),
+                TableColumn("experience_label", "Experience"),
+                TableColumn("site_label", "Site"),
+            ],
+            rows=[
+                {
+                    **person,
+                    "status_label": cls.STATUS_MAP.get(person["status"], {}).get("label", person["status"]),
+                    "status_colors": {
+                        "working": "success",
+                        "vacation": "warning",
+                        "training": "info",
+                        "fired": "secondary",
+                    },
+                    "days_label": ", ".join(person["days"]) or "—",
+                    "experience_label": f"{person['experience']} years",
+                    "site_label": "Visible" if person["visible_on_site"] else "Hidden",
+                }
+                for person in filtered
+            ],
+            empty_message="Staff not found",
+        )
+        context = cls._shell_context("staff", label="Staff", icon="bi-person-badge")
+        context.update(
+            {
+                "cabinet_sidebar": [
+                    cls._sidebar_item(
+                        str(seg["label"]),
+                        f"{cls._showcase_url('staff')}?segment={seg['key']}",
+                        str(seg["icon"]),
+                        active=segment == seg["key"],
+                        badge=cast("int | str | None", seg["count"]),
+                    )
+                    for seg in segments_with_counts
+                ],
+                "staff": filtered,
+                "segments": segments_with_counts,
+                "active_segment": segment,
+                "days_all": cls.DAYS,
+                "status_map": cls.STATUS_MAP,
+                "q": q,
+                "total": len(filtered),
+                "cards": cards,
+                "table": table,
+            }
+        )
+        return context
 
     @classmethod
     def get_clients_context(cls, *, segment: str = "all", q: str = "") -> dict[str, Any]:
@@ -838,13 +1069,68 @@ class ShowcaseMockData:
             counts[key] = sum(1 for c in cls.CLIENTS if c.get("status") == key)
         segments_with_counts = [{**seg, "count": counts.get(seg["key"], 0)} for seg in cls.CLIENT_SEGMENTS]
 
-        return {
-            "clients": clients,
-            "segments": segments_with_counts,
-            "active_segment": segment,
-            "q": q,
-            "total": len(clients),
-        }
+        cards = CardGridData(
+            items=[
+                CardItem(
+                    id=str(client["pk"]),
+                    title=client["name"],
+                    subtitle=client.get("email", ""),
+                    avatar=client["initials"],
+                    badge=client["status_meta"]["label"],
+                    badge_style="secondary",
+                    url="#",
+                    meta=[
+                        ("bi-telephone", client.get("phone") or "No phone"),
+                        ("bi-envelope", client.get("email") or "No email"),
+                        ("bi-calendar3", client.get("last_visit", "—")),
+                    ],
+                )
+                for client in clients
+            ],
+            search_placeholder="Search by name, phone, email...",
+            empty_message="No clients found",
+        )
+        table = DataTableData(
+            columns=[
+                TableColumn("name", "Name", bold=True),
+                TableColumn("status_label", "Status", badge_key="status_colors"),
+                TableColumn("phone", "Phone", muted=True),
+                TableColumn("email", "Email", muted=True),
+                TableColumn("last_visit", "Last Visit"),
+            ],
+            rows=[
+                {
+                    **client,
+                    "status_label": client["status_meta"]["label"],
+                    "status_colors": {"vip": "warning", "regular": "success", "new": "info", "guest": "secondary"},
+                }
+                for client in clients
+            ],
+            empty_message="No clients found",
+        )
+        context = cls._shell_context("clients", label="Clients", icon="bi-people")
+        context.update(
+            {
+                "cabinet_sidebar": [
+                    cls._sidebar_item(
+                        str(seg["label"]),
+                        f"{cls._showcase_url('clients')}?segment={seg['key']}",
+                        str(seg["icon"]),
+                        active=segment == seg["key"],
+                        badge=cast("int | str | None", seg["count"]),
+                    )
+                    for seg in segments_with_counts
+                ],
+                "clients": clients,
+                "segments": segments_with_counts,
+                "active_segment": segment,
+                "q": q,
+                "total": len(clients),
+                "cards": cards,
+                "table": table,
+            }
+        )
+        return context
 
     @classmethod
     def get_conversations_context(
@@ -871,15 +1157,64 @@ class ShowcaseMockData:
         }
         folders_with_counts = [{**f, "count": counts.get(f["key"])} for f in cls.FOLDERS]
 
-        return {
-            "conversations": convs,
-            "folders": folders_with_counts,
-            "topics": cls.TOPICS,
-            "active_folder": folder,
-            "active_topic": topic_pk,
-            "q": q,
-            "total": len(convs),
-        }
+        panel = SplitPanelData(
+            items=[
+                ListRow(
+                    id=str(conv["pk"]),
+                    primary=conv["client_name"],
+                    secondary=conv["preview"],
+                    meta=conv["date"],
+                    avatar=conv["initials"],
+                )
+                for conv in convs
+            ],
+            detail_url=cls._showcase_url("conversations").rstrip("/"),
+            empty_message="Select a conversation",
+        )
+        sidebar = [
+            cls._sidebar_item(
+                f["label"],
+                f"{cls._showcase_url('conversations')}?folder={f['key']}",
+                f["icon"],
+                active=folder == f["key"],
+                badge=f.get("count"),
+            )
+            for f in folders_with_counts
+        ]
+        sidebar.extend(
+            [
+                cls._sidebar_item(
+                    "All Topics",
+                    f"{cls._showcase_url('conversations')}?folder={folder}",
+                    "bi-funnel",
+                    active=not topic_pk,
+                ),
+                *[
+                    cls._sidebar_item(
+                        topic["label"],
+                        f"{cls._showcase_url('conversations')}?folder={folder}&topic={topic['pk']}",
+                        "bi-tag",
+                        active=topic_pk == str(topic["pk"]),
+                    )
+                    for topic in cls.TOPICS
+                ],
+            ]
+        )
+        context = cls._shell_context("conversations", label="Conversations", icon="bi-chat-dots")
+        context.update(
+            {
+                "cabinet_sidebar": sidebar,
+                "conversations": convs,
+                "folders": folders_with_counts,
+                "topics": cls.TOPICS,
+                "active_folder": folder,
+                "active_topic": topic_pk,
+                "q": q,
+                "total": len(convs),
+                "panel": panel,
+            }
+        )
+        return context
 
     @classmethod
     def get_conversation_detail(cls, pk: int) -> dict[str, Any] | None:
@@ -934,16 +1269,73 @@ class ShowcaseMockData:
         staff_list = [{**s, "appointments": appt_by_staff.get(s["id"], [])} for s in cls.BOOKING_STAFF]
         pending_count = sum(1 for a in cls.APPOINTMENTS if a.get("status") == "pending")
 
-        return {
-            "active_section": "booking",
-            "booking_tab": "schedule",
-            "time_slots": time_slots,
-            "total_slots": cls.TOTAL_SLOTS,
-            "min_col_px": cls.MIN_COL_PX,
-            "staff_list": staff_list,
-            "current_date": "March 23, 2026",
-            "pending_count": pending_count,
-        }
+        rows = []
+        events = []
+        for h in range(cls.DAY_START, cls.DAY_END):
+            rows.append({"hour": str(h), "min": "00"})
+            rows.append({"hour": str(h), "min": "30"})
+        for col_idx, staff in enumerate(staff_list):
+            for appt in staff["appointments"]:
+                color = appt.get("booking_color") or staff.get("color") or "#6366f1"
+                events.append(
+                    CalendarSlot(
+                        col=col_idx,
+                        row=appt["top_slots"],
+                        span=appt["dur_slots"],
+                        title=appt["client"],
+                        subtitle=appt["service"],
+                        color=f"{color}1c",
+                        badge=appt["status_short"],
+                        badge_style="dashed" if appt["status"] == "pending" else "",
+                        price=appt["price"],
+                        indicators=["bi-clock"],
+                        url="#",
+                        left_border=color,
+                    )
+                )
+        calendar = CalendarGridData(
+            cols=[
+                {
+                    "name": staff["name"],
+                    "avatar": staff["initials"],
+                    "color": staff["color"],
+                    "info": f"{len(staff['appointments'])} appts.",
+                }
+                for staff in staff_list
+            ],
+            rows=rows,
+            events=events,
+            title="March 23, 2026",
+            current_date="March 23, 2026",
+            new_event_url=cls._showcase_url("booking_new"),
+            slot_height="max(44px, calc((100vh - 165px) / 24))",
+            time_col_width="44px",
+            col_width=f"minmax({cls.MIN_COL_PX}px, 1fr)",
+        )
+        context = cls._shell_context("booking", label="Booking", icon="bi-calendar3")
+        context.update(
+            {
+                "cabinet_sidebar": [
+                    cls._sidebar_item("Schedule", cls._showcase_url("booking"), "bi-calendar3", active=True),
+                    cls._sidebar_item(
+                        "Appointments",
+                        cls._showcase_url("booking_appointments"),
+                        "bi-list-check",
+                        badge=pending_count,
+                    ),
+                    cls._sidebar_item("New booking", cls._showcase_url("booking_new"), "bi-plus-circle"),
+                ],
+                "booking_tab": "schedule",
+                "time_slots": time_slots,
+                "total_slots": cls.TOTAL_SLOTS,
+                "min_col_px": cls.MIN_COL_PX,
+                "staff_list": staff_list,
+                "current_date": "March 23, 2026",
+                "pending_count": pending_count,
+                "calendar": calendar,
+            }
+        )
+        return context
 
     @classmethod
     def get_booking_appointments_context(cls, *, active_status: str = "all") -> dict[str, Any]:
@@ -1003,33 +1395,95 @@ class ShowcaseMockData:
             "completed": "Completed",
             "cancelled": "Cancelled",
         }
-        return {
-            "active_section": "booking",
-            "booking_tab": active_status if active_status != "all" else "all",
-            "appointments": appointments,
-            "status_tabs": status_tabs,
-            "active_status": active_status,
-            "page_title": title_map.get(active_status, "Appointments"),
-            "pending_count": pending_count,
-        }
+        table = DataTableData(
+            columns=[
+                TableColumn("client", "Client", bold=True),
+                TableColumn("service", "Service"),
+                TableColumn("staff_name", "Specialist"),
+                TableColumn("date_time", "Date / Time"),
+                TableColumn("price", "Price", align="right", bold=True),
+                TableColumn("status_label", "Status", badge_key="status_colors"),
+            ],
+            rows=[
+                {
+                    **appt,
+                    "date_time": f"23 March 2026 · {appt['start_label']} - {appt['end_label']}",
+                    "status_colors": {
+                        "confirmed": "success",
+                        "pending": "warning",
+                        "cancelled": "danger",
+                        "completed": "primary",
+                        "no_show": "secondary",
+                    },
+                }
+                for appt in appointments
+            ],
+            filters=[
+                TableFilter(
+                    str(tab["key"]),
+                    f"{tab['label']} ({tab['count']})",
+                    "" if tab["key"] == "all" else str(tab["key"]),
+                )
+                for tab in status_tabs
+            ],
+            empty_message="No records found for the selected filters",
+        )
+        context = cls._shell_context("booking", label="Booking", icon="bi-calendar3")
+        context.update(
+            {
+                "cabinet_sidebar": [
+                    cls._sidebar_item("Schedule", cls._showcase_url("booking"), "bi-calendar3"),
+                    cls._sidebar_item(
+                        "Appointments",
+                        cls._showcase_url("booking_appointments"),
+                        "bi-list-check",
+                        active=True,
+                        badge=pending_count,
+                    ),
+                    cls._sidebar_item("New booking", cls._showcase_url("booking_new"), "bi-plus-circle"),
+                ],
+                "booking_tab": active_status if active_status != "all" else "all",
+                "appointments": appointments,
+                "status_tabs": status_tabs,
+                "active_status": active_status,
+                "page_title": title_map.get(active_status, "Appointments"),
+                "pending_count": pending_count,
+                "booking_new_url": cls._showcase_url("booking_new"),
+                "table": table,
+            }
+        )
+        return context
 
     @classmethod
     def get_booking_new_context(cls) -> dict[str, Any]:
         specialties = ["Nails, Brows", "Hair, Cosmetology", "Massage, Body Care"]
         staff_with_specialty = [{**s, "specialty": specialties[i]} for i, s in enumerate(cls.BOOKING_STAFF)]
         pending_count = sum(1 for a in cls.APPOINTMENTS if a.get("status") == "pending")
-        return {
-            "active_section": "booking",
-            "booking_tab": "new",
-            "services": cls.SERVICES,
-            "categories": cls.CATEGORIES_BOOKING,
-            "staff_list": staff_with_specialty,
-            "recent_clients": cls.RECENT_CLIENTS,
-            "cal_days": cls.CAL_DAYS_MARCH,
-            "time_options": cls.TIME_OPTIONS,
-            "pending_count": pending_count,
-            "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-        }
+        context = cls._shell_context("booking", label="Booking", icon="bi-calendar3")
+        context.update(
+            {
+                "cabinet_sidebar": [
+                    cls._sidebar_item("Schedule", cls._showcase_url("booking"), "bi-calendar3"),
+                    cls._sidebar_item(
+                        "Appointments",
+                        cls._showcase_url("booking_appointments"),
+                        "bi-list-check",
+                        badge=pending_count,
+                    ),
+                    cls._sidebar_item("New booking", cls._showcase_url("booking_new"), "bi-plus-circle", active=True),
+                ],
+                "booking_tab": "new",
+                "services": cls.SERVICES,
+                "categories": cls.CATEGORIES_BOOKING,
+                "staff_list": staff_with_specialty,
+                "recent_clients": cls.RECENT_CLIENTS,
+                "cal_days": cls.CAL_DAYS_MARCH,
+                "time_options": cls.TIME_OPTIONS,
+                "pending_count": pending_count,
+                "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+            }
+        )
+        return context
 
     @classmethod
     def _build_revenue_rows(cls) -> list[dict[str, Any]]:
@@ -1089,21 +1543,77 @@ class ShowcaseMockData:
             "top_master": "",
             "top_service": f"Working days: {summary['working_days']}",
         }
-        return {
-            "active_section": "analytics",
-            "report_tabs": cls.REPORT_TABS,
-            "period_options": cls.PERIOD_OPTIONS,
-            "staff_options": cls.STAFF_OPTIONS,
-            "active_tab": tab,
-            "active_period": period,
-            "active_staff": staff,
-            "columns": cls.REVENUE_COLUMNS,
-            "rows": rows,
-            "summary_row": summary_row,
-            "bar_max": 61200,
-            "table_summary": summary,
-            "period_label": "March 2026",
-        }
+        report = ReportPageData(
+            title="Reports",
+            summary="Revenue, bookings, and operating metrics.",
+            active_tab=tab,
+            active_period=period,
+            tabs=[ReportTabData(item["key"], item["label"], item.get("icon")) for item in cls.REPORT_TABS],
+            period_options=[ReportTabData(item["key"], item["label"]) for item in cls.PERIOD_OPTIONS],
+            period_label="March 2026",
+            summary_cards=[
+                ReportSummaryCardData("Revenue", summary["total_revenue"], hint="for March 2026", icon="bi-cash-stack"),
+                ReportSummaryCardData(
+                    "Bookings",
+                    str(summary["total_bookings"]),
+                    hint=f"working days: {summary['working_days']}",
+                    icon="bi-calendar-check",
+                ),
+                ReportSummaryCardData("Average check", summary["avg_check"], hint="per booking", icon="bi-receipt"),
+                ReportSummaryCardData("Best day", summary["best_day"], hint=summary["best_day_val"], icon="bi-trophy"),
+            ],
+            table=ReportTableData(
+                columns=cls.REVENUE_COLUMNS,
+                rows=rows,
+                title="Revenue breakdown",
+                subtitle="March 2026",
+                summary_row=summary_row,
+                primary_summary=summary["total_revenue"],
+                secondary_summary=f"{summary['total_bookings']} bookings",
+            ),
+            chart=ReportChartData(
+                chart_id="showcaseRevenueReport",
+                title="Revenue trend",
+                labels=[row["date"] for row in rows],
+                datasets=[
+                    ChartDatasetData(
+                        "Revenue",
+                        [row["revenue"] for row in rows],
+                        border_color="#6366f1",
+                        background_color="rgba(99,102,241,0.08)",
+                        fill=True,
+                        tension=0.35,
+                    )
+                ],
+                description="Daily revenue",
+                icon="bi-graph-up",
+                height="260px",
+                show_legend=False,
+            ),
+        )
+        context = cls._shell_context("analytics", label="Analytics", icon="bi-graph-up")
+        context.update(
+            {
+                "cabinet_sidebar": [
+                    cls._sidebar_item("Dashboard", cls._showcase_url("dashboard"), "bi-grid"),
+                    cls._sidebar_item("Reports", cls._showcase_url("reports"), "bi-table", active=True),
+                ],
+                "report_tabs": cls.REPORT_TABS,
+                "period_options": cls.PERIOD_OPTIONS,
+                "staff_options": cls.STAFF_OPTIONS,
+                "active_tab": tab,
+                "active_period": period,
+                "active_staff": staff,
+                "columns": cls.REVENUE_COLUMNS,
+                "rows": rows,
+                "summary_row": summary_row,
+                "bar_max": 61200,
+                "table_summary": summary,
+                "period_label": "March 2026",
+                "report": report,
+            }
+        )
+        return context
 
     @classmethod
     def get_catalog_context(cls, *, category_pk: int | None = None) -> dict[str, Any]:
@@ -1111,11 +1621,38 @@ class ShowcaseMockData:
             (c for c in cls.CATALOG_CATEGORIES if c["pk"] == category_pk),
             cls.CATALOG_CATEGORIES[0],
         )
-        return {
-            "categories": cls.CATALOG_CATEGORIES,
-            "active_category": active_category,
-            "items": cls.CATALOG_ITEMS.get(active_category["pk"], []),
-        }
+        list_widget = ListWidgetData(
+            title=active_category["name"],
+            icon="bi-tag",
+            items=[
+                ListItem(
+                    label=item["label"],
+                    value=item.get("value", ""),
+                    sublabel=item.get("sublabel", ""),
+                    subvalue=item.get("status", ""),
+                )
+                for item in cls.CATALOG_ITEMS.get(active_category["pk"], [])
+            ],
+        )
+        context = cls._shell_context("catalog", label="Catalog", icon="bi-tag")
+        context.update(
+            {
+                "cabinet_sidebar": [
+                    cls._sidebar_item(
+                        str(category["name"]),
+                        f"{cls._showcase_url('catalog')}{category['pk']}/",
+                        "bi-tag",
+                        active=category["pk"] == active_category["pk"],
+                    )
+                    for category in cls.CATALOG_CATEGORIES
+                ],
+                "categories": cls.CATALOG_CATEGORIES,
+                "active_category": active_category,
+                "items": cls.CATALOG_ITEMS.get(active_category["pk"], []),
+                "list_widget": list_widget,
+            }
+        )
+        return context
 
     # ── Notifications ──────────────────────────────────────────────────────────
 
@@ -1427,33 +1964,91 @@ class ShowcaseMockData:
         sent = sum(1 for e in cls._NOTIF_LOG_ENTRIES if e["status"] == "sent")
         failed = sum(1 for e in cls._NOTIF_LOG_ENTRIES if e["status"] == "failed")
         pending = sum(1 for e in cls._NOTIF_LOG_ENTRIES if e["status"] == "pending")
+        status_tabs = [
+            {"key": "all", "label": "All", "count": total},
+            {"key": "sent", "label": "Sent", "count": sent},
+            {"key": "failed", "label": "Failed", "count": failed},
+            {"key": "pending", "label": "Pending", "count": pending},
+        ]
 
-        return {
-            "active_section": "notifications",
-            "entries": entries,
-            "active_channel": channel,
-            "active_status": status,
-            "stats": {"total": total, "sent": sent, "failed": failed, "pending": pending},
-            "channel_tabs": [
-                {"key": "all", "label": "All channels", "count": total},
-                {
-                    "key": "email",
-                    "label": "Email",
-                    "count": sum(1 for e in cls._NOTIF_LOG_ENTRIES if e["channel"] == "email"),
-                },
-                {
-                    "key": "telegram",
-                    "label": "Telegram",
-                    "count": sum(1 for e in cls._NOTIF_LOG_ENTRIES if e["channel"] == "telegram"),
-                },
+        table = DataTableData(
+            columns=[
+                TableColumn("recipient", "Recipient", bold=True),
+                TableColumn("channel_label", "Channel"),
+                TableColumn("template_key", "Template"),
+                TableColumn("created_at", "Created"),
+                TableColumn("status_label", "Status", badge_key="status_colors"),
             ],
-            "status_tabs": [
-                {"key": "all", "label": "All", "count": total},
-                {"key": "sent", "label": "Sent", "count": sent},
-                {"key": "failed", "label": "Failed", "count": failed},
-                {"key": "pending", "label": "Pending", "count": pending},
+            rows=[
+                {
+                    **entry,
+                    "status_colors": {"sent": "success", "failed": "danger", "pending": "warning"},
+                }
+                for entry in entries
             ],
-        }
+            filters=[
+                TableFilter(
+                    str(tab["key"]),
+                    f"{tab['label']} ({tab['count']})",
+                    "" if tab["key"] == "all" else str(tab["key"]),
+                )
+                for tab in status_tabs
+            ],
+            empty_message="No notifications",
+        )
+        context = cls._shell_context("notifications", label="Notifications", icon="bi-bell")
+        context.update(
+            {
+                "cabinet_sidebar": [
+                    cls._sidebar_item(
+                        "Log",
+                        cls._showcase_url("notifications_log"),
+                        "bi-bell",
+                        active=True,
+                        badge=cast("int | str | None", failed),
+                    ),
+                    cls._sidebar_item(
+                        "Templates",
+                        cls._showcase_url("notifications_templates"),
+                        "bi-file-earmark-text",
+                    ),
+                ],
+                "entries": entries,
+                "active_channel": channel,
+                "active_status": status,
+                "stats": {"total": total, "sent": sent, "failed": failed, "pending": pending},
+                "channel_tabs": [
+                    {"key": "all", "label": "All channels", "count": total},
+                    {
+                        "key": "email",
+                        "label": "Email",
+                        "count": sum(1 for e in cls._NOTIF_LOG_ENTRIES if e["channel"] == "email"),
+                    },
+                    {
+                        "key": "telegram",
+                        "label": "Telegram",
+                        "count": sum(1 for e in cls._NOTIF_LOG_ENTRIES if e["channel"] == "telegram"),
+                    },
+                ],
+                "status_tabs": status_tabs,
+                "table": table,
+                "notification_total_kpi": MetricWidgetData("Total", str(total), icon="bi-bell"),
+                "notification_sent_kpi": MetricWidgetData(
+                    "Sent",
+                    str(sent),
+                    icon="bi-check-circle",
+                    trend_direction="up",
+                ),
+                "notification_failed_kpi": MetricWidgetData(
+                    "Failed",
+                    str(failed),
+                    icon="bi-exclamation-triangle",
+                    trend_direction="down",
+                ),
+                "notification_pending_kpi": MetricWidgetData("Pending", str(pending), icon="bi-hourglass-split"),
+            }
+        )
+        return context
 
     @classmethod
     def get_notification_templates_context(cls) -> dict[str, Any]:
@@ -1461,7 +2056,30 @@ class ShowcaseMockData:
         for tmpl in cls._NOTIF_TEMPLATES:
             channel_details = [cls._NOTIF_CHANNELS[ch] for ch in tmpl["channels"]]
             templates.append({**tmpl, "channel_details": channel_details})
-        return {
-            "active_section": "notifications",
-            "templates": templates,
-        }
+        table = DataTableData(
+            columns=[
+                TableColumn("key", "Key", bold=True),
+                TableColumn("label", "Label"),
+                TableColumn("channels_label", "Channels"),
+                TableColumn("subject", "Subject", muted=True),
+            ],
+            rows=[{**template, "channels_label": ", ".join(template["channels"])} for template in templates],
+            empty_message="No templates",
+        )
+        context = cls._shell_context("notifications", label="Notifications", icon="bi-bell")
+        context.update(
+            {
+                "cabinet_sidebar": [
+                    cls._sidebar_item("Log", cls._showcase_url("notifications_log"), "bi-bell"),
+                    cls._sidebar_item(
+                        "Templates",
+                        cls._showcase_url("notifications_templates"),
+                        "bi-file-earmark-text",
+                        active=True,
+                    ),
+                ],
+                "templates": templates,
+                "table": table,
+            }
+        )
+        return context

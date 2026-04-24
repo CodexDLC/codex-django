@@ -2,7 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.6.3] - 2026-04-23
+## [0.6.5] - 2026-04-24
+
+### Added
+
+- **Showcase Migration**: Finalized the migration of the showcase module to the library-standard Cabinet UI. Pages now inherit from `cabinet/base_*` and are assembled from library widgets and components.
+- **Mobile Optimizations**: Implemented responsive "Card Mode" for data tables, fluid KPI scaling using CSS `clamp()`, fullscreen mobile modals, and a touch-friendly topbar with a hamburger menu.
+- **Typed Mock Data**: Updated `ShowcaseMockData` to return library-standard dataclass objects (`SidebarItem`, `DataTableData`, `CalendarGridData`, `ReportPageData`, etc.), ensuring full compatibility with the cabinet shell contract.
+
+### Changed
+
+- **Library Type Contracts**: Broadened `DataTableData`, `CalendarGridData`, and `ReportTableData` contracts from `list` to `Sequence` to resolve Mypy invariance errors and facilitate easier integration with dynamic ORM-based data.
+- **Security Policy**: Added `CVE-2026-3219` (pip) to the ignored vulnerabilities list in `pyproject.toml` as it affects the latest available pip version and has no upstream fix yet.
+
+### Fixed
+
+- Resolved 45+ Mypy type-safety errors in `showcase/mock.py` and library type definitions.
+- Fixed line length (Ruff E501) and formatting issues in mock data generation.
+- Upgraded `pygments` to `2.20.0` to resolve `CVE-2026-4539`.
+
 
 ### Fixed
 

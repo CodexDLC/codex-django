@@ -178,6 +178,54 @@
   flex-wrap: wrap;
 }
 
+.cab-data-table__cards {
+  display: none;
+}
+
+.cab-data-card {
+  background: var(--cab-card-bg, #fff);
+  border: 1px solid var(--cab-border, #e2e8f0);
+  border-radius: 8px;
+  padding: 0.875rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.cab-data-card + .cab-data-card {
+  margin-top: 0.75rem;
+}
+
+.cab-data-card__fields {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.cab-data-card__field {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.cab-data-card__label {
+  color: var(--cab-text-muted, #64748b);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cab-data-card__value {
+  color: var(--cab-text, #1e293b);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.cab-data-card__actions {
+  border-top: 1px solid var(--cab-border, #e2e8f0);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.875rem;
+  padding-top: 0.875rem;
+}
+
 /* ==========================================================================
    Split Panel
    ========================================================================== */
@@ -298,18 +346,24 @@
 }
 
 .cab-card {
-  background: var(--cab-slot-bg, #fff);
-  border: 1px solid var(--cab-slot-border, #e2e8f0);
-  border-radius: 4px;
-  padding: 4px 6px;
+  background: var(--cab-card-bg, #fff);
+  border: 1px solid var(--cab-border, #e2e8f0);
+  border-radius: 8px;
+  padding: 0.875rem;
   box-sizing: border-box;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  gap: 0.65rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   cursor: pointer;
   transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.cab-card:hover {
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
 }
 
 .cab-cal-slot:hover {
@@ -1014,5 +1068,56 @@
 
   .cab-report__export {
     margin-left: 0;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .cab-data-table__desktop {
+    display: none;
+  }
+
+  .cab-data-table__cards {
+    display: block;
+  }
+
+  .cab-data-table__toolbar,
+  .cab-card-grid__toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .cab-data-table__search,
+  .cab-card-grid__search {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .modal-dialog {
+    margin: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .modal-content {
+    border: 0;
+    border-radius: 0;
+    min-height: 100vh;
+  }
+
+  .modal-footer {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .modal-footer .btn,
+  .modal-footer button {
+    margin: 0 !important;
+    width: 100%;
+  }
+
+  .cab-content {
+    padding: 1rem;
   }
 }
