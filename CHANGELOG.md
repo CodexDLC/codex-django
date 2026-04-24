@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [0.6.5] - 2026-04-24
 
+### Fixed
+
+- **Security/CSRF**: Added `csrf-token` meta tag to base cabinet templates. This ensures frontend JS utilities (like `getCsrfToken()`) can reliably retrieve the token regardless of `CSRF_COOKIE_NAME` overrides in consumer projects.
+
 ### Added
 
 - **Showcase Migration**: Finalized the migration of the showcase module to the library-standard Cabinet UI. Pages now inherit from `cabinet/base_*` and are assembled from library widgets and components.
