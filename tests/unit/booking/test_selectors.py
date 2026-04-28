@@ -450,9 +450,16 @@ class TestCreateBookingUnit:
         """Return configured mocks for create_booking tests."""
         engine_result = MagicMock()
         engine_result.get_unique_start_times.return_value = available_times
-        engine_result.best = MagicMock()
-        engine_result.best.starts_at = datetime(2025, 1, 6, 9, 0, tzinfo=UTC)
-        engine_result.best.span_minutes = 60
+        solutions = []
+        for slot in available_times:
+            hour, minute = [int(part) for part in slot.split(":")]
+            solution = MagicMock()
+            solution.starts_at = datetime(2025, 1, 6, hour, minute, tzinfo=UTC)
+            solution.span_minutes = 60
+            solution.items = [MagicMock(resource_id="1")]
+            solutions.append(solution)
+        engine_result.solutions = solutions
+        engine_result.best = solutions[0] if solutions else None
         return engine_result
 
     def test_raises_slot_already_booked_when_time_unavailable(self, mock_adapter):
@@ -484,6 +491,7 @@ class TestCreateBookingUnit:
     def test_raises_when_best_is_none(self, mock_adapter):
         engine_result = MagicMock()
         engine_result.get_unique_start_times.return_value = ["09:00"]
+        engine_result.solutions = []
         engine_result.best = None
         with patch("codex_django.booking.selectors.ChainFinder") as finder_cls:
             finder = MagicMock()
@@ -535,6 +543,67 @@ class TestCreateBookingUnit:
                 )
         call_kwargs = appointment_model.objects.create.call_args[1]
         assert call_kwargs["notes"] == "VIP client"
+
+    def test_single_any_resource_persists_selected_solution_not_best(self, mock_adapter):
+        engine_result = self._setup_mocks(["10:00", "15:30"])
+        engine_result.solutions[0].items = [MagicMock(resource_id="1")]
+        engine_result.solutions[1].items = [MagicMock(resource_id="2")]
+        appointment_model = MagicMock()
+        appointment_model.objects.create.return_value = MagicMock()
+
+        with patch("codex_django.booking.selectors.ChainFinder") as finder_cls:
+            finder = MagicMock()
+            finder.find.return_value = engine_result
+            finder_cls.return_value = finder
+            with patch("codex_django.booking.selectors.transaction") as mock_txn:
+                mock_txn.atomic.return_value.__enter__ = MagicMock(return_value=None)
+                mock_txn.atomic.return_value.__exit__ = MagicMock(return_value=False)
+                mock_txn.on_commit = MagicMock()
+                from codex_django.booking.selectors import create_booking
+
+                create_booking(
+                    adapter=mock_adapter,
+                    cache_adapter=MagicMock(),
+                    appointment_model=appointment_model,
+                    service_ids=[1],
+                    target_date=date(2025, 1, 6),
+                    selected_time="15:30",
+                    resource_id=None,
+                    client=MagicMock(),
+                )
+
+        call_kwargs = appointment_model.objects.create.call_args[1]
+        assert call_kwargs["datetime_start"].strftime("%H:%M") == "15:30"
+        assert call_kwargs["master_id"] == 2
+
+    def test_locked_resource_persists_selected_solution_not_best(self, mock_adapter):
+        engine_result = self._setup_mocks(["10:00", "15:30"])
+        appointment_model = MagicMock()
+        appointment_model.objects.create.return_value = MagicMock()
+
+        with patch("codex_django.booking.selectors.ChainFinder") as finder_cls:
+            finder = MagicMock()
+            finder.find.return_value = engine_result
+            finder_cls.return_value = finder
+            with patch("codex_django.booking.selectors.transaction") as mock_txn:
+                mock_txn.atomic.return_value.__enter__ = MagicMock(return_value=None)
+                mock_txn.atomic.return_value.__exit__ = MagicMock(return_value=False)
+                mock_txn.on_commit = MagicMock()
+                from codex_django.booking.selectors import create_booking
+
+                create_booking(
+                    adapter=mock_adapter,
+                    cache_adapter=MagicMock(),
+                    appointment_model=appointment_model,
+                    service_ids=[1],
+                    target_date=date(2025, 1, 6),
+                    selected_time="15:30",
+                    resource_id=1,
+                    client=MagicMock(),
+                )
+
+        call_kwargs = appointment_model.objects.create.call_args[1]
+        assert call_kwargs["datetime_start"].strftime("%H:%M") == "15:30"
 
     def test_on_commit_registers_cache_invalidation(self, mock_adapter):
         """Verify that transaction.on_commit is called with a callback."""
@@ -623,6 +692,43 @@ class TestCreateBookingUnit:
         hook.persist_chain.assert_called_once()
         mock_adapter.lock_resources.assert_called_once_with([1, 2])
         assert result == created
+
+    def test_multi_with_hook_receives_selected_solution_not_best(self, mock_adapter):
+        engine_result = self._setup_mocks(["10:00", "15:30"])
+        step1 = MagicMock()
+        step1.resource_id = "10"
+        step2 = MagicMock()
+        step2.resource_id = "12"
+        engine_result.solutions[1].items = [step1, step2]
+
+        with patch("codex_django.booking.selectors.ChainFinder") as finder_cls:
+            finder = MagicMock()
+            finder.find.return_value = engine_result
+            finder_cls.return_value = finder
+            with patch("codex_django.booking.selectors.transaction") as mock_txn:
+                mock_txn.atomic.return_value.__enter__ = MagicMock(return_value=None)
+                mock_txn.atomic.return_value.__exit__ = MagicMock(return_value=False)
+                mock_txn.on_commit = MagicMock()
+                from codex_django.booking.selectors import create_booking
+
+                hook = MagicMock()
+                created = [MagicMock(), MagicMock()]
+                hook.persist_chain.return_value = created
+                result = create_booking(
+                    adapter=mock_adapter,
+                    cache_adapter=MagicMock(),
+                    appointment_model=MagicMock(),
+                    service_ids=[1, 2],
+                    target_date=date(2025, 1, 6),
+                    selected_time="15:30",
+                    resource_id=1,
+                    client=MagicMock(),
+                    persistence_hook=hook,
+                )
+
+        assert result == created
+        call_kwargs = hook.persist_chain.call_args[1]
+        assert call_kwargs["solution"].starts_at.strftime("%H:%M") == "15:30"
 
     def test_multi_with_hook_uses_default_2000_for_late_slot_revalidation(self, mock_adapter):
         legacy_result = self._setup_mocks(["09:00"])
@@ -735,9 +841,16 @@ class TestCreateBookingWithDb:
     def _engine_result(self, times):
         r = MagicMock()
         r.get_unique_start_times.return_value = times
-        r.best = MagicMock()
-        r.best.starts_at = datetime(2025, 1, 6, 9, 0, tzinfo=UTC)
-        r.best.span_minutes = 60
+        solutions = []
+        for slot in times:
+            hour, minute = [int(part) for part in slot.split(":")]
+            solution = MagicMock()
+            solution.starts_at = datetime(2025, 1, 6, hour, minute, tzinfo=UTC)
+            solution.span_minutes = 60
+            solution.items = [MagicMock(resource_id="1")]
+            solutions.append(solution)
+        r.solutions = solutions
+        r.best = solutions[0] if solutions else None
         return r
 
     def test_creates_appointment_and_returns_it(self):

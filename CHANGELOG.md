@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.6] - 2026-04-28
+
+### Fixed
+
+- Fix `create_booking()` to persist the selected slot instead of `result.best`.
+
 ## [0.6.5] - 2026-04-24
 
 ### Fixed

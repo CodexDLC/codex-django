@@ -448,20 +448,20 @@ def create_booking(
             if selected_time not in available_times:
                 raise SlotAlreadyBookedError(f"Slot {selected_time} on {target_date} is no longer available.")
 
-            best = result.best
-            if best is None:
+            selected_solution = _select_solution_for_time(result, selected_time)
+            if selected_solution is None:
                 raise SlotAlreadyBookedError("No solution found.")
 
             if persistence_hook is not None:
                 created_appointments = persistence_hook.persist_chain(
-                    solution=best,
+                    solution=selected_solution,
                     service_ids=service_ids,
                     client=client,
                     extra_fields=extra_fields,
                 )
             else:
                 # Generic fallback for single-service "any resource" flows.
-                primary_item = next(iter(getattr(best, "items", [])), None)
+                primary_item = next(iter(getattr(selected_solution, "items", [])), None)
                 if primary_item is None:
                     raise SlotAlreadyBookedError("No solution found.")
                 created_appointments = [
@@ -469,15 +469,17 @@ def create_booking(
                         appointment_model=appointment_model,
                         resource_id=int(primary_item.resource_id),
                         service_ids=service_ids,
-                        starts_at=best.starts_at,
-                        span_minutes=best.span_minutes,
+                        starts_at=selected_solution.starts_at,
+                        span_minutes=selected_solution.span_minutes,
                         client=client,
                         extra_fields=extra_fields,
                     )
                 ]
 
             chain_resource_ids = {
-                str(item.resource_id) for item in getattr(best, "items", []) if getattr(item, "resource_id", None)
+                str(item.resource_id)
+                for item in getattr(selected_solution, "items", [])
+                if getattr(item, "resource_id", None)
             }
             if not chain_resource_ids and resource_id is not None:
                 chain_resource_ids = {str(resource_id)}
@@ -513,17 +515,17 @@ def create_booking(
         if selected_time not in available_times:
             raise SlotAlreadyBookedError(f"Slot {selected_time} on {target_date} is no longer available.")
 
-        # Find the matching solution for duration info
-        best = result.best
-        if best is None:
+        # Find the matching solution for duration info.
+        selected_solution = _select_solution_for_time(result, selected_time)
+        if selected_solution is None:
             raise SlotAlreadyBookedError("No solution found.")
 
         appointment = _create_single_appointment(
             appointment_model=appointment_model,
             resource_id=resource_id,
             service_ids=service_ids,
-            starts_at=best.starts_at,
-            span_minutes=best.span_minutes,
+            starts_at=selected_solution.starts_at,
+            span_minutes=selected_solution.span_minutes,
             client=client,
             extra_fields=extra_fields,
         )
@@ -542,6 +544,13 @@ def _get_effective_max_solutions(service_ids: list[int], max_solutions: int | No
     if len(service_ids) > 1:
         return MULTI_SERVICE_DEFAULT_MAX_SOLUTIONS
     return SINGLE_SERVICE_DEFAULT_MAX_SOLUTIONS
+
+
+def _select_solution_for_time(result: EngineResult, selected_time: str) -> Any | None:
+    for solution in result.solutions:
+        if solution.starts_at.strftime("%H:%M") == selected_time:
+            return solution
+    return None
 
 
 def _create_single_appointment(
