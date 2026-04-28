@@ -1,12 +1,12 @@
-# Graph Report - codex-django  (2026-04-24)
+# Graph Report - codex-django  (2026-04-28)
 
 ## Corpus Check
-- 299 files · ~492,594 words
+- 299 files · ~864,448 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 4304 nodes · 11336 edges · 66 communities detected
-- Extraction: 73% EXTRACTED · 27% INFERRED · 0% AMBIGUOUS · INFERRED: 3078 edges (avg confidence: 0.71)
+- 4309 nodes · 11350 edges · 67 communities detected
+- Extraction: 73% EXTRACTED · 27% INFERRED · 0% AMBIGUOUS · INFERRED: 3084 edges (avg confidence: 0.71)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -76,6 +76,7 @@
 - [[_COMMUNITY_Community 98|Community 98]]
 - [[_COMMUNITY_Community 99|Community 99]]
 - [[_COMMUNITY_Community 100|Community 100]]
+- [[_COMMUNITY_Community 122|Community 122]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `Reusable page tracking runtime for codex-django projects.` - 180 edges
@@ -90,16 +91,16 @@
 10. `H()` - 50 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Return the dashboard cache manager lazily.` --uses--> `DashboardRedisManager`  [INFERRED]
-  src\codex_django\cabinet\selector\dashboard.py → src\codex_django\cabinet\redis\managers\dashboard.py
-- `Base class for dashboard data adapters.      Adapters are responsible for fetchi` --uses--> `DashboardRedisManager`  [INFERRED]
-  src\codex_django\cabinet\selector\dashboard.py → src\codex_django\cabinet\redis\managers\dashboard.py
-- `Generic adapter for metric widgets.` --uses--> `DashboardRedisManager`  [INFERRED]
-  src\codex_django\cabinet\selector\dashboard.py → src\codex_django\cabinet\redis\managers\dashboard.py
-- `Wrap metric payloads under the ``metric`` key.` --uses--> `DashboardRedisManager`  [INFERRED]
-  src\codex_django\cabinet\selector\dashboard.py → src\codex_django\cabinet\redis\managers\dashboard.py
-- `Generic adapter for table widgets.` --uses--> `DashboardRedisManager`  [INFERRED]
-  src\codex_django\cabinet\selector\dashboard.py → src\codex_django\cabinet\redis\managers\dashboard.py
+- `Per-provider Redis cache for dashboard data.      Usage in DashboardSelector:` --uses--> `BaseDjangoRedisManager`  [INFERRED]
+  src\codex_django\cabinet\redis\managers\dashboard.py → src\codex_django\core\redis\managers\base.py
+- `ve()` --calls--> `N()`  [INFERRED]
+  src\codex_django\cabinet\static\cabinet\js\vendor\alpine.min.js → src\codex_django\cabinet\static\cabinet\js\vendor\htmx.min.js
+- `P()` --calls--> `T()`  [INFERRED]
+  src\codex_django\cabinet\static\cabinet\js\vendor\alpine.min.js → src\codex_django\cabinet\static\cabinet\js\vendor\htmx.min.js
+- `j()` --calls--> `parse()`  [INFERRED]
+  src\codex_django\cabinet\static\cabinet\js\vendor\bootstrap.bundle.min.js → src\codex_django\cabinet\static\cabinet\js\vendor\chart.min.js
+- `CacheCoder` --uses--> `Unit tests for :class:`codex_django.cache.values.CacheCoder`.`  [INFERRED]
+  src\codex_django\cache\values.py → tests\unit\cache\test_values.py
 
 ## Communities
 
@@ -109,43 +110,43 @@ Nodes (250): _(), a(), aa(), addBox(), addElements(), Ae(), afterDatasetsUpdate(
 
 ### Community 1 - "Community 1"
 Cohesion: 0.01
-Nodes (307): AsyncMock, async_hash(), async_string(), BaseDjangoRedisManager, Skip or execute an import based on the computed fixture hash.          Args:, Synchronize the updated instance to Redis when a manager is available., get_default_redis_manager(), Base Redis manager utilities adapted to Django settings.  This module is the bri (+299 more)
+Nodes (309): AsyncMock, async_hash(), async_string(), BaseDjangoRedisManager, Skip or execute an import based on the computed fixture hash.          Args:, Synchronize the updated instance to Redis when a manager is available., get_default_redis_manager(), Base Redis manager utilities adapted to Django settings.  This module is the bri (+301 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.01
-Nodes (69): _(), a(), Ae(), ao, b(), be(), Bt, c() (+61 more)
+Nodes (70): _(), a(), Ae(), ao, b(), be(), Bt, c() (+62 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.01
-Nodes (139): AbstractBookingSettings, DjangoAvailabilityAdapter, Build a ``BookingEngineRequest`` from DB service/resource data., Build ``MasterAvailability`` dicts from ORM data.          Caches **busy interva, Public seam for project-specific resource ordering policies., Return UTC working hours for a master on a specific date.          Reads from ``, Return UTC break interval for a master on a date., Acquire row-level locks on resource records.          Must be called inside ``tr (+131 more)
+Nodes (141): AbstractBookingSettings, DjangoAvailabilityAdapter, Build a ``BookingEngineRequest`` from DB service/resource data., Build ``MasterAvailability`` dicts from ORM data.          Caches **busy interva, Public seam for project-specific resource ordering policies., Return UTC working hours for a master on a specific date.          Reads from ``, Return UTC break interval for a master on a date., Acquire row-level locks on resource records.          Must be called inside ``tr (+133 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.01
-Nodes (189): AbstractBookableAppointment, AppointmentCoreMixin, AppointmentStatusMixin, Meta, codex_django.booking.mixins.appointment ========================================, Appointment lifecycle status.      Status constants are class-level attributes s, Core booking data: when and how long.      Admin fieldsets example::          (_, Convenience base that assembles all appointment mixins.      Usage::          cl (+181 more)
+Nodes (211): AbstractBookableAppointment, AppointmentCoreMixin, AppointmentStatusMixin, Meta, codex_django.booking.mixins.appointment ========================================, Appointment lifecycle status.      Status constants are class-level attributes s, Core booking data: when and how long.      Admin fieldsets example::          (_, Convenience base that assembles all appointment mixins.      Usage::          cl (+203 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.02
-Nodes (186): Return a cached content value by key., ActionSection, BookingChainPreviewData, BookingChainPreviewItem, BookingQuickCreateClientOption, BookingQuickCreateData, BookingQuickCreateServiceOption, BookingSlotPickerData (+178 more)
-
-### Community 6 - "Community 6"
 Cohesion: 0.04
 Nodes (203): _(), a(), aa(), Ae(), ai(), an(), Ao(), ar() (+195 more)
 
+### Community 6 - "Community 6"
+Cohesion: 0.02
+Nodes (163): Return a cached content value by key., ActionSection, BookingChainPreviewData, BookingChainPreviewItem, BookingQuickCreateClientOption, BookingQuickCreateData, BookingQuickCreateServiceOption, BookingSlotPickerData (+155 more)
+
 ### Community 7 - "Community 7"
 Cohesion: 0.02
-Nodes (96): Deprecated compatibility wrapper.  Use ``codex_django.cabinet.notifications`` in, Title(), cabinet(), _cabinet_shell_urls(), _can_use_staff_switch(), _detect_module(), _detect_space(), notifications() (+88 more)
+Nodes (86): Deprecated compatibility wrapper.  Use ``codex_django.cabinet.notifications`` in, Title(), cabinet(), _cabinet_shell_urls(), _can_use_staff_switch(), _detect_module(), _detect_space(), notifications() (+78 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.02
-Nodes (96): PageViewAdmin, Django admin integration for tracking snapshots., Inspect flushed page view snapshots., Cabinet declarations for the reusable tracking app., Install the package in an isolated venv for subprocess-based E2E tests.     Ret, sterile_env(), flush_page_views(), Flush Redis tracking counters into database snapshots. (+88 more)
-
-### Community 9 - "Community 9"
 Cohesion: 0.03
 Nodes (129): _(), a(), Ae(), ar(), B(), bi(), Bn(), br() (+121 more)
 
-### Community 10 - "Community 10"
+### Community 9 - "Community 9"
 Cohesion: 0.03
 Nodes (82): BaseHashProtectedCommand, BaseUpdateAllContentCommand, FixtureImportResult, JsonFixtureLoadResult, JsonFixtureUpsertCommand, load_json_fixture_rows(), Base classes and helpers for content update and fixture import commands.  These, Register shared command-line arguments.          Args:             parser: Djang (+74 more)
+
+### Community 10 - "Community 10"
+Cohesion: 0.03
+Nodes (84): PageViewAdmin, Django admin integration for tracking snapshots., Inspect flushed page view snapshots., Cabinet declarations for the reusable tracking app., Install the package in an isolated venv for subprocess-based E2E tests.     Ret, sterile_env(), flush_page_views(), Flush Redis tracking counters into database snapshots. (+76 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.08
@@ -156,20 +157,20 @@ Cohesion: 0.03
 Nodes (74): ro(), arrayToHash(), balanced(), braceExpand(), childrenIgnored(), cleanUpNextTick(), collectNonEnumProps(), _deepEqual() (+66 more)
 
 ### Community 13 - "Community 13"
-Cohesion: 0.03
-Nodes (72): ABC, Return the model class that receives imported rows., Expose static translation content as a simple template dictionary.      The proc, static_content(), dashboard_view(), DashboardAdapter, extend(), get_context() (+64 more)
+Cohesion: 0.04
+Nodes (50): NotificationPayloadBuilder, NotificationPayloadBuilder ========================== Builds payload dicts for A, Build serializable payload dictionaries for notification queue tasks.      The b, Build a payload where the worker renders the template itself.          Args:, Build a payload that already contains rendered notification content.          Ar, NotificationDispatchSpec, QueueAdapterProtocol, Public contracts for the Django notification integration layer. (+42 more)
 
 ### Community 14 - "Community 14"
 Cohesion: 0.05
-Nodes (41): NotificationPayloadBuilder, NotificationPayloadBuilder ========================== Builds payload dicts for A, Build serializable payload dictionaries for notification queue tasks.      The b, Build a payload where the worker renders the template itself.          Args:, Build a payload that already contains rendered notification content.          Ar, NotificationDispatchSpec, QueueAdapterProtocol, Public contracts for the Django notification integration layer. (+33 more)
+Nodes (41): _ArqAdapterProtocol, build_redis_settings_from_django(), DjangoArqClient, Django-facing ARQ adapter built on top of codex-platform delivery primitives., Minimal protocol expected from the platform ARQ notification adapter., Thin Django-friendly wrapper around codex-platform's ARQ adapter., Lazily create the underlying codex-platform ARQ adapter., Enqueue a task synchronously via the platform ARQ adapter. (+33 more)
 
 ### Community 15 - "Community 15"
 Cohesion: 0.04
-Nodes (57): ActiveMixin, ActiveMixin, BaseEmailContentMixin, Meta, OrderableMixin, Database models for flushed tracking snapshots., Add an ``is_deleted`` flag for soft-deletion workflows.      Notes:         The, Mark the object as deleted without removing the database row.          Notes: (+49 more)
+Nodes (70): ABC, Return the model class that receives imported rows., dashboard_view(), DashboardAdapter, DashboardRedisManager, DashboardSelector, extend(), get_context() (+62 more)
 
 ### Community 16 - "Community 16"
-Cohesion: 0.05
-Nodes (40): _ArqAdapterProtocol, build_redis_settings_from_django(), DjangoArqClient, Django-facing ARQ adapter built on top of codex-platform delivery primitives., Minimal protocol expected from the platform ARQ notification adapter., Thin Django-friendly wrapper around codex-platform's ARQ adapter., Lazily create the underlying codex-platform ARQ adapter., Enqueue a task synchronously via the platform ARQ adapter. (+32 more)
+Cohesion: 0.04
+Nodes (57): ActiveMixin, ActiveMixin, BaseEmailContentMixin, Meta, OrderableMixin, Database models for flushed tracking snapshots., Add an ``is_deleted`` flag for soft-deletion workflows.      Notes:         The, Mark the object as deleted without removing the database row.          Notes: (+49 more)
 
 ### Community 17 - "Community 17"
 Cohesion: 0.06
@@ -184,52 +185,52 @@ Cohesion: 0.28
 Nodes (30): _(), a(), b(), c(), d(), E(), er(), f() (+22 more)
 
 ### Community 20 - "Community 20"
-Cohesion: 0.08
-Nodes (19): Template tags for multilingual navigation helpers.  The tags in this module are, Translate the current request path into another active language.      Args:, translate_url(), discover_locale_paths(), Helpers for discovering Django locale directories.  Examples:     Resolve locale, Discover locale directories that should be added to ``LOCALE_PATHS``.      The h, Translate the current request path into another active language.      Args:, translate_current_url() (+11 more)
-
-### Community 21 - "Community 21"
 Cohesion: 0.11
 Nodes (12): Sitemap, BaseSitemap, Sitemap primitives with codex-django defaults.  The base sitemap centralizes can, Sitemap for static route-name pages configured through Django settings., Base sitemap with Codex defaults for multilingual canonical URLs.      The imple, Return the language used for the sitemap ``x-default`` alternate., Build alternate language URLs for a sitemap item.          Args:             ite, Resolve sitemap items to absolute path components.          String items are tre (+4 more)
+
+### Community 21 - "Community 21"
+Cohesion: 0.08
+Nodes (19): Template tags for multilingual navigation helpers.  The tags in this module are, Translate the current request path into another active language.      Args:, translate_url(), discover_locale_paths(), Helpers for discovering Django locale directories.  Examples:     Resolve locale, Discover locale directories that should be added to ``LOCALE_PATHS``.      The h, Translate the current request path into another active language.      Args:, translate_current_url() (+11 more)
 
 ### Community 22 - "Community 22"
 Cohesion: 0.11
 Nodes (12): AppConfig, CabinetConfig, CodexDjangoConfig, CoreConfig, Django app configuration for the reusable tracking package., Import dashboard providers/declarations after Django app loading., Load ``cabinet.py`` modules from installed apps after startup., Register the tracking runtime and optional cabinet declarations. (+4 more)
 
 ### Community 23 - "Community 23"
-Cohesion: 0.18
-Nodes (1): tn
-
-### Community 24 - "Community 24"
 Cohesion: 0.21
 Nodes (13): a(), b(), c(), d(), e(), h(), i(), l() (+5 more)
 
-### Community 25 - "Community 25"
+### Community 24 - "Community 24"
 Cohesion: 0.21
 Nodes (13): _(), a(), c(), e(), f(), i(), k(), l() (+5 more)
 
-### Community 26 - "Community 26"
+### Community 25 - "Community 25"
 Cohesion: 0.21
 Nodes (14): _(), a(), d(), e(), f(), i(), l(), m() (+6 more)
 
-### Community 27 - "Community 27"
+### Community 26 - "Community 26"
 Cohesion: 0.23
 Nodes (14): _(), a(), c(), d(), f(), i(), l(), m() (+6 more)
 
-### Community 28 - "Community 28"
+### Community 27 - "Community 27"
 Cohesion: 0.19
 Nodes (14): a(), c(), d(), e(), f(), l(), m(), n() (+6 more)
 
-### Community 29 - "Community 29"
+### Community 28 - "Community 28"
 Cohesion: 0.15
 Nodes (12): AppointmentAggregateAction, AppointmentAggregateData, AppointmentAggregateHeader, AppointmentAggregateItem, AppointmentDisplayData, BookingSummaryData, ClientSelectorData, DateTimePickerData (+4 more)
 
-### Community 30 - "Community 30"
+### Community 29 - "Community 29"
 Cohesion: 0.28
 Nodes (13): a(), b(), c(), f(), i(), k(), l(), m() (+5 more)
 
-### Community 31 - "Community 31"
+### Community 30 - "Community 30"
 Cohesion: 0.23
 Nodes (13): a(), c(), e(), f(), i(), l(), m(), o() (+5 more)
+
+### Community 31 - "Community 31"
+Cohesion: 0.18
+Nodes (12): load_cli_module(), raise_cli_dependency_error(), Import a module from codex_django_cli and normalize missing-dependency errors., Raise a helpful error when the split-out CLI package is unavailable., main(), Lazily dispatch to the real CLI entrypoint from codex-django-cli., _execute_shim(), test_load_cli_module_delegates_to_import_module() (+4 more)
 
 ### Community 32 - "Community 32"
 Cohesion: 0.21
@@ -367,11 +368,13 @@ Nodes (1): Return whether the import completed without fatal errors.
 Cohesion: 1.0
 Nodes (1): Record one page view for the current request.
 
+### Community 122 - "Community 122"
+Cohesion: 1.0
+Nodes (1): Verify that transaction.on_commit is called with a callback.
+
 ## Knowledge Gaps
-- **344 isolated node(s):** `Profile header data shown in booking cabinet modals.`, `Single key/value row in a booking modal summary block.`, `Declarative form-field state for booking cabinet modals.`, `Form section state for booking cabinet modals.`, `Resolved booking context extracted from a calendar slot.` (+339 more)
+- **345 isolated node(s):** `Profile header data shown in booking cabinet modals.`, `Single key/value row in a booking modal summary block.`, `Declarative form-field state for booking cabinet modals.`, `Form section state for booking cabinet modals.`, `Resolved booking context extracted from a calendar slot.` (+340 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 23`** (19 nodes): `.unregister()`, `.isForType()`, `tn`, `.add()`, `.addControllers()`, `.addElements()`, `.addPlugins()`, `.addScales()`, `.constructor()`, `._each()`, `._get()`, `.getController()`, `.getPlugin()`, `._getRegistryForType()`, `.getScale()`, `.removeControllers()`, `.removeElements()`, `.removePlugins()`, `.removeScales()`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 37`** (9 nodes): `rs`, `.acquireContext()`, `.addEventListener()`, `.getDevicePixelRatio()`, `.getMaximumSize()`, `.isAttached()`, `.releaseContext()`, `.removeEventListener()`, `.updateConfig()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 40`** (6 nodes): `e()`, `n()`, `o()`, `s()`, `t()`, `lunr.da.min.js`
@@ -422,20 +425,22 @@ Nodes (1): Record one page view for the current request.
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 100`** (1 nodes): `Record one page view for the current request.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 122`** (1 nodes): `Verify that transaction.on_commit is called with a callback.`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Reusable page tracking runtime for codex-django projects.` connect `Community 4` to `Community 1`, `Community 3`, `Community 5`, `Community 7`, `Community 8`, `Community 10`, `Community 13`, `Community 14`, `Community 15`, `Community 16`, `Community 20`?**
-  _High betweenness centrality (0.196) - this node is a cross-community bridge._
-- **Why does `filter()` connect `Community 9` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 6`, `Community 8`, `Community 11`, `Community 12`?**
-  _High betweenness centrality (0.098) - this node is a cross-community bridge._
-- **Why does `BaseDjangoRedisManager` connect `Community 1` to `Community 3`, `Community 4`, `Community 15`?**
-  _High betweenness centrality (0.035) - this node is a cross-community bridge._
+- **Why does `Reusable page tracking runtime for codex-django projects.` connect `Community 4` to `Community 1`, `Community 3`, `Community 6`, `Community 7`, `Community 9`, `Community 10`, `Community 13`, `Community 14`, `Community 15`, `Community 16`, `Community 21`, `Community 31`?**
+  _High betweenness centrality (0.205) - this node is a cross-community bridge._
+- **Why does `filter()` connect `Community 8` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 5`, `Community 10`, `Community 11`, `Community 12`?**
+  _High betweenness centrality (0.097) - this node is a cross-community bridge._
+- **Why does `BaseDjangoRedisManager` connect `Community 1` to `Community 16`, `Community 3`, `Community 4`, `Community 15`?**
+  _High betweenness centrality (0.039) - this node is a cross-community bridge._
+- **Are the 180 inferred relationships involving `MagicMock` (e.g. with `adapter_models()` and `mock_booking_manager()`) actually correct?**
+  _`MagicMock` has 180 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 143 inferred relationships involving `Reusable page tracking runtime for codex-django projects.` (e.g. with `BookingActionResult` and `BookingBridge`) actually correct?**
   _`Reusable page tracking runtime for codex-django projects.` has 143 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 177 inferred relationships involving `MagicMock` (e.g. with `adapter_models()` and `mock_booking_manager()`) actually correct?**
-  _`MagicMock` has 177 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 83 inferred relationships involving `BaseDjangoRedisManager` (e.g. with `_Encoder` and `DashboardRedisManager`) actually correct?**
   _`BaseDjangoRedisManager` has 83 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 76 inferred relationships involving `TableColumn` (e.g. with `TableFilter` and `TableAction`) actually correct?**
