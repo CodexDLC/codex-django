@@ -1,0 +1,4679 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Django runtime utilities, mixins, adapters, and reusable modules for Codex projects">
+      
+      
+        <meta name="author" content="Codex Team">
+      
+      
+        <link rel="canonical" href="https://codexdlc.github.io/codex-django/0.6.6/changelog/">
+      
+      
+        <link rel="prev" href="../en/api/internal/redis/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Changelog - codex-django</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#changelog" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="codex-django" class="md-header__button md-logo" aria-label="codex-django" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            codex-django
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Changelog
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="cyan"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="cyan"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../en/" class="md-tabs__link">
+          
+  
+  
+  Guide (EN)
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ru/" class="md-tabs__link">
+          
+  
+  
+  Руководство (RU)
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../en/api/" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Changelog
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="codex-django" class="md-nav__button md-logo" aria-label="codex-django" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    codex-django
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide (EN)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guide (EN)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/guides/installation-modes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation Modes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/guides/runtime-vs-cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime vs CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/guides/project-structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/guides/blueprints-and-scaffolding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blueprint Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Module Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Module Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/guides/booking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Booking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/guides/cabinet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cabinet
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/guides/cabinet-settings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Site Settings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/guides/notifications/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notifications
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/guides/system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/guides/redis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Redis Cache and Session
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/architecture/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/architecture/system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/architecture/notifications/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notifications
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/architecture/tracking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tracking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/architecture/booking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Booking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/architecture/cabinet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cabinet
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/architecture/redis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Redis Cache and Session
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/architecture/showcase/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Showcase
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Руководство (RU)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Руководство (RU)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Обзор
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Быстрый старт
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/guides/installation-modes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Режимы установки
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/guides/runtime-vs-cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime и CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/guides/project-structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Структура проекта
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/guides/blueprints-and-scaffolding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Работа с blueprints
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7" id="__nav_3_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Гайды по модулям
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Гайды по модулям
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/guides/booking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Booking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/guides/cabinet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cabinet
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/guides/cabinet-settings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Site Settings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/guides/notifications/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notifications
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/guides/system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/guides/redis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Redis Cache и Session
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_8" id="__nav_3_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Архитектура
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Архитектура
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Обзор
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/architecture/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/architecture/system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/architecture/notifications/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notifications
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/architecture/tracking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tracking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/architecture/booking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Booking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/architecture/cabinet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cabinet
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/architecture/redis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Redis Cache и Session
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/architecture/showcase/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Showcase
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Public API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Public API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/api/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/api/system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/api/notifications/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notifications
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/api/tracking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tracking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/api/booking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Booking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/api/cabinet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cabinet
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/api/redis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Redis Cache and Session
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Internal Modules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Internal Modules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/api/internal/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core internals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/api/internal/system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System internals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/api/internal/notifications/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notifications internals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/api/internal/tracking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tracking internals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/api/internal/booking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Booking internals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/api/internal/cabinet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cabinet internals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../en/api/internal/redis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Redis internals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#066-2026-04-28" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.6] - 2026-04-28
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.6.6] - 2026-04-28">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#065-2026-04-24" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.5] - 2026-04-24
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.6.5] - 2026-04-24">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#062-2026-04-23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.2] - 2026-04-23
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.6.2] - 2026-04-23">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#061-2026-04-23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.1] - 2026-04-23
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.6.1] - 2026-04-23">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#060-2026-04-22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.0] - 2026-04-22
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.6.0] - 2026-04-22">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#changed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#053-2026-04-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.5.3] - 2026-04-19
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.5.3] - 2026-04-19">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#052-2026-04-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.5.2] - 2026-04-18
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.5.2] - 2026-04-18">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#051-2026-04-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.5.1] - 2026-04-18
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.5.1] - 2026-04-18">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#044-2026-04-16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.4] - 2026-04-16
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.4] - 2026-04-16">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#043-2026-04-16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.3] - 2026-04-16
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.3] - 2026-04-16">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#042-2026-04-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.2] - 2026-04-11
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.2] - 2026-04-11">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#changed_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#041-2026-04-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.1] - 2026-04-11
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.1] - 2026-04-11">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#040-2026-04-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.0] - 2026-04-10
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.0] - 2026-04-10">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#032-2026-04-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.3.2] - 2026-04-10
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.3.2] - 2026-04-10">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#031-2026-04-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.3.1] - 2026-04-10
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.3.1] - 2026-04-10">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#030-2026-04-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.3.0] - 2026-04-10
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.3.0] - 2026-04-10">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#025-2026-03-29" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.2.5] - 2026-03-29
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.2.5] - 2026-03-29">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#020-internal-milestone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.2.0] - Internal milestone
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.2.0] - Internal milestone">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#015-internal-milestone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.1.5] - Internal milestone
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.1.5] - Internal milestone">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#010-internal-milestone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.1.0] - Internal milestone
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.1.0] - Internal milestone">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#066-2026-04-28" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.6] - 2026-04-28
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.6.6] - 2026-04-28">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#065-2026-04-24" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.5] - 2026-04-24
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.6.5] - 2026-04-24">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#062-2026-04-23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.2] - 2026-04-23
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.6.2] - 2026-04-23">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#061-2026-04-23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.1] - 2026-04-23
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.6.1] - 2026-04-23">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#060-2026-04-22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.6.0] - 2026-04-22
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.6.0] - 2026-04-22">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#changed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#053-2026-04-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.5.3] - 2026-04-19
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.5.3] - 2026-04-19">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#052-2026-04-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.5.2] - 2026-04-18
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.5.2] - 2026-04-18">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#051-2026-04-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.5.1] - 2026-04-18
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.5.1] - 2026-04-18">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#044-2026-04-16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.4] - 2026-04-16
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.4] - 2026-04-16">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#043-2026-04-16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.3] - 2026-04-16
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.3] - 2026-04-16">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#042-2026-04-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.2] - 2026-04-11
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.2] - 2026-04-11">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#changed_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#041-2026-04-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.1] - 2026-04-11
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.1] - 2026-04-11">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#040-2026-04-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.0] - 2026-04-10
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.0] - 2026-04-10">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#032-2026-04-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.3.2] - 2026-04-10
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.3.2] - 2026-04-10">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#031-2026-04-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.3.1] - 2026-04-10
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.3.1] - 2026-04-10">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#030-2026-04-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.3.0] - 2026-04-10
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.3.0] - 2026-04-10">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#025-2026-03-29" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.2.5] - 2026-03-29
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.2.5] - 2026-03-29">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#020-internal-milestone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.2.0] - Internal milestone
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.2.0] - Internal milestone">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#015-internal-milestone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.1.5] - Internal milestone
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.1.5] - Internal milestone">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#010-internal-milestone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.1.0] - Internal milestone
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.1.0] - Internal milestone">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="changelog">Changelog</h1>
+<p>All notable changes to this project will be documented in this file.</p>
+<h2 id="066-2026-04-28">[0.6.6] - 2026-04-28</h2>
+<h3 id="fixed">Fixed</h3>
+<ul>
+<li>Fix <code>create_booking()</code> to persist the selected slot instead of <code>result.best</code>.</li>
+</ul>
+<h2 id="065-2026-04-24">[0.6.5] - 2026-04-24</h2>
+<h3 id="fixed_1">Fixed</h3>
+<ul>
+<li><strong>Security/CSRF</strong>: Added <code>csrf-token</code> meta tag to base cabinet templates. This ensures frontend JS utilities (like <code>getCsrfToken()</code>) can reliably retrieve the token regardless of <code>CSRF_COOKIE_NAME</code> overrides in consumer projects.</li>
+</ul>
+<h3 id="added">Added</h3>
+<ul>
+<li><strong>Showcase Migration</strong>: Finalized the migration of the showcase module to the library-standard Cabinet UI. Pages now inherit from <code>cabinet/base_*</code> and are assembled from library widgets and components.</li>
+<li><strong>Mobile Optimizations</strong>: Implemented responsive "Card Mode" for data tables, fluid KPI scaling using CSS <code>clamp()</code>, fullscreen mobile modals, and a touch-friendly topbar with a hamburger menu.</li>
+<li><strong>Typed Mock Data</strong>: Updated <code>ShowcaseMockData</code> to return library-standard dataclass objects (<code>SidebarItem</code>, <code>DataTableData</code>, <code>CalendarGridData</code>, <code>ReportPageData</code>, etc.), ensuring full compatibility with the cabinet shell contract.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li><strong>Library Type Contracts</strong>: Broadened <code>DataTableData</code>, <code>CalendarGridData</code>, and <code>ReportTableData</code> contracts from <code>list</code> to <code>Sequence</code> to resolve Mypy invariance errors and facilitate easier integration with dynamic ORM-based data.</li>
+<li><strong>Security Policy</strong>: Added <code>CVE-2026-3219</code> (pip) to the ignored vulnerabilities list in <code>pyproject.toml</code> as it affects the latest available pip version and has no upstream fix yet.</li>
+</ul>
+<h3 id="fixed_2">Fixed</h3>
+<ul>
+<li>Resolved 45+ Mypy type-safety errors in <code>showcase/mock.py</code> and library type definitions.</li>
+<li>Fixed line length (Ruff E501) and formatting issues in mock data generation.</li>
+<li>Upgraded <code>pygments</code> to <code>2.20.0</code> to resolve <code>CVE-2026-4539</code>.</li>
+</ul>
+<h3 id="fixed_3">Fixed</h3>
+<ul>
+<li>Aligned the client cabinet shell with the staff shell branding contract: client sidebars now use <code>cabinet_branding.icon</code> / <code>cabinet_branding.label</code> with safe fallbacks and support <code>SidebarItem.badge_key</code>.</li>
+<li>Updated the client cabinet base layout to use branding-aware document titles and to support mobile sidebar open/backdrop state without changing desktop collapse persistence.</li>
+<li>Restricted client topbar staff/admin switch URLs for non-staff users while preserving the switch for staff users viewing the client space.</li>
+<li>Moved client notification topbar hardcoded hover/background/text colors into cabinet CSS classes backed by <code>--cab-*</code> theme tokens.</li>
+</ul>
+<h2 id="062-2026-04-23">[0.6.2] - 2026-04-23</h2>
+<h3 id="added_1">Added</h3>
+<ul>
+<li>Added <code>optional_static_css</code>, a defensive cabinet template tag that checks Django staticfiles before rendering a stylesheet <code>&lt;link&gt;</code>. Library templates can now expose optional project-owned CSS slots without creating 404s in projects that do not ship those assets.</li>
+<li>Added template coverage for optional static CSS rendering, missing-file behavior, and cabinet head stylesheet ordering.</li>
+</ul>
+<h3 id="fixed_4">Fixed</h3>
+<ul>
+<li>Cabinet head templates now automatically load <code>cabinet/css/app_cabinet.css</code> when a consumer project provides it. The project theme layer is inserted after the codex-django cabinet defaults and before <code>cabinet_css</code> / <code>extra_css</code>, so app branding and <code>.cab-wrapper--client</code> themes work without local <code>_head.html</code> overrides.</li>
+<li>Updated GitHub Actions workflows to <code>actions/checkout@v6</code> and <code>actions/setup-python@v6</code> so CI, docs, and publish jobs no longer target the deprecated Node.js 20 action runtime.</li>
+</ul>
+<h2 id="061-2026-04-23">[0.6.1] - 2026-04-23</h2>
+<h3 id="fixed_5">Fixed</h3>
+<ul>
+<li>Fixed Redis JSON serialization paths for non-primitive values in dashboard, core settings, and system token managers.</li>
+</ul>
+<h2 id="060-2026-04-22">[0.6.0] - 2026-04-22</h2>
+<h3 id="changed_1">Changed</h3>
+<ul>
+<li><strong>Breaking:</strong> Reworked <code>BaseDjangoRedisManager</code> around per-operation client factories and four explicit context managers: <code>async_string()</code>, <code>async_hash()</code>, <code>sync_string()</code>, and <code>sync_hash()</code>. The old manager-level <code>self._client</code>, <code>self.string</code>, and <code>self.hash</code> surfaces are no longer part of the public contract.</li>
+<li>Redis-backed cache, session, dashboard, SEO, site-settings, static-content, booking, notification, fixture-hash, and action-token paths now use native sync Redis clients for sync Django code and async Redis clients for async code. This removes <code>async_to_sync</code> from Redis-backed Django hot paths and prevents cross-event-loop Redis client reuse.</li>
+<li><code>DashboardSelector</code> now resolves <code>DashboardRedisManager</code> lazily through a cached factory instead of constructing a Redis manager at module import time.</li>
+<li>Bumped <code>codex-platform</code> to <code>&gt;=0.4.0</code> for sync Redis operation wrappers.</li>
+<li>Moved <code>django-unfold</code> and <code>django-prometheus</code> out of core dependencies into <code>admin</code> and <code>observability</code> extras, and kept <code>django-debug-toolbar</code> in the <code>dev</code> extra only.</li>
+</ul>
+<h3 id="added_2">Added</h3>
+<ul>
+<li>Extended <code>CacheCoder</code> with explicit support for <code>bool</code>, <code>None</code>, <code>Enum</code>, <code>Path</code>, Django lazy strings, and <code>time</code>, while preserving the no-type-marker Redis payload policy.</li>
+<li>Added typed Redis hash restore for <code>DjangoSiteSettingsManager</code>, decoding cached values according to Django model field types including booleans, nullable fields, dates/times, decimals, UUIDs, integers, floats, and JSON fields.</li>
+<li>Added unit coverage for Redis client factory injection/cleanup, sync cache and session paths, dashboard cache invalidation, typed site-settings restore, and the expanded <code>CacheCoder</code> surface.</li>
+</ul>
+<h3 id="fixed_6">Fixed</h3>
+<ul>
+<li>Fixed Redis manager failures caused by missing <code>_client</code> attributes in dashboard/cache paths.</li>
+<li>Fixed event-loop reuse failures caused by live async Redis clients crossing <code>async_to_sync</code> boundaries.</li>
+<li>Fixed Redis <code>HSET</code> data errors for site-settings values such as booleans and <code>None</code> by encoding hash payloads before writing.</li>
+</ul>
+<h2 id="053-2026-04-19">[0.5.3] - 2026-04-19</h2>
+<h3 id="fixed_7">Fixed</h3>
+<ul>
+<li>Raised the default booking engine solution cap for multi-service availability lookups from 50 to 2000, while preserving the legacy 50 default for single-service requests.</li>
+<li>Propagated the same multi-service default into <code>create_booking()</code> final availability revalidation so late-day chain starts do not fail confirmation solely because the revalidation search was truncated.</li>
+</ul>
+<h2 id="052-2026-04-18">[0.5.2] - 2026-04-18</h2>
+<h3 id="added_3">Added</h3>
+<ul>
+<li>Extended <code>codex_django.cabinet.reports.resolve_report_period</code> with two new period keys: <code>"year"</code> (year-to-date anchored at the current year's January 1st) and <code>"custom"</code> (inclusive range supplied via <code>date_from</code> / <code>date_to</code>, accepting either <code>date</code> objects or ISO <code>YYYY-MM-DD</code> strings). The comparison window is computed identically to existing periods (same-length block immediately preceding <code>date_from</code>).</li>
+<li><code>"custom"</code> with missing or inverted bounds (<code>date_from &gt; date_to</code>) falls back to the default <code>"month"</code> period so callers can route query-string input through the resolver without pre-validation.</li>
+<li>Report filter templates (<code>cabinet/includes/_report_filters.html</code> and the showcase twin) now render a compact <code>&lt;form method="get"&gt;</code> around the date inputs with a calendar-range submit button. Submitting posts <code>period=custom&amp;date_from=…&amp;date_to=…</code> to the same view; the existing period pills continue to drive named periods.</li>
+</ul>
+<h3 id="changed_2">Changed</h3>
+<ul>
+<li><code>ReportPeriodKey</code> type alias broadened to <code>Literal["week", "month", "quarter", "year", "custom"]</code>. Callers that narrow the type explicitly must update their annotations.</li>
+<li>Report filter templates now read <code>date_from</code> / <code>date_to</code> from context (ISO strings) instead of hardcoded <code>2026-03-01</code> / <code>2026-03-31</code>, and preserve custom bounds across report-tab navigation when <code>active_period == "custom"</code>.</li>
+<li>Tracking cabinet declarations now honor <code>CODEX_TRACKING.track_dashboard_widgets</code> to allow disabling tracking dashboard widgets without removing the analytics route/topbar/sidebar entry.</li>
+<li>Tracking analytics selectors now apply configured <code>skip_prefixes</code> to merged top-pages output and to live Redis multi-day totals before chart summation.</li>
+</ul>
+<h2 id="051-2026-04-18">[0.5.1] - 2026-04-18</h2>
+<h3 id="added_4">Added</h3>
+<ul>
+<li>Added Redis-backed Django session engine <code>codex_django.sessions.backends.redis.SessionStore</code>. Stores session payloads as Django-encoded JSON strings (no pickle), uses atomic <code>SET NX EX</code> for <code>must_create</code>, respects <code>SESSION_COOKIE_AGE</code> via <code>get_expiry_age()</code>, and propagates <code>RedisConnectionError</code> instead of silently returning empty sessions. Namespaced key: <code>{PROJECT_NAME}:{CODEX_SESSION_KEY_PREFIX}:{session_key}</code> (prefix defaults to <code>session</code>).</li>
+<li>Added Redis-backed Django cache backend <code>codex_django.cache.backends.redis.RedisCache</code> implementing the full Django cache contract (<code>get</code>, <code>set</code>, <code>add</code>, <code>delete</code>, <code>get_many</code>, <code>set_many</code>, <code>delete_many</code>, <code>touch</code>, <code>has_key</code>, <code>incr</code>, <code>decr</code>, <code>clear</code>) on top of <code>codex_platform.redis_service</code>. Serialization is strict JSON via <code>codex_django.cache.serializers.JsonSerializer</code>; pluggable through <code>OPTIONS["SERIALIZER"]</code>. <code>add()</code> is atomic via <code>SET NX EX</code>. <code>clear()</code> is namespace-scoped through <code>SCAN + DEL</code> on <code>{KEY_PREFIX}:*</code> and refuses to run without a non-empty <code>KEY_PREFIX</code> — no <code>FLUSHDB</code> ever.</li>
+<li>Added <code>codex_django.cache.values.CacheCoder</code> with explicit helpers to round-trip <code>datetime</code>, <code>date</code>, <code>timedelta</code>, <code>Decimal</code>, <code>UUID</code>, <code>set</code>, and <code>bytes</code> through a JSON cache, plus a recursive <code>dump()</code> convenience for nested structures. No magic type tags are stored in Redis — callers decode explicitly.</li>
+<li>Added shared helper <code>codex_django.core.redis.django_adapter</code> exposing <code>build_redis_client</code>, <code>build_redis_service</code>, and <code>namespaced_key</code> for backends that need a Redis client without inheriting the <code>_is_disabled</code> shortcut of <code>BaseDjangoRedisManager</code>.</li>
+</ul>
+<h3 id="changed_3">Changed</h3>
+<ul>
+<li><code>docs/dev/django_cache_backend_plan.md</code> is no longer a forward-looking plan; it now documents the shipped backends, settings wiring, no-pickle policy, and migration path away from <code>django-redis</code>.</li>
+<li><strong>Breaking:</strong> Replaced <code>SiteEmailSettingsMixin</code> with <code>SiteEmailIdentityMixin</code> in <code>codex_django.system.mixins</code>. The new mixin exposes only identity fields (<code>email_from</code>, <code>email_sender_name</code>, <code>email_reply_to</code>) — SMTP transport (host, port, user, password, TLS/SSL flags, SendGrid key) is no longer stored in the database. Configure transport via <code>EMAIL_*</code> Django settings / <code>.env</code>.</li>
+<li>Rewrote <code>cabinet/site_settings/partials/_email.html</code> to render identity-only fields with an info banner pointing at <code>.env</code> for transport.</li>
+<li><code>DjangoDirectAdapter</code> now resolves <code>from_email</code> as <code>"&lt;sender_name&gt; &lt;email_from&gt;"</code> from <code>SiteSettings</code> (via the Redis-synced site-settings manager and <code>CODEX_SITE_SETTINGS_MODEL</code>), falling back to <code>DEFAULT_FROM_EMAIL</code>.</li>
+<li>Updated RU/EN cabinet settings guides to reflect the identity-only email section.</li>
+</ul>
+<h3 id="removed">Removed</h3>
+<ul>
+<li>Removed fields <code>smtp_host</code>, <code>smtp_port</code>, <code>smtp_user</code>, <code>smtp_password</code>, <code>smtp_use_tls</code>, <code>smtp_use_ssl</code>, <code>sendgrid_api_key</code> from <code>codex_django.system.mixins.settings</code>. Projects must generate a <code>RemoveField</code> migration after upgrading — see the migration notes below.</li>
+</ul>
+<h3 id="migration">Migration</h3>
+<ol>
+<li>Move SMTP credentials from the DB / admin UI into <code>.env</code> (<code>EMAIL_HOST</code>, <code>EMAIL_PORT</code>, <code>EMAIL_HOST_USER</code>, <code>EMAIL_HOST_PASSWORD</code>, <code>EMAIL_USE_TLS</code>/<code>EMAIL_USE_SSL</code>, <code>DEFAULT_FROM_EMAIL</code>).</li>
+<li>Replace <code>SiteEmailSettingsMixin</code> with <code>SiteEmailIdentityMixin</code> in your concrete <code>SiteSettings</code> model.</li>
+<li><code>python manage.py makemigrations</code> — expect a <code>RemoveField</code> for the 7 removed columns plus <code>AddField</code> for <code>email_from</code> / <code>email_sender_name</code> / <code>email_reply_to</code>. If you want to preserve <code>smtp_from_email</code>, edit the migration to use <code>RenameField</code> for that column before the <code>RemoveField</code> batch runs.</li>
+</ol>
+<h3 id="fixed_8">Fixed</h3>
+<ul>
+<li>Fixed cabinet widget/report filter templates loading the non-existent <code>cabinet_extras</code> tag library; they now load the registered <code>cabinet_tags</code> library.</li>
+<li>Fixed cabinet chart widget JSON payload handling so Alpine receives valid <code>x-data</code> for regular charts, report charts, and donut charts instead of rendering blank cards.</li>
+</ul>
+<h2 id="044-2026-04-16">[0.4.4] - 2026-04-16</h2>
+<h3 id="added_5">Added</h3>
+<ul>
+<li>Added reusable cabinet report contracts (<code>ReportPageData</code>, <code>ReportChartData</code>, <code>ReportTableData</code>, period helpers) and library report templates for data-driven analytics pages.</li>
+<li>Added dual-axis/mixed dataset support to the cabinet Chart.js widget config.</li>
+<li>Added default cabinet shell URLs for public site, staff/client space switching, login, and logout links, plus safe staff/client topbar navigation that does not require allauth URL names.</li>
+</ul>
+<h2 id="043-2026-04-16">[0.4.3] - 2026-04-16</h2>
+<h3 id="added_6">Added</h3>
+<ul>
+<li>Added <code>cabinet_vendor_js</code> block to <code>base_cabinet.html</code> to allow flexible overriding or CDN-loading of feature dependencies (like Chart.js).</li>
+</ul>
+<h3 id="fixed_9">Fixed</h3>
+<ul>
+<li>Fixed <code>SiteSettingsService</code> to correctly handle empty raw values for nullable fields (e.g., <code>TimeField</code>, <code>DateField</code>) by setting them to <code>None</code>.</li>
+<li>Added safety checks for <code>Chart</code> existence in <code>cabinet.js</code> to prevent runtime errors when the vendor block is modified or missing.</li>
+</ul>
+<h2 id="042-2026-04-11">[0.4.2] - 2026-04-11</h2>
+<h3 id="changed_4">Changed</h3>
+<ul>
+<li>Breaking: booking runtime contracts no longer depend on <code>SiteSettings</code>; <code>BookingFeatureModels</code> now wires only booking-specific models.</li>
+<li>Breaking: booking fallback hours now use a full 7-day <code>BookingSettings</code> schedule with <code>&lt;day&gt;_is_closed</code>, <code>work_start_&lt;day&gt;</code>, and <code>work_end_&lt;day&gt;</code> fields.</li>
+<li>Booking availability timezone handling now defaults to <code>UTC</code> at runtime, with optional adapter/resource overrides instead of site-settings coupling.</li>
+<li>Updated README and booking documentation to reflect the booking-only runtime boundary and 7-day schedule model.</li>
+</ul>
+<h3 id="fixed_10">Fixed</h3>
+<ul>
+<li>Fixed <code>DjangoAvailabilityAdapter</code> fallback math so default working hours are read only from <code>BookingSettings</code>, never from <code>SiteSettings</code>.</li>
+<li>Fixed booking contract and adapter tests to cover closed days, 7-day defaults, and the new runtime timezone behavior.</li>
+</ul>
+<h2 id="041-2026-04-11">[0.4.1] - 2026-04-11</h2>
+<h3 id="fixed_11">Fixed</h3>
+<ul>
+<li>Fixed Redis key mismatch in <code>CabinetSettingsRedisManager</code> by aligning it with the global <code>site_settings</code> key.</li>
+<li>Implemented robust database fallback and settings merging in <code>SiteSettingsService.get_all_settings()</code> to ensure settings remain available when Redis is offline.</li>
+<li>Updated cabinet context processor to utilize <code>SiteSettingsService</code> for unified settings retrieval.</li>
+</ul>
+<h2 id="040-2026-04-10">[0.4.0] - 2026-04-10</h2>
+<h3 id="added_7">Added</h3>
+<ul>
+<li>Added a reusable <code>tracking</code> runtime module with models, admin integration, settings, providers, flush helpers, and management commands for page-view analytics.</li>
+<li>Added analytics cabinet integration with selector support, dashboard widgets, middleware-driven recording, and a dedicated analytics view/template surface.</li>
+<li>Added comprehensive unit coverage for tracking runtime flows and notification selector behavior.</li>
+</ul>
+<h3 id="changed_5">Changed</h3>
+<ul>
+<li>Enhanced notification content selection to support cache-prefix aware email lookups.</li>
+<li>Finalized typing and dashboard cleanup around the new tracking and analytics runtime surfaces.</li>
+</ul>
+<h3 id="fixed_12">Fixed</h3>
+<ul>
+<li>Fixed runtime test linting issues in the tracking test suite.</li>
+</ul>
+<h2 id="032-2026-04-10">[0.3.2] - 2026-04-10</h2>
+<h3 id="added_8">Added</h3>
+<ul>
+<li>Added public core sitemap seams for alternates, x-default language selection, and settings-backed static page sitemaps.</li>
+<li>Added a public i18n URL translation helper and a default Redis manager factory/export surface.</li>
+<li>Added public system management seams for Django-style JSON fixture upserts, singleton fixture updates, and aggregate command section hooks.</li>
+<li>Added a generic system Redis JSON action-token manager for temporary confirmation/action payloads.</li>
+<li>Added System domain refactor notes and a Lily post-release cleanup note for replacing project-local fixture import and action-token wrappers.</li>
+</ul>
+<h3 id="changed_6">Changed</h3>
+<ul>
+<li>Changed static-page SEO selection to support injectable model, lookup field, cache manager, and cache timeout seams while preserving existing defaults.</li>
+<li>Expanded system documentation around fixture orchestration, singleton settings imports, action-token Redis helpers, and project cleanup boundaries.</li>
+</ul>
+<h3 id="fixed_13">Fixed</h3>
+<ul>
+<li>Fixed sitemap alternates being computed but not attached to generated URL entries.</li>
+</ul>
+<h2 id="031-2026-04-10">[0.3.1] - 2026-04-10</h2>
+<h3 id="added_9">Added</h3>
+<ul>
+<li>Added cabinet runtime extension seams: request context resolver, public registry read API, generic view mixins, and modal presenters.</li>
+<li>Added generic booking cabinet helpers for modal presentation, availability normalization, and workflow payload assembly.</li>
+<li>Added component knobs for cabinet card grids, avatars, client topbar hooks, chart widget options, and date-time picker labels.</li>
+</ul>
+<h3 id="changed_7">Changed</h3>
+<ul>
+<li>Updated cabinet context processing and quick-access helpers to use public registry/runtime APIs while preserving existing context keys and template names.</li>
+<li>Made cabinet site settings configurable through service/model/tab/save/permission hooks with default-compatible behavior.</li>
+</ul>
+<h3 id="fixed_14">Fixed</h3>
+<ul>
+<li>Removed the need for project code to inspect <code>cabinet_registry._sidebar</code> for quick-access-like UIs.</li>
+</ul>
+<h2 id="030-2026-04-10">[0.3.0] - 2026-04-10</h2>
+<h3 id="added_10">Added</h3>
+<ul>
+<li>Cabinet redesign groundwork across templates, styles, quick-access flows, notifications, and dashboard/site-settings surfaces.</li>
+<li>New runtime modules and coverage for conversations, cabinet services/tags, booking contracts, and core app wiring.</li>
+</ul>
+<h3 id="changed_8">Changed</h3>
+<ul>
+<li>Standardized the developer quality gate around <code>codex_core.dev.check_runner</code> and moved project policy into <code>[tool.codex-check]</code>.</li>
+<li>Raised the runtime dependency floor to the refreshed Codex package line: <code>codex-core</code> and <code>codex-platform</code> now resolve from <code>&gt;=0.3.0</code>, while <code>codex-services</code> resolves from the published <code>&gt;=0.1.3</code>, all with <code>&lt;1.0.0</code> headroom.</li>
+<li>Raised the optional CLI extra to <code>codex-django-cli&gt;=0.3.0,&lt;0.4.0</code> so new installs resolve against the current standalone CLI release line.</li>
+<li>Expanded English and Russian docs around cabinet architecture, guides, and settings.</li>
+<li>Booking runtime contracts switched to neutral <code>resource/executor</code> naming with public seams for prioritization and orchestration.</li>
+</ul>
+<h3 id="fixed_15">Fixed</h3>
+<ul>
+<li>Aligned the cabinet <code>date_time_picker</code> month grid by supporting padded calendar cells with leading and trailing blank placeholders.</li>
+</ul>
+<h2 id="025-2026-03-29">[0.2.5] - 2026-03-29</h2>
+<p>First public release.</p>
+<h3 id="added_11">Added</h3>
+<ul>
+<li>Optional <code>cli</code> extra that installs the published <code>codex-django-cli</code> companion package.</li>
+<li>Runtime compatibility shims that forward legacy <code>codex_django.cli.*</code> imports to <code>codex-django-cli</code>.</li>
+<li>Additional runtime test coverage for dashboard selectors, Redis managers, and showcase views.</li>
+</ul>
+<h3 id="changed_9">Changed</h3>
+<ul>
+<li>Refocused <code>codex-django</code> on reusable Django runtime modules while project scaffolding lives in <code>codex-django-cli</code>.</li>
+<li>Replaced the old runtime extras layout with <code>cli</code>, <code>dev</code>, <code>maintainer</code>, and <code>docs</code>.</li>
+<li>Updated README, install guides, and CI workflow around the runtime/CLI split.</li>
+<li>Reworked the docs landing page into a runtime-oriented entry screen with quick-start paths and module navigation.</li>
+<li>Raised the runtime coverage threshold to reflect the audited baseline.</li>
+</ul>
+<h3 id="fixed_16">Fixed</h3>
+<ul>
+<li>Packaging metadata and lockfile resolution for <code>codex-django[cli]</code>.</li>
+<li>Online installation flow where a built <code>codex-django</code> wheel pulls <code>codex-django-cli</code> from the package registry.</li>
+<li>Compatibility typing around the lazy CLI dispatch module.</li>
+<li>Empty integration/e2e marker handling in the maintainer quality gate.</li>
+<li>Async test environment resolution by restoring <code>arq</code> and <code>pytest-asyncio</code> in development extras.</li>
+<li>Missing <code>unit</code> marker coverage for cabinet context processor tests.</li>
+</ul>
+<h2 id="020-internal-milestone">[0.2.0] - Internal milestone</h2>
+<h3 id="added_12">Added</h3>
+<ul>
+<li>Broader runtime modules for cabinet, showcase, booking, system, notifications, and core integrations.</li>
+<li>Expanded unit coverage for runtime helpers and compatibility surfaces.</li>
+</ul>
+<h3 id="changed_10">Changed</h3>
+<ul>
+<li>Reworked the runtime architecture around reusable adapters, mixins, selectors, and generated-project boundaries.</li>
+<li>Evolved scaffold templates and docs in parallel with the runtime modules.</li>
+</ul>
+<h2 id="015-internal-milestone">[0.1.5] - Internal milestone</h2>
+<h3 id="added_13">Added</h3>
+<ul>
+<li>Cabinet/dashboard foundation with selectors, widgets, settings, and templates.</li>
+<li>Showcase reference implementation with mock data, views, and demo flows.</li>
+<li>Booking runtime adapters and selectors.</li>
+</ul>
+<h3 id="changed_11">Changed</h3>
+<ul>
+<li>Extended project templates, feature blueprints, and deployment-oriented repository scaffolds.</li>
+</ul>
+<h2 id="010-internal-milestone">[0.1.0] - Internal milestone</h2>
+<h3 id="added_14">Added</h3>
+<ul>
+<li>Initial library scaffold for Django runtime utilities, mixins, adapters, and Codex-oriented project structure.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.breadcrumbs", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>
