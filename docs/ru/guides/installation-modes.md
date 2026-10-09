@@ -32,14 +32,12 @@ pip install "codex-django[dev]"
 ```bash
 pip install "codex-django[cli]"
 # или: pip install codex-django-cli
-codex-django init myproject
-codex-django add-client-cabinet --project myproject
-codex-django add-booking --project myproject
-codex-django add-notifications --app system --project myproject
+codex-django init myproject --with-booking --with-messaging
+codex-django menu
 ```
 
 CLI больше не является частью runtime-дистрибутива.
-Его лучше воспринимать как project-construction tooling, которое зависит от `codex-django`, а не как business runtime code внутри того же пакета.
+CLI — самостоятельный генератор; от `codex-django` зависят созданные им проекты. Необязательный extra `[cli]` runtime-пакета устанавливает генератор вместе с runtime.
 
 ## Contributor Mode
 

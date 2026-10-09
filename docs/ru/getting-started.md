@@ -40,15 +40,13 @@ codex-django
 
 ## Подключение модулей позже
 
-Если scaffold проекта уже есть, добавляйте модули по одному через `codex-django-cli`:
+Выбирайте дополнительные модули через интерактивное меню companion-пакета CLI:
 
 ```bash
-codex-django add-client-cabinet --project myproject
-codex-django add-booking --project myproject
-codex-django add-notifications --app system --project myproject
+codex-django menu
 ```
 
-Каждая команда создает файлы и затем печатает точные follow-up шаги для settings, admin, migrations и URLs.
+Для нового проекта можно выбрать модули командой `codex-django init myproject --with-booking --with-messaging`. Проверьте созданные файлы и инструкции перед подключением settings, admin, migrations и URLs. Существующие файлы пропускаются, если перезапись явно не выбрана.
 
 ## Типичный цикл разработки
 

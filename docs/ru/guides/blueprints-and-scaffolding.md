@@ -8,7 +8,7 @@
 
 Типичный flow:
 
-1. Вы выбираете команду вроде `init`, `add-client-cabinet`, `add-booking` или `add-notifications`.
+1. Вы запускаете `init` с флагами модулей, например `--with-booking` и `--with-messaging`, либо выбираете модули через `menu`.
 2. Команда определяет нужное blueprint family.
 3. `CLIEngine` рендерит шаблоны и копирует static assets в target project.
 4. Команда печатает follow-up шаги, которые еще нужно применить вручную.

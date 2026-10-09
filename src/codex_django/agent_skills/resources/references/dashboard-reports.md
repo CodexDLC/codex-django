@@ -14,6 +14,7 @@ Example registration in the project's discovered `cabinet.py` (the project imple
 from codex_django.cabinet.selector.dashboard import DashboardSelector
 from .selectors import orders_summary_for
 
+
 @DashboardSelector.extend(cache_key="orders_summary", cache_ttl=0)
 def orders_summary(request):
     return {"orders_summary": orders_summary_for(request.user)}

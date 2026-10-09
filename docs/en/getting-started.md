@@ -40,15 +40,13 @@ That menu is useful when you want to choose i18n mode, language codes, or option
 
 ## Add Optional Modules Later
 
-If you already have a scaffolded project, extend it incrementally through `codex-django-cli`:
+Use the companion CLI's interactive scaffold menu to select optional modules:
 
 ```bash
-codex-django add-client-cabinet --project myproject
-codex-django add-booking --project myproject
-codex-django add-notifications --app system --project myproject
+codex-django menu
 ```
 
-Each command scaffolds files and then prints the project-specific follow-up steps you need to wire into settings, admin, migrations, and URLs.
+For a new project, select modules directly with `codex-django init myproject --with-booking --with-messaging`. Review generated files and follow-up steps before wiring settings, admin, migrations, and URLs. Existing files are skipped unless overwrite is explicitly selected.
 
 ## Typical Development Loop
 

@@ -39,10 +39,10 @@ Use the companion package when you want to scaffold or extend a project:
 pip install "codex-django[cli]"
 # or: pip install codex-django-cli
 codex-django init myproject
-codex-django add-client-cabinet --project myproject
 ```
 
 Temporary compatibility shims remain under `codex_django.cli`, but the real CLI code lives in `codex-django-cli`.
+Select optional scaffolds with `init --with-booking --with-messaging`, or use `codex-django menu` for interactive selection.
 
 ## Development
 

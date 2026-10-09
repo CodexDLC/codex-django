@@ -11,7 +11,7 @@ app_name = "codex_showcase"
 
 def _t(template: str) -> Callable[..., HttpResponse]:
     # Using the same debug_only protection for template generic views
-    return views.debug_only(TemplateView.as_view(template_name=template))  # type: ignore[arg-type]
+    return views.debug_only(TemplateView.as_view(template_name=template))
 
 
 urlpatterns = [

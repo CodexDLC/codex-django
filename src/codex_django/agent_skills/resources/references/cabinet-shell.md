@@ -11,6 +11,7 @@ For new declarations use the space/module API: `declare(module, space=..., topba
 ```python
 from codex_django.cabinet import CabinetTemplateView, StaffRequiredMixin
 
+
 class OrdersView(StaffRequiredMixin, CabinetTemplateView):
     template_name = "orders/index.html"
     cabinet_space = "staff"

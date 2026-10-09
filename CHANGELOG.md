@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.7.0] - 2026-10-09
 
 ### Added
 
@@ -22,6 +22,7 @@ All notable changes to this project will be documented in this file.
 - `codex_django.notifications` now serves as a deprecating compatibility facade for one minor release.
 - `MESSAGING_RECIPIENT_MODEL` is the preferred setting name for audience model resolution; `CONVERSATIONS_RECIPIENT_MODEL` remains as a compatibility fallback during the deprecation window.
 - Updated locked dependencies with available security fixes within the existing package constraints and removed obsolete vulnerability audit exceptions.
+- Updated the Codex dependency baseline to `codex-core>=0.5.0`, `codex-platform>=0.6.0`, `codex-services>=0.1.4`, and optional `codex-django-cli>=0.4.0,<0.5.0`.
 
 ### Fixed
 
@@ -29,6 +30,7 @@ All notable changes to this project will be documented in this file.
 - Corrected type annotations for cabinet resource normalization and dynamic forms, and messaging settings showcase data.
 - Limited source distributions to project files so temporary environments and generated workspace artifacts are excluded.
 - Corrected Russian cabinet guide links to the English API reference.
+- Updated scaffolding examples to the companion CLI's supported `init` flags and interactive `menu` command.
 
 ## [0.6.6] - 2026-04-28
 

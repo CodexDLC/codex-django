@@ -10,18 +10,22 @@ Example in an installed project app's `cabinet.py`, assuming its `Category` mode
 
 ```python
 from codex_django.cabinet import (
-    CabinetResource, CabinetResourceListColumn, cabinet_resource_registry,
+    CabinetResource,
+    CabinetResourceListColumn,
+    cabinet_resource_registry,
 )
 from .models import Category
 
-cabinet_resource_registry.register(CabinetResource(
-    key="catalog_categories",
-    model=Category,
-    section="catalog",
-    title="Categories",
-    list_columns=[CabinetResourceListColumn("name", searchable=True)],
-    form_fields=["name"],
-))
+cabinet_resource_registry.register(
+    CabinetResource(
+        key="catalog_categories",
+        model=Category,
+        section="catalog",
+        title="Categories",
+        list_columns=[CabinetResourceListColumn("name", searchable=True)],
+        form_fields=["name"],
+    )
+)
 ```
 
 With library routes included in the project's `cabinet` namespace, reverse `cabinet:resource_list` using `resource_key="catalog_categories"`. Register navigation separately through `declare`; resource registration does not choose the project's menu composition.

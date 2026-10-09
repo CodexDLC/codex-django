@@ -8,7 +8,7 @@ Every major `codex-django-cli` command translates a developer intention into one
 
 Typical flow:
 
-1. Choose a command such as `init`, `add-client-cabinet`, `add-booking`, or `add-notifications`.
+1. Use `init` with module flags such as `--with-booking` and `--with-messaging`, or select modules through `menu`.
 2. The command resolves the relevant blueprint family.
 3. `CLIEngine` renders templates and copies static assets into the target project.
 4. The command prints follow-up integration steps you still need to apply manually.

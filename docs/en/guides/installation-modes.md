@@ -32,14 +32,12 @@ Use the companion CLI package when you want to generate a new project or add fea
 ```bash
 pip install "codex-django[cli]"
 # or: pip install codex-django-cli
-codex-django init myproject
-codex-django add-client-cabinet --project myproject
-codex-django add-booking --project myproject
-codex-django add-notifications --app system --project myproject
+codex-django init myproject --with-booking --with-messaging
+codex-django menu
 ```
 
 The CLI is no longer part of the runtime distribution.
-Treat it as project-construction tooling that depends on `codex-django`, not as business runtime code bundled into the same package.
+The CLI is a standalone generator; its generated projects depend on `codex-django`. The runtime package's optional `[cli]` extra installs the generator alongside the runtime.
 
 ## Contributor Mode
 
