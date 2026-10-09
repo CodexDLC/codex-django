@@ -18,7 +18,8 @@ This keeps the top-level API navigation usable while still making the real sourc
 
 - `codex_django.core`
 - `codex_django.system`
-- `codex_django.notifications`
+- `codex_django.messaging`
+- `codex_django.notifications` (deprecated compatibility facade)
 - `codex_django.tracking`
 - `codex_django.booking`
 - `codex_django.cabinet`

@@ -17,11 +17,12 @@ Runtime-слой это то, что Django-приложение реально 
 
 - `codex_django.core`
 - `codex_django.system`
+- `codex_django.messaging`
 - `codex_django.notifications`
 - `codex_django.booking`
 - `codex_django.cabinet`
 
-Здесь находятся переиспользуемые модели, mixins, selectors, adapters, Redis helpers, templates и integration points.
+Здесь находятся переиспользуемые модели, mixins, selectors, adapters, Redis helpers, templates и integration points. `codex_django.notifications` теперь compatibility-only; новые messaging integrations должны импортировать `codex_django.messaging`.
 
 ## CLI Package
 
@@ -46,6 +47,8 @@ Generated code при этом может продолжать импортир�
 
 Если вопрос звучит как "что мой Django app импортирует в runtime?", оставайтесь в runtime modules.
 Если вопрос звучит как "какая команда создает или расширяет эту структуру?", переходите в документацию и исходники `codex-django-cli`.
+
+Обратите внимание, что установщик агентских навыков (`python -m codex_django.agent_skills`) входит в сам runtime-пакет `codex-django`; он полностью автономен (offline) и не требует ни companion-пакета CLI, ни настройки Django. См. [Гайд по агентским навыкам](./agent-skills.md).
 
 ## Связанные Страницы
 

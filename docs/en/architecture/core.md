@@ -112,7 +112,7 @@ flowchart TD
 ## Design Role In The Repository
 
 `core` is the foundation layer for framework-level reuse.
-If another package describes a business capability such as booking or notifications, `core` describes the shared mechanics that make those capabilities easier to integrate into a Django project.
+If another package describes a business capability such as booking or messaging, `core` describes the shared mechanics that make those capabilities easier to integrate into a Django project.
 
 That is why `core` mixes multiple concerns that would otherwise feel unrelated:
 they are all project-wide concerns rather than feature-specific ones.
@@ -121,4 +121,4 @@ they are all project-wide concerns rather than feature-specific ones.
 
 - `system` for project state, settings, fixtures, and broader infrastructure mixins
 - `booking` for booking-specific model mixins and adapters built on top of shared infrastructure
-- `notifications` for delivery-specific notification orchestration
+- `messaging` for delivery-specific message orchestration

@@ -101,7 +101,7 @@ It sits between infrastructure and cabinet UI:
 - it depends on shared Redis and cabinet primitives from the rest of the runtime
 - it exposes a ready-to-wire analytics feature for generated or hand-built Django projects
 
-That makes it similar to `booking` or `notifications`: it is a reusable domain runtime with its own models, settings, selectors, and cabinet entrypoints.
+That makes it similar to `booking` or `messaging`: it is a reusable domain runtime with its own models, settings, selectors, and cabinet entrypoints.
 
 ## See Also
 

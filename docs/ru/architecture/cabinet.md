@@ -21,7 +21,7 @@
 
 `cabinet` устроен иначе, чем остальные верхнеуровневые пакеты:
 
-- `core`, `system`, `booking` и `notifications` в основном дают backend-примитивы
+- `core`, `system`, `booking` и `messaging` в основном дают backend-примитивы
 - `cabinet` дает переиспользуемую application surface с правилами UI-композиции
 
 Он все еще является частью библиотеки, но по поведению больше похож на упакованное mini-application, чем на простой utility module.
@@ -230,7 +230,7 @@ flowchart TD
 
 - `system` может давать настройки и контент, которые cabinet показывает или редактирует
 - `booking` может регистрировать cabinet sections и dashboard widgets для scheduling-сценариев
-- `notifications` может добавлять метрики или actions, связанные с коммуникациями
+- `messaging` может добавлять метрики или actions, связанные с коммуникациями
 - `core` дает базовый Redis layer, на котором построены cabinet-specific managers
 
 ## См. Также

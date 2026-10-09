@@ -4,7 +4,9 @@
 
 ## When To Use It
 
-Use `notifications` when your project needs email content models, message payload builders, delivery adapters, and optional ARQ-backed background dispatch.
+Do not use `notifications` for new code. It remains as a deprecated compatibility path for projects that have not yet migrated to `codex_django.messaging`.
+
+Use [Messaging Guide](messaging.md) for new email content models, payload builders, delivery adapters, audience batching, and cabinet bridge contracts.
 
 ## Add The Scaffold
 
@@ -28,11 +30,15 @@ If your ARQ client should live outside the default location, pass `--arq-dir`.
 
 ## Runtime Entry Points
 
-- `codex_django.notifications`
-- `codex_django.notifications.adapters`
-- `codex_django.notifications.mixins`
+- Legacy: `codex_django.notifications`
+- Canonical replacement: `codex_django.messaging`
+- Canonical adapters: `codex_django.messaging.adapters`
+- Canonical mixins: `codex_django.messaging.mixins`
+
+Legacy package-level imports emit `DeprecationWarning`, but old imports remain usable during the deprecation window.
 
 ## Related Reading
 
-- Architecture: `notifications`
-- API reference: `codex_django.notifications`
+- Architecture: `messaging`
+- API reference: `codex_django.messaging`
+- Compatibility API: `codex_django.notifications`

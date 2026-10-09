@@ -21,7 +21,7 @@ pip install "codex-django[admin,observability]"
 pip install "codex-django[dev]"
 ```
 
-This mode is for teams consuming the runtime modules such as `core`, `system`, `booking`, `notifications`, and `cabinet`.
+This mode is for teams consuming runtime modules such as `core`, `system`, `booking`, `messaging`, and `cabinet`.
 The base install intentionally avoids debug toolbar, admin-theme, and metrics packages; install `admin` for `django-unfold`,
 `observability` for `django-prometheus`, and `dev` for contributor/debug tooling.
 

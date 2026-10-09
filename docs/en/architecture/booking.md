@@ -154,12 +154,12 @@ That makes it different from:
 
 - `core`, which provides shared infrastructure primitives
 - `system`, which provides project-state models and admin workflows
-- `notifications`, which handles message dispatch around domain events
+- `messaging`, which handles message dispatch around domain events
 
 `booking` sits closer to business behavior than those modules, but it still remains an adapter library rather than a full concrete booking application.
 
 ## See Also
 
-- `notifications` for confirmation and reminder workflows built on top of booking events
+- `messaging` for confirmation and reminder workflows built on top of booking events
 - `system` for site-facing project state that remains outside booking runtime math
 - `codex-services` for the actual slot-finding and chain-solving engine this module integrates with

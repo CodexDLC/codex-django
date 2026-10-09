@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- Added an offline agent skills installer and payload (`python -m codex_django.agent_skills`) to manage project-local `.agents/skills/codex-django` and bounded root `AGENTS.md` instructions with manifest tracking and transaction rollback.
+- Added the new canonical package `codex_django.messaging` with runtime orchestration, registry decorators, abstract messaging models, cabinet bridge contracts, audience streaming, and campaign batching primitives.
+- Added `email_template(...)` and `email_rendered(...)` decorator helpers on top of the shared event registry.
+- Added reusable abstract models for email settings, recipients, logs, threads, messages, replies, campaigns, and campaign recipients.
+- Added `EmailSettingsRedisManager` plus `SETTINGS_HASH_KEY = "email_settings"` for worker-readable email settings sync.
+- Added EN/RU messaging guide and architecture docs plus EN API reference pages.
+- Added a registry-backed cabinet resource framework with model-driven list and form views, permission checks, and reusable templates.
+- Added optional smart-create preview, status, and publish routes backed by a project-provided handler.
+- Added cabinet field help tooltips and bundled tooltip assets for the cabinet UI.
+
+### Changed
+
+- `codex_django.messaging` is now the canonical public import surface for Django-side messaging integrations.
+- `codex_django.notifications` now serves as a deprecating compatibility facade for one minor release.
+- `MESSAGING_RECIPIENT_MODEL` is the preferred setting name for audience model resolution; `CONVERSATIONS_RECIPIENT_MODEL` remains as a compatibility fallback during the deprecation window.
+- Updated locked dependencies with available security fixes within the existing package constraints and removed obsolete vulnerability audit exceptions.
+
+### Fixed
+
+- Email settings synchronization uses the supported Redis hash operation and serializes empty values before writing.
+- Corrected type annotations for cabinet resource normalization and dynamic forms, and messaging settings showcase data.
+- Limited source distributions to project files so temporary environments and generated workspace artifacts are excluded.
+- Corrected Russian cabinet guide links to the English API reference.
+
 ## [0.6.6] - 2026-04-28
 
 ### Fixed

@@ -88,7 +88,8 @@ print(result.get_unique_start_times())
 
 - `cabinet`: user-facing dashboard pages, profile/settings views, and cabinet adapters.
 - `booking`: booking app scaffolds, booking settings, cabinet booking pages, and booking templates.
-- `notifications`: notification content models, service hooks, and ARQ client scaffolding.
+- `messaging`: content models, dispatch hooks, campaign primitives, and queue/direct delivery adapters.
+- `notifications`: deprecated compatibility import path for older notification integrations.
 
 ## Modules
 
@@ -96,17 +97,38 @@ print(result.get_unique_start_times())
 | :--- | :--- | :--- |
 | `codex_django.core` | - | Shared Django infrastructure: mixins, SEO access path, i18n helpers, sitemap base, Redis managers. |
 | `codex_django.system` | - | Project-state models and admin workflows: site settings, static content, integrations, fixture orchestration. |
-| `codex_django.notifications` | - | Django notification orchestration: content selector, payload builder, queue/direct adapters. |
+| `codex_django.messaging` | - | Canonical Django messaging orchestration: selectors, payload builders, queue/direct adapters, campaigns, and cabinet contracts. |
+| `codex_django.notifications` | compat only | Deprecated forwarding layer to `codex_django.messaging`; old imports continue during the migration window. |
 | `codex_django.booking` | - | Django adapter layer over `codex-services` booking engine: model mixins, availability adapter, booking selectors. |
 | `codex_django.cabinet` | - | Reusable cabinet/dashboard framework with registry-based navigation, widgets, and cached settings. |
 | `codex_django.cli` | compat only | Temporary forwarding layer to `codex-django-cli`; not part of the long-term runtime surface. |
 | `codex_django.showcase` | - | DEBUG-only showcase layer for demo screens and generated-project previews backed by mock data. |
+
+## Agent Skills
+
+`codex-django` includes an optional, offline agent skill installer. From the consuming project's root, use the Python environment where `codex-django` is installed:
+
+```bash
+python -m codex_django.agent_skills install --project .
+python -m codex_django.agent_skills status --project .
+```
+
+After upgrading the package, refresh the installed instructions separately:
+
+```bash
+python -m pip install --upgrade codex-django
+python -m codex_django.agent_skills update --project .
+```
+
+The installer manages `.agents/skills/codex-django/` and a bounded block in the project's root `AGENTS.md`. Skill installation is optional for normal Python use and requires neither Django configuration nor the `[cli]` extra. The [Agent Skills Guide](https://codexdlc.github.io/codex-django/en/guides/agent-skills/) covers removal, ownership, and recovery.
 
 ## Documentation
 
 Full docs with architecture, API reference, and generated project structure:
 
 **[https://codexdlc.github.io/codex-django/](https://codexdlc.github.io/codex-django/)**
+
+- [Agent Skills Guide (EN)](https://codexdlc.github.io/codex-django/en/guides/agent-skills/) | [Руководство по агентским навыкам (RU)](https://codexdlc.github.io/codex-django/ru/guides/agent-skills/)
 
 ## Part of the Codex ecosystem
 

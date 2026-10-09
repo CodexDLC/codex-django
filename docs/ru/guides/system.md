@@ -33,7 +33,7 @@
 
 1. `booking` хранит booking defaults через booking settings.
 2. `cabinet` расширяет project-level user profile и dashboard settings.
-3. `notifications` часто размещает content models и orchestration hooks рядом с system-данными.
+3. `messaging` часто размещает content models и orchestration hooks рядом с system-данными.
 
 ## Основные точки входа
 

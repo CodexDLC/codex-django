@@ -1,10 +1,11 @@
 <!-- DOC_TYPE: API -->
 
-# Notifications Public API
+# Notifications Compatibility API
 
-The notifications package exposes the high-level delivery building blocks that projects compose into their own notification service layer.
+`codex_django.notifications` is a deprecated compatibility facade for `codex_django.messaging`.
+Existing imports continue to resolve during the deprecation window, but new code should import from `codex_django.messaging`.
 
-## Stable imports
+## Legacy imports
 
 ```python
 from codex_django.notifications import (
@@ -20,11 +21,22 @@ from codex_django.notifications import (
 )
 ```
 
-## Use cases
+Equivalent canonical imports:
 
-- Build a project-specific notification service on top of `BaseNotificationEngine`.
-- Store localized subjects and content via `BaseEmailContentMixin` and `BaseEmailContentSelector`.
-- Use `BaseEmailContentSelector.cache_key_prefix` when notification content caches need per-feature or per-domain isolation.
-- Choose queue-based or direct-delivery adapters depending on runtime needs.
+```python
+from codex_django.messaging import (
+    BaseMessagingEngine,
+    MessagingPayloadBuilder,
+    BaseEmailContentSelector,
+    BaseEmailContentMixin,
+    DjangoQueueAdapter,
+    DjangoDirectAdapter,
+    DjangoCacheAdapter,
+    DjangoI18nAdapter,
+    DjangoArqClient,
+)
+```
 
-For detailed module docstrings, adapter internals, and selector implementation notes, open [Notifications internals](internal/notifications.md).
+Package-level legacy symbol access emits `DeprecationWarning`. Submodule imports remain available so downstream test suites and older project code can migrate incrementally.
+
+For the canonical API, use [Messaging Public API](messaging.md).

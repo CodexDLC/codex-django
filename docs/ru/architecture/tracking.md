@@ -101,7 +101,7 @@ flowchart TD
 - использует общие Redis- и cabinet-примитивы остального runtime
 - отдает готовую analytics-функциональность для generated и hand-built Django-проектов
 
-Поэтому по роли он ближе к `booking` и `notifications`: это переиспользуемый доменный runtime со своими моделями, настройками, selectors и cabinet entrypoint-ами.
+Поэтому по роли он ближе к `booking` и `messaging`: это переиспользуемый доменный runtime со своими моделями, настройками, selectors и cabinet entrypoint-ами.
 
 ## См. также
 

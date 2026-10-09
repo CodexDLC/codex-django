@@ -95,7 +95,7 @@ flowchart TD
 
 ## Роль В Репозитории
 
-`showcase` не является частью core runtime architecture в том же смысле, что `core`, `system`, `booking`, `notifications` или `cabinet`.
+`showcase` не является частью core runtime architecture в том же смысле, что `core`, `system`, `booking`, `messaging` или `cabinet`.
 Это демонстрационный companion-layer.
 
 Его роль отвечает на вопрос:
@@ -112,7 +112,7 @@ flowchart TD
 
 - `cabinet` дает реальную reusable dashboard architecture; showcase показывает cabinet-подобные экраны на mock data
 - `booking` дает runtime booking integration layer; showcase визуализирует booking-страницы и состояния
-- `system` и `notifications` влияют на те страницы и сценарии, которые позже могут быть показаны внутри showcase
+- `system` и `messaging` влияют на те страницы и сценарии, которые позже могут быть показаны внутри showcase
 
 ## См. Также
 

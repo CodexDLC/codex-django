@@ -6,6 +6,7 @@
 
 - [Core](./core.md)
 - [System](./system.md)
+- [Messaging](./messaging.md)
 - [Notifications](./notifications.md)
 - [Tracking](./tracking.md)
 - [Booking](./booking.md)

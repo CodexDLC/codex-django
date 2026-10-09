@@ -323,5 +323,5 @@ CSS-токены клиентского пространства переопр�
 ## Связанные Разделы
 
 - Архитектура: [Модуль Cabinet](../architecture/cabinet.md)
-- API reference: [Cabinet Public API](../api/cabinet.md)
-- Внутренности: [Cabinet Internal Modules](../api/internal/cabinet.md)
+- API reference: [Cabinet Public API](../../en/api/cabinet.md)
+- Внутренности: [Cabinet Internal Modules](../../en/api/internal/cabinet.md)

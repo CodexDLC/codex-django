@@ -163,5 +163,5 @@ This gives the repository a separation of responsibilities:
 ## See Also
 
 - `core` for the lower-level Redis, SEO, i18n, and template infrastructure that `system` builds on
-- `notifications` for delivery workflows that may depend on system-level credentials and settings
+- `messaging` for delivery workflows that may depend on system-level credentials and settings
 - `cabinet` for UI-oriented administrative and personal dashboard functionality

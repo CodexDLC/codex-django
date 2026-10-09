@@ -4,7 +4,7 @@
 
 Деревья blueprints теперь принадлежат `codex-django-cli`.
 
-При этом они по-прежнему концептуально связаны с `codex-django`, потому что generated code намеренно импортирует runtime-модули вроде `codex_django.system`, `codex_django.booking` и `codex_django.notifications`.
+При этом они по-прежнему концептуально связаны с `codex-django`, потому что generated code намеренно импортирует runtime-модули вроде `codex_django.system`, `codex_django.booking` и `codex_django.messaging`. Старый generated notification code может временно импортировать `codex_django.notifications` в compatibility window.
 
 ## Что Важно Со Стороны Runtime
 

@@ -1,25 +1,18 @@
 <!-- DOC_TYPE: API -->
 
-# Notifications Internal Modules
+# Notifications Compatibility Internals
 
-These pages expose the implementation pieces behind notification delivery: selectors, queue adapters, rendering modes, and payload construction.
+These pages document the legacy import paths that now forward to `codex_django.messaging`.
+Use [Messaging internals](messaging.md) for the canonical implementation docs.
 
-## Cache adapter
+## Package facade
 
-::: codex_django.notifications.adapters.cache_adapter
+::: codex_django.notifications
 
-## Direct adapter
+## Compatibility modules
 
-::: codex_django.notifications.adapters.direct_adapter
-
-## i18n adapter
-
-::: codex_django.notifications.adapters.i18n_adapter
-
-## Queue adapter
-
-::: codex_django.notifications.adapters.queue_adapter
-
-## ARQ client adapter
-
-::: codex_django.notifications.adapters.arq_client
+::: codex_django.notifications.registry
+::: codex_django.notifications.service
+::: codex_django.notifications.builder
+::: codex_django.notifications.selector
+::: codex_django.notifications.contracts

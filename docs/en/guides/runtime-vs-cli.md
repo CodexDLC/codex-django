@@ -17,11 +17,12 @@ The runtime layer is what your Django app imports and executes:
 
 - `codex_django.core`
 - `codex_django.system`
+- `codex_django.messaging`
 - `codex_django.notifications`
 - `codex_django.booking`
 - `codex_django.cabinet`
 
-These modules define reusable models, mixins, selectors, adapters, Redis helpers, templates, and integration points.
+These modules define reusable models, mixins, selectors, adapters, Redis helpers, templates, and integration points. `codex_django.notifications` is compatibility-only; new messaging integrations should import `codex_django.messaging`.
 
 ## CLI Package
 
@@ -46,6 +47,8 @@ Generated code may still import `codex_django.*`, which is expected because blue
 
 If the question is "what does my Django app import at runtime?", stay in the runtime modules.
 If the question is "what command creates or extends this structure?", move into `codex-django-cli` documentation and source.
+
+Note that the agent skills installer (`python -m codex_django.agent_skills`) is part of the runtime package `codex-django` itself; it is fully offline and requires neither the companion CLI package nor Django configuration. See the [Agent Skills Guide](./agent-skills.md).
 
 ## Related Pages
 

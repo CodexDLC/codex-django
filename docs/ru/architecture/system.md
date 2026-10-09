@@ -164,5 +164,5 @@ flowchart TD
 ## См. Также
 
 - `core` для нижележащей Redis-, SEO-, i18n- и template-инфраструктуры, на которой строится `system`
-- `notifications` для delivery workflow, которые могут зависеть от system-level credentials и settings
+- `messaging` для delivery workflow, которые могут зависеть от system-level credentials и settings
 - `cabinet` для UI-ориентированного административного и пользовательского dashboard-слоя

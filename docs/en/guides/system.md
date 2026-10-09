@@ -33,7 +33,7 @@ Use `SingletonFixtureUpdateCommand` for one-row project state such as `SiteSetti
 
 1. `booking` stores booking defaults through booking settings.
 2. `cabinet` extends project-level user profile and dashboard settings.
-3. `notifications` often places content models or orchestration hooks alongside system data.
+3. `messaging` often places content models or orchestration hooks alongside system data.
 
 ## Runtime Entry Points
 

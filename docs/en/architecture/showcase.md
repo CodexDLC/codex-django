@@ -13,7 +13,7 @@ In practice, showcase acts as a visual sandbox for:
 - cabinet screens
 - booking screens
 - analytics views
-- clients, staff, catalog, and conversations mock interfaces
+- clients, staff, catalog, and messaging mock interfaces
 
 This makes it useful as a presentation surface, a design reference, and a development aid when real project data is not yet wired in.
 
@@ -48,7 +48,7 @@ It contains in-memory structures for:
 
 - staff
 - clients
-- conversations
+- messaging inbox and delivery views
 - booking schedule and appointments
 - reports
 - catalog data
@@ -67,7 +67,7 @@ Examples include:
 - cabinet dashboard
 - staff and client directories
 - booking pages
-- conversation views
+- messaging views
 - reports
 - catalog
 - site settings previews
@@ -95,7 +95,7 @@ flowchart TD
 
 ## Role In The Repository
 
-`showcase` is not part of the core runtime architecture in the same way as `core`, `system`, `booking`, `notifications`, or `cabinet`.
+`showcase` is not part of the core runtime architecture in the same way as `core`, `system`, `booking`, `messaging`, or `cabinet`.
 It is a demonstration companion layer.
 
 Its role is to answer the question:
@@ -112,7 +112,7 @@ That makes it especially useful for:
 
 - `cabinet` provides the reusable dashboard architecture; showcase demonstrates cabinet-like screens with mock data
 - `booking` provides the runtime booking integration layer; showcase visualizes booking-oriented pages and states
-- `system` and `notifications` influence the kinds of pages that can later be represented in showcase demos
+- `system` and `messaging` influence the kinds of pages that can later be represented in showcase demos
 
 ## See Also
 

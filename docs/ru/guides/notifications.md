@@ -4,7 +4,9 @@
 
 ## Когда использовать
 
-Используйте `notifications`, когда проекту нужны email content models, builders для payload, delivery adapters и при необходимости ARQ-backed background dispatch.
+Не используйте `notifications` для нового кода. Этот пакет остался deprecated compatibility path для проектов, которые еще не перешли на `codex_django.messaging`.
+
+Для новых email content models, payload builders, delivery adapters, audience batching и cabinet bridge contracts используйте [Messaging Guide](messaging.md).
 
 ## Добавление scaffold
 
@@ -28,11 +30,15 @@ codex-django add-notifications --app system --project myproject
 
 ## Основные точки входа
 
-- `codex_django.notifications`
-- `codex_django.notifications.adapters`
-- `codex_django.notifications.mixins`
+- Legacy: `codex_django.notifications`
+- Canonical replacement: `codex_django.messaging`
+- Canonical adapters: `codex_django.messaging.adapters`
+- Canonical mixins: `codex_django.messaging.mixins`
+
+Package-level legacy imports выбрасывают `DeprecationWarning`, но старые import paths остаются рабочими на время deprecation window.
 
 ## Связанные разделы
 
-- Architecture: `notifications`
-- API reference: `codex_django.notifications`
+- Architecture: `messaging`
+- API reference: `codex_django.messaging`
+- Compatibility API: `codex_django.notifications`

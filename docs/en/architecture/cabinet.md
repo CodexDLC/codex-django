@@ -21,7 +21,7 @@ So the module acts as both a UI shell and an extension framework for administrat
 
 Cabinet sits differently from the other top-level packages:
 
-- `core`, `system`, `booking`, and `notifications` mostly provide reusable backend primitives
+- `core`, `system`, `booking`, and `messaging` mostly provide reusable backend primitives
 - `cabinet` provides a reusable application surface with UI composition rules
 
 It is still part of the library, but it behaves more like a packaged mini-application than like a simple utility module.
@@ -229,7 +229,7 @@ It is still a library component, but one that provides a full compositional UI f
 
 - `system` can provide settings and content that cabinet surfaces or edits
 - `booking` can register cabinet sections and dashboard widgets for scheduling workflows
-- `notifications` can contribute metrics or settings-related actions
+- `messaging` can contribute metrics or settings-related actions
 - `core` provides the Redis base layer that cabinet-specific managers build on
 
 ## See Also

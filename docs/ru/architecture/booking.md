@@ -149,12 +149,12 @@ flowchart TD
 
 - `core`, который дает общие инфраструктурные примитивы
 - `system`, который дает project-state models и admin workflow
-- `notifications`, который занимается dispatch уведомлений вокруг доменных событий
+- `messaging`, который занимается dispatch сообщений вокруг доменных событий
 
 `booking` расположен ближе к предметному поведению, чем эти модули, но при этом все еще остается adapter library, а не готовым конечным booking-приложением.
 
 ## См. Также
 
-- `notifications` для confirmation и reminder workflow поверх booking events
+- `messaging` для confirmation и reminder workflow поверх booking events
 - `system` для settings models, которые могут хранить project-level booking defaults
 - `codex-services` для самого slot-finding и chain-solving engine, с которым интегрируется этот модуль

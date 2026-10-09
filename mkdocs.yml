@@ -71,10 +71,12 @@ nav:
       - Runtime vs CLI: en/guides/runtime-vs-cli.md
       - Project Structure: en/guides/project-structure.md
       - Blueprint Workflow: en/guides/blueprints-and-scaffolding.md
+      - Agent Skills: en/guides/agent-skills.md
       - Module Guides:
           - Booking: en/guides/booking.md
           - Cabinet: en/guides/cabinet.md
           - Site Settings: en/guides/cabinet-settings.md
+          - Messaging: en/guides/messaging.md
           - Notifications: en/guides/notifications.md
           - System: en/guides/system.md
           - Redis Cache and Session: en/guides/redis.md
@@ -82,6 +84,7 @@ nav:
           - Overview: en/architecture/README.md
           - Core: en/architecture/core.md
           - System: en/architecture/system.md
+          - Messaging: en/architecture/messaging.md
           - Notifications: en/architecture/notifications.md
           - Tracking: en/architecture/tracking.md
           - Booking: en/architecture/booking.md
@@ -95,10 +98,12 @@ nav:
       - Runtime и CLI: ru/guides/runtime-vs-cli.md
       - Структура проекта: ru/guides/project-structure.md
       - Работа с blueprints: ru/guides/blueprints-and-scaffolding.md
+      - Агентские навыки: ru/guides/agent-skills.md
       - Гайды по модулям:
           - Booking: ru/guides/booking.md
           - Cabinet: ru/guides/cabinet.md
           - Site Settings: ru/guides/cabinet-settings.md
+          - Messaging: ru/guides/messaging.md
           - Notifications: ru/guides/notifications.md
           - System: ru/guides/system.md
           - Redis Cache и Session: ru/guides/redis.md
@@ -106,6 +111,7 @@ nav:
           - Обзор: ru/architecture/README.md
           - Core: ru/architecture/core.md
           - System: ru/architecture/system.md
+          - Messaging: ru/architecture/messaging.md
           - Notifications: ru/architecture/notifications.md
           - Tracking: ru/architecture/tracking.md
           - Booking: ru/architecture/booking.md
@@ -117,6 +123,7 @@ nav:
       - Public API:
           - Core: en/api/core.md
           - System: en/api/system.md
+          - Messaging: en/api/messaging.md
           - Notifications: en/api/notifications.md
           - Tracking: en/api/tracking.md
           - Booking: en/api/booking.md
@@ -125,6 +132,7 @@ nav:
       - Internal Modules:
           - Core internals: en/api/internal/core.md
           - System internals: en/api/internal/system.md
+          - Messaging internals: en/api/internal/messaging.md
           - Notifications internals: en/api/internal/notifications.md
           - Tracking internals: en/api/internal/tracking.md
           - Booking internals: en/api/internal/booking.md
