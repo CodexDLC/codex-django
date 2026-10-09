@@ -36,6 +36,25 @@ document.body.addEventListener('htmx:afterSettle', syncSidebarLinks);
 document.addEventListener('DOMContentLoaded', syncSidebarLinks);
 window.addEventListener('popstate', syncSidebarLinks);
 
+function initCabinetTooltips(root = document) {
+    if (typeof window.tippy !== 'function') return;
+    root.querySelectorAll('[data-tippy-content]').forEach((element) => {
+        if (element._tippy) return;
+        window.tippy(element, {
+            allowHTML: false,
+            animation: 'shift-away-subtle',
+            delay: [120, 0],
+            interactive: true,
+            maxWidth: 320,
+            placement: element.dataset.tippyPlacement || 'top',
+            theme: element.dataset.tippyTheme || 'cabinet',
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => initCabinetTooltips());
+document.body.addEventListener('htmx:afterSettle', (evt) => initCabinetTooltips(evt.target || document));
+
 // Alpine components for Widgets
 document.addEventListener('alpine:init', () => {
     Alpine.data('chartWidget', (config) => ({

@@ -1,0 +1,53 @@
+{% extends "cabinet/base_cabinet.html" %}
+
+{% block title %}Messaging Settings{% endblock %}
+
+{% block cabinet_content %}
+<div class="row g-4">
+  <div class="col-xl-8">
+    <div class="alert alert-primary border-0 shadow-sm mb-4" role="alert">
+      <div class="fw-semibold mb-1">Messaging settings are now a dedicated module</div>
+      <div style="font-size:.9rem;">
+        This screen mirrors the new <code>AbstractEmailSettings</code> direction. SMTP credentials and provider secrets stay in environment variables and do not live in site settings.
+      </div>
+    </div>
+
+    {% for section in settings_state.sections %}
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white border-0 pt-3 pb-0">
+        <h6 class="fw-semibold mb-0">{{ section.title }}</h6>
+      </div>
+      <div class="card-body d-flex flex-column gap-3">
+        {% for field_name in section.fields %}
+        <div>
+          <label class="form-label text-muted mb-1" style="font-size:.8rem;">{{ field_name }}</label>
+          <input type="text" class="form-control form-control-sm" value="{{ settings_state.values|get_item:field_name }}">
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="col-xl-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 pt-3 pb-0">
+        <h6 class="fw-semibold mb-0">Migration Notes</h6>
+      </div>
+      <div class="card-body" style="font-size:.9rem;color:#475569;">
+        <p class="mb-2">Canonical runtime package:</p>
+        <p><code>codex_django.messaging</code></p>
+        <p class="mb-2">Deprecated compatibility package:</p>
+        <p><code>codex_django.notifications</code></p>
+        <hr>
+        <p class="mb-2">Settings expected in project code:</p>
+        <ul class="mb-0 ps-3">
+          <li><code>MESSAGING_RECIPIENT_MODEL</code></li>
+          <li><code>EmailSettings(AbstractEmailSettings)</code></li>
+          <li>Redis sync via <code>EmailSettingsSyncMixin</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

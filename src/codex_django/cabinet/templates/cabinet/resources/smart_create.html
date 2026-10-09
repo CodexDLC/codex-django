@@ -1,0 +1,209 @@
+{% extends "cabinet/base_cabinet.html" %}
+{% load cabinet_tags %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block cabinet_content %}
+  {% include "cabinet/includes/_page_header.html" with title=title subtitle=resource.title btn_label="Back" btn_url=list_url btn_icon="bi-arrow-left" %}
+
+  <div class="cab-resource-smart" data-smart-create>
+    <form method="post" action="{{ preview_url }}" data-smart-source-form>
+      {% csrf_token %}
+      <div class="row g-3">
+        {% for field in form %}
+          <div class="col-12">
+            {% with tooltip=field.field.widget.attrs|get_item:"data-cab-field-tooltip" %}
+            {% if field.field.widget.input_type == "checkbox" %}
+              <div class="form-check">
+                {{ field }}
+                <label class="form-check-label cab-field-label" for="{{ field.id_for_label }}">
+                  {{ field.label }}
+                  {% if tooltip %}
+                    <button type="button"
+                            class="cab-field-tooltip"
+                            data-tippy-content="{{ tooltip }}"
+                            aria-label="Field help">
+                      <i class="bi bi-info-circle"></i>
+                    </button>
+                  {% endif %}
+                </label>
+              </div>
+            {% else %}
+              <label class="form-label cab-field-label" for="{{ field.id_for_label }}">
+                {{ field.label }}
+                {% if tooltip %}
+                  <button type="button"
+                          class="cab-field-tooltip"
+                          data-tippy-content="{{ tooltip }}"
+                          aria-label="Field help">
+                    <i class="bi bi-info-circle"></i>
+                  </button>
+                {% endif %}
+              </label>
+              {{ field }}
+            {% endif %}
+            {% endwith %}
+            {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="d-flex align-items-center gap-2 mt-4">
+        <button type="submit" class="btn btn-primary" data-smart-preview-button>
+          <i class="bi bi-stars"></i>
+          Preview
+        </button>
+        <span class="text-muted small" data-smart-status-text></span>
+      </div>
+    </form>
+
+    <div class="mt-4" data-smart-error hidden></div>
+    <div class="mt-4" data-smart-panels></div>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script>
+    (() => {
+      const root = document.querySelector("[data-smart-create]");
+      if (!root) return;
+
+      const form = root.querySelector("[data-smart-source-form]");
+      const button = root.querySelector("[data-smart-preview-button]");
+      const statusText = root.querySelector("[data-smart-status-text]");
+      const panels = root.querySelector("[data-smart-panels]");
+      const errorBox = root.querySelector("[data-smart-error]");
+      let publishUrl = "";
+      let pollTimer = null;
+
+      const csrfToken = () => form.querySelector("input[name=csrfmiddlewaretoken]")?.value || "";
+
+      const showError = (message) => {
+        errorBox.hidden = false;
+        errorBox.className = "alert alert-danger mt-4";
+        errorBox.textContent = message;
+      };
+
+      const setStatus = (message) => {
+        statusText.textContent = message || "";
+      };
+
+      const fieldName = (language, name) => `languages.${language}.${name}`;
+
+      const renderPanels = (languages) => {
+        panels.replaceChildren();
+        languages.forEach((languageState) => {
+          const card = document.createElement("section");
+          card.className = "border rounded-2 p-3 mb-3 bg-white";
+
+          const header = document.createElement("div");
+          header.className = "d-flex justify-content-between align-items-center mb-3";
+          const title = document.createElement("h6");
+          title.className = "mb-0";
+          title.textContent = languageState.language;
+          const badge = document.createElement("span");
+          badge.className = "badge bg-secondary";
+          badge.textContent = languageState.status;
+          header.append(title, badge);
+          card.appendChild(header);
+
+          if (languageState.error) {
+            const error = document.createElement("div");
+            error.className = "alert alert-danger";
+            error.textContent = languageState.error;
+            card.appendChild(error);
+          }
+
+          Object.entries(languageState.fields || {}).forEach(([name, value]) => {
+            const group = document.createElement("div");
+            group.className = "mb-3";
+            const label = document.createElement("label");
+            label.className = "form-label";
+            label.textContent = name.replaceAll("_", " ");
+            const input = document.createElement(typeof value === "string" && value.length > 120 ? "textarea" : "input");
+            input.className = "form-control";
+            input.name = fieldName(languageState.language, name);
+            input.value = value ?? "";
+            if (input.tagName === "TEXTAREA") input.rows = 5;
+            input.disabled = languageState.user_editable === false;
+            group.append(label, input);
+            card.appendChild(group);
+          });
+
+          panels.appendChild(card);
+        });
+
+        if (languages.some((languageState) => languageState.status === "done") && publishUrl) {
+          const publish = document.createElement("button");
+          publish.type = "button";
+          publish.className = "btn btn-primary";
+          publish.innerHTML = '<i class="bi bi-cloud-upload"></i> Publish';
+          publish.addEventListener("click", submitPublish);
+          panels.appendChild(publish);
+        }
+      };
+
+      const poll = async (statusUrl) => {
+        const response = await fetch(statusUrl, {headers: {"Accept": "application/json"}});
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+          showError(data.error || "Smart-create status failed");
+          return;
+        }
+        setStatus(data.status);
+        renderPanels(data.languages || []);
+        if (["ready", "failed", "stale"].includes(data.status)) {
+          clearInterval(pollTimer);
+        }
+      };
+
+      const submitPublish = async () => {
+        const payload = {};
+        panels.querySelectorAll("input[name], textarea[name]").forEach((input) => {
+          payload[input.name] = input.value;
+        });
+        const response = await fetch(publishUrl, {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken(),
+          },
+          body: JSON.stringify(payload),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+          showError(data.error || "Publish failed");
+          return;
+        }
+        window.location.href = data.edit_url || data.list_url;
+      };
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        clearInterval(pollTimer);
+        errorBox.hidden = true;
+        panels.replaceChildren();
+        button.disabled = true;
+        setStatus("Starting preview...");
+        const response = await fetch(form.action, {
+          method: "POST",
+          headers: {"Accept": "application/json"},
+          body: new FormData(form),
+        });
+        const data = await response.json();
+        button.disabled = false;
+        if (!response.ok || !data.ok) {
+          showError(data.error || "Preview failed");
+          setStatus("");
+          return;
+        }
+        publishUrl = data.publish_url;
+        setStatus("Preview is running...");
+        await poll(data.status_url);
+        pollTimer = setInterval(() => poll(data.status_url), 2500);
+      });
+    })();
+  </script>
+{% endblock %}

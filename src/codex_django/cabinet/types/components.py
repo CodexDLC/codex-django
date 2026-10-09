@@ -154,6 +154,9 @@ class DataTableData:
     filters: list[TableFilter] = field(default_factory=list)
     actions: list[TableAction] = field(default_factory=list)
     search_placeholder: str = ""
+    search_query: str = ""
+    search_param: str = "q"
+    search_action: str = ""
     empty_message: str = "Нет данных"
 
 

@@ -1,33 +1,10 @@
-"""
-codex_django.notifications
-==========================
-Django-specific notification infrastructure for Codex projects.
+"""Deprecated compatibility facade for :mod:`codex_django.messaging`."""
 
-Quick start::
+from __future__ import annotations
 
-    from codex_django.notifications import (
-        DjangoArqClient,
-        DjangoQueueAdapter,
-        DjangoCacheAdapter,
-        DjangoI18nAdapter,
-        BaseEmailContentSelector,
-        BaseNotificationEngine,
-        BaseEmailContentMixin,
-        NotificationPayloadBuilder,
-    )
-"""
+import warnings
 
-from .adapters.arq_client import DjangoArqClient
-from .adapters.cache_adapter import DjangoCacheAdapter
-from .adapters.direct_adapter import DjangoDirectAdapter
-from .adapters.i18n_adapter import DjangoI18nAdapter
-from .adapters.queue_adapter import DjangoQueueAdapter
-from .builder import NotificationPayloadBuilder
-from .contracts import ContentSelectorProtocol, NotificationDispatchSpec, NotificationEventHandler, QueueAdapterProtocol
-from .mixins.models import BaseEmailContentMixin
-from .registry import NotificationEventRegistry, notification_event_registry, notification_handler
-from .selector import BaseEmailContentSelector
-from .service import BaseNotificationEngine
+from codex_django import messaging as _messaging
 
 __all__ = [
     "DjangoArqClient",
@@ -47,3 +24,33 @@ __all__ = [
     "notification_event_registry",
     "notification_handler",
 ]
+
+_ATTRIBUTE_MAP = {
+    "DjangoArqClient": "DjangoArqClient",
+    "DjangoCacheAdapter": "DjangoCacheAdapter",
+    "DjangoDirectAdapter": "DjangoDirectAdapter",
+    "DjangoI18nAdapter": "DjangoI18nAdapter",
+    "DjangoQueueAdapter": "DjangoQueueAdapter",
+    "QueueAdapterProtocol": "QueueAdapterProtocol",
+    "ContentSelectorProtocol": "ContentSelectorProtocol",
+    "NotificationEventHandler": "NotificationEventHandler",
+    "NotificationDispatchSpec": "NotificationDispatchSpec",
+    "NotificationPayloadBuilder": "MessagingPayloadBuilder",
+    "BaseEmailContentMixin": "BaseEmailContentMixin",
+    "BaseEmailContentSelector": "BaseEmailContentSelector",
+    "BaseNotificationEngine": "BaseMessagingEngine",
+    "NotificationEventRegistry": "MessagingEventRegistry",
+    "notification_event_registry": "messaging_event_registry",
+    "notification_handler": "notification_handler",
+}
+
+
+def __getattr__(name: str) -> object:
+    if name not in _ATTRIBUTE_MAP:
+        raise AttributeError(name)
+    warnings.warn(
+        "codex_django.notifications is deprecated; import from codex_django.messaging instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return getattr(_messaging, _ATTRIBUTE_MAP[name])

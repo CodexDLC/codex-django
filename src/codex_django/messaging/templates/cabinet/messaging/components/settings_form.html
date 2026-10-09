@@ -1,0 +1,29 @@
+{% load cabinet_tags %}
+<form method="post" action="{{ messaging_settings.action_url }}" class="vstack gap-4">
+  {% csrf_token %}
+  {% for section in messaging_settings.sections %}
+  <section class="border rounded p-3">
+    <h2 class="h6 mb-1">{{ section.title }}</h2>
+    {% if section.description %}<p class="text-muted small mb-3">{{ section.description }}</p>{% endif %}
+    <div class="row g-3">
+      {% for field in section.fields %}
+      <div class="col-md-6">
+        <label class="form-label" for="messaging-setting-{{ field }}">{{ field }}</label>
+        <input id="messaging-setting-{{ field }}"
+               class="form-control"
+               type="text"
+               name="{{ field }}"
+               value="{{ messaging_settings.values|get_item:field }}">
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% empty %}
+  {% include "cabinet/messaging/components/empty_state.html" with title="No settings" message="Messaging settings sections are not configured." %}
+  {% endfor %}
+  <div class="d-flex justify-content-end">
+    <button class="btn btn-primary" type="submit">
+      <i class="bi bi-save me-1"></i>{{ messaging_settings.submit_label }}
+    </button>
+  </div>
+</form>

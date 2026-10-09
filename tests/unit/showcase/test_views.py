@@ -25,24 +25,33 @@ def test_showcase_index_renders_in_debug_mode():
     mock_render.assert_called_once_with(request, "showcase/index.html")
 
 
-def test_showcase_notifications_views_render_in_debug_mode():
-    log_request = RequestFactory().get("/showcase/notifications/")
-    templates_request = RequestFactory().get("/showcase/notifications/templates/")
+def test_showcase_messaging_views_render_in_debug_mode():
+    inbox_request = RequestFactory().get("/showcase/messaging/")
+    log_request = RequestFactory().get("/showcase/messaging/log/")
+    templates_request = RequestFactory().get("/showcase/messaging/templates/")
+    settings_request = RequestFactory().get("/showcase/messaging/settings/")
 
     with (
         override_settings(DEBUG=True),
-        patch("codex_django.showcase.views.render", return_value=HttpResponse("Notifications Template")) as mock_render,
+        patch("codex_django.showcase.views.render", return_value=HttpResponse("Messaging Template")) as mock_render,
     ):
-        log_response = views.notifications_log_view(log_request)
-        templates_response = views.notifications_templates_view(templates_request)
+        inbox_response = views.messaging_view(inbox_request)
+        log_response = views.messaging_log_view(log_request)
+        templates_response = views.messaging_templates_view(templates_request)
+        settings_response = views.messaging_settings_view(settings_request)
 
+    assert inbox_response.status_code == 200
     assert log_response.status_code == 200
     assert templates_response.status_code == 200
-    assert b"Notifications" in log_response.content
+    assert settings_response.status_code == 200
+    assert b"Messaging" in inbox_response.content
+    assert b"Messaging" in log_response.content
     assert b"Template" in templates_response.content
-    assert mock_render.call_count == 2
-    assert mock_render.call_args_list[0].args[1] == "showcase/cabinet/notifications/log.html"
-    assert mock_render.call_args_list[1].args[1] == "showcase/cabinet/notifications/templates.html"
+    assert mock_render.call_count == 4
+    assert mock_render.call_args_list[0].args[1] == "showcase/cabinet/messaging/index.html"
+    assert mock_render.call_args_list[1].args[1] == "showcase/cabinet/messaging/log.html"
+    assert mock_render.call_args_list[2].args[1] == "showcase/cabinet/messaging/templates.html"
+    assert mock_render.call_args_list[3].args[1] == "showcase/cabinet/messaging/settings.html"
 
 
 @pytest.mark.parametrize(
@@ -52,9 +61,9 @@ def test_showcase_notifications_views_render_in_debug_mode():
         ("/showcase/staff/?segment=active&q=anna", views.staff_view, "showcase/cabinet/staff/index.html"),
         ("/showcase/clients/?segment=vip&q=emma", views.clients_view, "showcase/cabinet/clients/index.html"),
         (
-            "/showcase/conversations/?folder=archived&topic=2&q=follow-up",
-            views.conversations_view,
-            "showcase/cabinet/conversations/index.html",
+            "/showcase/messaging/?folder=all&topic=2&q=follow-up",
+            views.messaging_view,
+            "showcase/cabinet/messaging/index.html",
         ),
         ("/showcase/booking/", views.booking_view, "showcase/cabinet/booking/index.html"),
         (
@@ -89,31 +98,31 @@ def test_showcase_data_views_render_expected_templates(path, view, template):
     assert isinstance(mock_render.call_args.args[2], dict)
 
 
-def test_showcase_conversation_detail_renders_detail_when_found():
-    request = RequestFactory().get("/showcase/conversations/1/")
+def test_showcase_messaging_detail_renders_detail_when_found():
+    request = RequestFactory().get("/showcase/messaging/1/")
 
     with (
         override_settings(DEBUG=True),
         patch("codex_django.showcase.views.render", return_value=HttpResponse("detail")) as mock_render,
     ):
-        response = views.conversation_detail_view(request, pk=1)
+        response = views.messaging_detail_view(request, pk=1)
 
     assert response.status_code == 200
-    assert mock_render.call_args.args[1] == "showcase/cabinet/conversations/_detail.html"
+    assert mock_render.call_args.args[1] == "showcase/cabinet/messaging/_detail.html"
     assert "conv" in mock_render.call_args.args[2]
 
 
-def test_showcase_conversation_detail_renders_empty_when_not_found():
-    request = RequestFactory().get("/showcase/conversations/999/")
+def test_showcase_messaging_detail_renders_empty_when_not_found():
+    request = RequestFactory().get("/showcase/messaging/999/")
 
     with (
         override_settings(DEBUG=True),
         patch("codex_django.showcase.views.render", return_value=HttpResponse("empty")) as mock_render,
     ):
-        response = views.conversation_detail_view(request, pk=999)
+        response = views.messaging_detail_view(request, pk=999)
 
     assert response.status_code == 200
-    mock_render.assert_called_once_with(request, "showcase/cabinet/conversations/_empty.html")
+    mock_render.assert_called_once_with(request, "showcase/cabinet/messaging/_empty.html")
 
 
 def test_showcase_site_settings_redirects_to_default_tab():

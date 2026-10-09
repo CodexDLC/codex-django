@@ -1,0 +1,18 @@
+<nav class="list-group list-group-flush">
+  {% for folder in mailbox.folders %}
+  <a class="list-group-item list-group-item-action d-flex align-items-center justify-content-between {% if folder.active %}active{% endif %}"
+     href="{{ folder.url }}">
+    <span>
+      {% if folder.icon %}<i class="bi {{ folder.icon }} me-2"></i>{% endif %}
+      {{ folder.label }}
+    </span>
+    {% if folder.count %}
+    <span class="badge rounded-pill {% if folder.active %}bg-light text-dark{% else %}bg-secondary{% endif %}">
+      {{ folder.count }}
+    </span>
+    {% endif %}
+  </a>
+  {% empty %}
+  {% include "cabinet/messaging/components/empty_state.html" with title="No folders" message="Mailbox folders are not configured." %}
+  {% endfor %}
+</nav>

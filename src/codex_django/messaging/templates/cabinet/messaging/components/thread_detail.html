@@ -1,0 +1,37 @@
+{% if mailbox.selected and mailbox.selected.thread %}
+<section class="h-100 d-flex flex-column">
+  <header class="border-bottom pb-3 mb-3">
+    <div class="d-flex justify-content-between gap-3">
+      <div>
+        <h2 class="h5 mb-1">{{ mailbox.selected.thread.subject }}</h2>
+        <div class="text-muted small">
+          {{ mailbox.selected.thread.sender_label|default:mailbox.selected.thread.sender_email }}
+          {% if mailbox.selected.thread.status_label %} · {{ mailbox.selected.thread.status_label }}{% endif %}
+        </div>
+      </div>
+      {% if mailbox.selected.actions %}
+      <div class="d-flex gap-2 flex-wrap justify-content-end">
+        {% for action in mailbox.selected.actions %}
+        <form method="{{ action.method }}" action="{{ action.url }}">
+          {% csrf_token %}
+          <button class="btn btn-sm btn-{{ action.variant }}" {% if action.confirm %}data-confirm="{{ action.confirm }}"{% endif %}>
+            {% if action.icon %}<i class="bi {{ action.icon }} me-1"></i>{% endif %}{{ action.label }}
+          </button>
+        </form>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </header>
+  <div class="flex-grow-1 overflow-auto pe-1">
+    {% for message in mailbox.selected.messages %}
+      {% include "cabinet/messaging/components/message_bubble.html" with message=message %}
+    {% empty %}
+      {% include "cabinet/messaging/components/empty_state.html" with title="No messages" message="This thread has no messages yet." %}
+    {% endfor %}
+  </div>
+  {% include "cabinet/messaging/components/reply_composer.html" with composer=mailbox.selected.composer %}
+</section>
+{% else %}
+{% include "cabinet/messaging/components/empty_state.html" with title=mailbox.empty_title message=mailbox.empty_message %}
+{% endif %}

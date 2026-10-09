@@ -1,0 +1,9 @@
+{% extends "cabinet/base_cabinet.html" %}
+
+{% block title %}Messaging{% endblock %}
+
+{% block cabinet_content %}
+<div style="height: calc(100vh - var(--cab-topbar-height) - 3rem); margin: -1.5rem;">
+  {% include "cabinet/components/split_panel.html" with panel=panel %}
+</div>
+{% endblock %}

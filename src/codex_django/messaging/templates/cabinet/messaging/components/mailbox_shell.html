@@ -1,0 +1,22 @@
+<div class="border rounded overflow-hidden bg-white" style="min-height: 640px;">
+  <div class="row g-0">
+    <aside class="col-12 col-lg-2 border-end bg-light">
+      {% include "cabinet/messaging/components/mailbox_folders.html" with mailbox=mailbox %}
+    </aside>
+    <aside class="col-12 col-lg-4 border-end" style="max-height: 760px; overflow: auto;">
+      <div class="p-3 border-bottom">
+        <h1 class="h5 mb-2">{{ mailbox.title }}</h1>
+        <form method="get">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+            <input class="form-control" type="search" name="q" value="{{ mailbox.search_query }}" placeholder="Search mailbox">
+          </div>
+        </form>
+      </div>
+      {% include "cabinet/messaging/components/thread_list.html" with mailbox=mailbox %}
+    </aside>
+    <main class="col-12 col-lg-6 p-3" style="max-height: 760px; overflow: auto;">
+      {% include "cabinet/messaging/components/thread_detail.html" with mailbox=mailbox %}
+    </main>
+  </div>
+</div>

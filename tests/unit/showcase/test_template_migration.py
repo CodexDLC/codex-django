@@ -69,13 +69,13 @@ def _request(path: str = "/showcase/"):
             ("cab-report", "cab-report-table", "chartWidget"),
         ),
         (
-            "showcase/cabinet/conversations/index.html",
-            ShowcaseMockData.get_conversations_context(),
+            "showcase/cabinet/messaging/index.html",
+            ShowcaseMockData.get_messaging_context(),
             ("cab-split-panel", "split-panel-detail"),
         ),
         (
-            "showcase/cabinet/notifications/log.html",
-            ShowcaseMockData.get_notifications_log_context(),
+            "showcase/cabinet/messaging/log.html",
+            ShowcaseMockData.get_messaging_log_context(),
             ("cab-data-table", "cab-data-table__cards"),
         ),
     ],

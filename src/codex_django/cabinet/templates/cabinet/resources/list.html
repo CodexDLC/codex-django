@@ -1,0 +1,10 @@
+{% extends "cabinet/base_cabinet.html" %}
+
+{% block title %}{{ resource.title }}{% endblock %}
+
+{% block cabinet_content %}
+  <section class="cab-resource-list">
+    {% include "cabinet/includes/_page_header.html" with title=title subtitle=subtitle btn_label=btn_label btn_url=btn_url btn_icon=btn_icon %}
+    {% include "cabinet/components/data_table.html" with table=table %}
+  </section>
+{% endblock %}

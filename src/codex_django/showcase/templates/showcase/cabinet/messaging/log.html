@@ -1,0 +1,13 @@
+{% extends "cabinet/base_cabinet.html" %}
+
+{% block title %}Messaging Delivery Log{% endblock %}
+
+{% block cabinet_content %}
+<div class="row g-3 mb-3">
+  <div class="col-sm-3">{% include "cabinet/widgets/kpi.html" with data=notification_total_kpi %}</div>
+  <div class="col-sm-3">{% include "cabinet/widgets/kpi.html" with data=notification_sent_kpi %}</div>
+  <div class="col-sm-3">{% include "cabinet/widgets/kpi.html" with data=notification_failed_kpi %}</div>
+  <div class="col-sm-3">{% include "cabinet/widgets/kpi.html" with data=notification_pending_kpi %}</div>
+</div>
+{% include "cabinet/components/data_table.html" with table=table %}
+{% endblock %}

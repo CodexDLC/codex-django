@@ -1,0 +1,42 @@
+<form method="post" action="{{ campaign.action_url }}" class="vstack gap-3">
+  {% csrf_token %}
+  <div>
+    <label class="form-label" for="campaign-subject">Subject</label>
+    <input id="campaign-subject" class="form-control" type="text" name="subject" value="{{ campaign.subject }}">
+  </div>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label" for="campaign-template-key">Template key</label>
+      <input id="campaign-template-key" class="form-control" type="text" name="template_key" value="{{ campaign.template_key }}">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="campaign-locale">Locale</label>
+      <select id="campaign-locale" class="form-select" name="locale">
+        {% for value,label in campaign.available_locales %}
+        <option value="{{ value }}" {% if value == campaign.locale %}selected{% endif %}>{{ label }}</option>
+        {% empty %}
+        <option value="{{ campaign.locale }}">{{ campaign.locale }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div>
+    <label class="form-label" for="campaign-body">Body</label>
+    <textarea id="campaign-body" class="form-control" name="body_text" rows="10">{{ campaign.body_text }}</textarea>
+  </div>
+  {% if campaign.audience_summary %}
+  <div class="alert alert-secondary mb-0">
+    <i class="bi bi-people me-1"></i>{{ campaign.audience_summary }}
+  </div>
+  {% endif %}
+  <div class="d-flex gap-2 justify-content-end">
+    {% if campaign.test_send_url %}
+    <button class="btn btn-outline-secondary" formaction="{{ campaign.test_send_url }}">
+      <i class="bi bi-envelope-check me-1"></i>Send test
+    </button>
+    {% endif %}
+    <button class="btn btn-primary" type="submit">
+      <i class="bi bi-save me-1"></i>{{ campaign.submit_label }}
+    </button>
+  </div>
+</form>

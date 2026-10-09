@@ -1,0 +1,13 @@
+<article class="d-flex {% if message.direction == 'outbound' %}justify-content-end{% else %}justify-content-start{% endif %} mb-3">
+  <div class="border rounded p-3 {% if message.direction == 'outbound' %}bg-primary text-white{% else %}bg-white{% endif %}"
+       style="max-width: 760px;">
+    <div class="d-flex justify-content-between gap-3 mb-2 small {% if message.direction == 'outbound' %}text-white-50{% else %}text-muted{% endif %}">
+      <span>{{ message.sender_label }}</span>
+      <span>{{ message.created_at }}</span>
+    </div>
+    {% if message.subject %}
+    <div class="fw-semibold mb-2">{{ message.subject }}</div>
+    {% endif %}
+    <div class="mb-0" style="white-space: pre-wrap;">{{ message.body }}</div>
+  </div>
+</article>

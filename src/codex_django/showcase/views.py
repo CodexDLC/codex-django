@@ -55,22 +55,32 @@ def clients_view(request: HttpRequest) -> HttpResponse:
 
 @debug_only
 def conversations_view(request: HttpRequest) -> HttpResponse:
+    return messaging_view(request)
+
+
+@debug_only
+def messaging_view(request: HttpRequest) -> HttpResponse:
     folder = request.GET.get("folder", "inbox")
     topic_pk = request.GET.get("topic")
     q = request.GET.get("q", "").strip().lower()
     return render(
         request,
-        "showcase/cabinet/conversations/index.html",
-        ShowcaseMockData.get_conversations_context(folder=folder, topic_pk=topic_pk, q=q),
+        "showcase/cabinet/messaging/index.html",
+        ShowcaseMockData.get_messaging_context(folder=folder, topic_pk=topic_pk, q=q),
     )
 
 
 @debug_only
 def conversation_detail_view(request: HttpRequest, pk: int) -> HttpResponse:
-    conv = ShowcaseMockData.get_conversation_detail(pk)
+    return messaging_detail_view(request, pk=pk)
+
+
+@debug_only
+def messaging_detail_view(request: HttpRequest, pk: int) -> HttpResponse:
+    conv = ShowcaseMockData.get_message_detail(pk)
     if not conv:
-        return render(request, "showcase/cabinet/conversations/_empty.html")
-    return render(request, "showcase/cabinet/conversations/_detail.html", {"conv": conv})
+        return render(request, "showcase/cabinet/messaging/_empty.html")
+    return render(request, "showcase/cabinet/messaging/_detail.html", {"conv": conv})
 
 
 @debug_only
@@ -112,7 +122,7 @@ def site_settings_view(request: HttpRequest) -> HttpResponse:
 
 @debug_only
 def site_settings_tab_view(request: HttpRequest, tab: str) -> HttpResponse:
-    VALID_TABS = {"contact", "geo", "social", "marketing", "technical", "email", "topbar"}
+    VALID_TABS = {"contact", "geo", "social", "marketing", "technical", "topbar"}
     if tab not in VALID_TABS:
         tab = "contact"
     if request.headers.get("HX-Request"):
@@ -129,19 +139,38 @@ def catalog_view(request: HttpRequest, category_pk: int | None = None) -> HttpRe
 
 @debug_only
 def notifications_log_view(request: HttpRequest) -> HttpResponse:
+    return messaging_log_view(request)
+
+
+@debug_only
+def messaging_log_view(request: HttpRequest) -> HttpResponse:
     channel = request.GET.get("channel", "all")
     status = request.GET.get("status", "all")
     return render(
         request,
-        "showcase/cabinet/notifications/log.html",
-        ShowcaseMockData.get_notifications_log_context(channel=channel, status=status),
+        "showcase/cabinet/messaging/log.html",
+        ShowcaseMockData.get_messaging_log_context(channel=channel, status=status),
     )
 
 
 @debug_only
 def notifications_templates_view(request: HttpRequest) -> HttpResponse:
+    return messaging_templates_view(request)
+
+
+@debug_only
+def messaging_templates_view(request: HttpRequest) -> HttpResponse:
     return render(
         request,
-        "showcase/cabinet/notifications/templates.html",
-        ShowcaseMockData.get_notification_templates_context(),
+        "showcase/cabinet/messaging/templates.html",
+        ShowcaseMockData.get_messaging_templates_context(),
+    )
+
+
+@debug_only
+def messaging_settings_view(request: HttpRequest) -> HttpResponse:
+    return render(
+        request,
+        "showcase/cabinet/messaging/settings.html",
+        ShowcaseMockData.get_messaging_settings_context(),
     )

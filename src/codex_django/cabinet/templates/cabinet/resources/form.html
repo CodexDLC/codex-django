@@ -1,0 +1,63 @@
+{% extends "cabinet/base_cabinet.html" %}
+{% load cabinet_tags %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block cabinet_content %}
+  {% include "cabinet/includes/_page_header.html" with title=title subtitle=resource.title btn_label="Back" btn_url=list_url btn_icon="bi-arrow-left" %}
+
+  <form method="post" class="cab-resource-form">
+    {% csrf_token %}
+    <div class="row g-3">
+      {% for field in form %}
+        <div class="col-12">
+          {% with tooltip=field.field.widget.attrs|get_item:"data-cab-field-tooltip" %}
+          {% if field.field.widget.input_type == "checkbox" %}
+            <div class="form-check">
+              {{ field }}
+              <label class="form-check-label cab-field-label" for="{{ field.id_for_label }}">
+                {{ field.label }}
+                {% if tooltip %}
+                  <button type="button"
+                          class="cab-field-tooltip"
+                          data-tippy-content="{{ tooltip }}"
+                          aria-label="Field help">
+                    <i class="bi bi-info-circle"></i>
+                  </button>
+                {% endif %}
+              </label>
+            </div>
+          {% else %}
+            <label class="form-label cab-field-label" for="{{ field.id_for_label }}">
+              {{ field.label }}
+              {% if tooltip %}
+                <button type="button"
+                        class="cab-field-tooltip"
+                        data-tippy-content="{{ tooltip }}"
+                        aria-label="Field help">
+                  <i class="bi bi-info-circle"></i>
+                </button>
+              {% endif %}
+            </label>
+            {{ field }}
+          {% endif %}
+          {% endwith %}
+          {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+          {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger mt-3">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="d-flex gap-2 mt-4">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check-lg"></i>
+        Save
+      </button>
+      <a href="{{ list_url }}" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+  </form>
+{% endblock %}

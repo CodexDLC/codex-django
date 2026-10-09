@@ -1,0 +1,7 @@
+{% extends "cabinet/base_cabinet.html" %}
+
+{% block title %}{{ mailbox.title }}{% endblock %}
+
+{% block cabinet_content %}
+{% include "cabinet/messaging/components/mailbox_shell.html" with mailbox=mailbox %}
+{% endblock %}

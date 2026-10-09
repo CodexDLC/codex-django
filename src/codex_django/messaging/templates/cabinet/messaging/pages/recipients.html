@@ -1,0 +1,13 @@
+{% extends "cabinet/base_cabinet.html" %}
+
+{% block title %}{{ recipients.title }}{% endblock %}
+
+{% block cabinet_content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">{{ recipients.title }}</h1>
+  {% if recipients.create_url %}
+  <a class="btn btn-primary btn-sm" href="{{ recipients.create_url }}"><i class="bi bi-person-plus me-1"></i>New recipient</a>
+  {% endif %}
+</div>
+{% include "cabinet/messaging/components/recipient_table.html" with recipients_table=recipients_table %}
+{% endblock %}

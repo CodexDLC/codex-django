@@ -1,0 +1,13 @@
+{% extends "cabinet/base_cabinet.html" %}
+
+{% block title %}{{ campaigns.title }}{% endblock %}
+
+{% block cabinet_content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">{{ campaigns.title }}</h1>
+  {% if campaigns.create_url %}
+  <a class="btn btn-primary btn-sm" href="{{ campaigns.create_url }}"><i class="bi bi-plus-lg me-1"></i>New campaign</a>
+  {% endif %}
+</div>
+{% include "cabinet/messaging/components/campaign_table.html" with campaigns_table=campaigns_table %}
+{% endblock %}

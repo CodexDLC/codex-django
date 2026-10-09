@@ -11,7 +11,6 @@
   {% url 'codex_showcase:site_settings_tab' 'social' as url_social %}
   {% url 'codex_showcase:site_settings_tab' 'marketing' as url_marketing %}
   {% url 'codex_showcase:site_settings_tab' 'technical' as url_technical %}
-  {% url 'codex_showcase:site_settings_tab' 'email' as url_email %}
   {% url 'codex_showcase:site_settings_tab' 'topbar' as url_topbar %}
 
   <li>
@@ -67,17 +66,6 @@
        style="color: var(--cab-sidebar-text); transition: background 0.15s;">
       <span class="bi bi-gear-wide fs-5 flex-shrink-0"></span>
       <span class="cab-nav__label ms-3" style="white-space: nowrap;">Technical</span>
-    </a>
-  </li>
-  <li>
-    <a href="{{ url_email }}"
-       hx-get="{{ url_email }}"
-       hx-target="#cab-content"
-       hx-push-url="true"
-       class="cab-nav__item d-flex align-items-center px-3 py-2 rounded mx-2{% if active_tab == 'email' %} cab-nav__item--active{% endif %}"
-       style="color: var(--cab-sidebar-text); transition: background 0.15s;">
-      <span class="bi bi-envelope fs-5 flex-shrink-0"></span>
-      <span class="cab-nav__label ms-3" style="white-space: nowrap;">Email / SMTP</span>
     </a>
   </li>
   <li><hr class="mx-3 my-1" style="border-color: rgba(255,255,255,0.08);"></li>

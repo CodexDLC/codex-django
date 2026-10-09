@@ -22,6 +22,17 @@ from .reports import (
     ReportTableData,
     resolve_report_period,
 )
+from .resources import (
+    CabinetResource,
+    CabinetResourceField,
+    CabinetResourceListColumn,
+    SmartCreateHandlerProtocol,
+    SmartCreateJobRef,
+    SmartCreateLanguageState,
+    SmartCreateStatus,
+    build_resource_form_class,
+    cabinet_resource_registry,
+)
 from .runtime import CabinetRequestContext, CabinetRuntimeResolver, CabinetSpaceConfig
 from .types import (
     ActionSection,
@@ -61,6 +72,7 @@ __all__ = [
     "declare",
     "configure_space",
     "cabinet_registry",
+    "cabinet_resource_registry",
     "notification_registry",
     "CabinetModuleMixin",
     "CabinetTemplateView",
@@ -84,6 +96,14 @@ __all__ = [
     "ReportSummaryCardData",
     "ReportTabData",
     "ReportTableData",
+    "CabinetResource",
+    "CabinetResourceField",
+    "CabinetResourceListColumn",
+    "SmartCreateHandlerProtocol",
+    "SmartCreateJobRef",
+    "SmartCreateLanguageState",
+    "SmartCreateStatus",
+    "build_resource_form_class",
     "TopbarEntry",
     "CabinetModuleConfig",
     "SidebarItem",

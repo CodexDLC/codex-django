@@ -1,0 +1,23 @@
+<div class="list-group list-group-flush">
+  {% for thread in mailbox.threads %}
+  <a class="list-group-item list-group-item-action {% if mailbox.selected.thread.id == thread.id %}active{% endif %}"
+     href="{{ thread.url }}">
+    <div class="d-flex justify-content-between gap-3">
+      <div class="min-w-0">
+        <div class="fw-semibold text-truncate">
+          {% if thread.unread %}<span class="badge bg-primary me-1">New</span>{% endif %}
+          {{ thread.subject }}
+        </div>
+        <div class="small {% if mailbox.selected.thread.id == thread.id %}text-white-50{% else %}text-muted{% endif %} text-truncate">
+          {{ thread.sender_label|default:thread.sender_name }}{% if thread.preview %} - {{ thread.preview }}{% endif %}
+        </div>
+      </div>
+      <div class="small {% if mailbox.selected.thread.id == thread.id %}text-white-50{% else %}text-muted{% endif %} text-nowrap">
+        {{ thread.received_at }}
+      </div>
+    </div>
+  </a>
+  {% empty %}
+  {% include "cabinet/messaging/components/empty_state.html" with title=mailbox.empty_title message=mailbox.empty_message %}
+  {% endfor %}
+</div>

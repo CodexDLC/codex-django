@@ -1,0 +1,8 @@
+{% extends "cabinet/base_cabinet.html" %}
+
+{% block title %}{{ delivery_log.title }}{% endblock %}
+
+{% block cabinet_content %}
+<h1 class="h4 mb-3">{{ delivery_log.title }}</h1>
+{% include "cabinet/messaging/components/delivery_log_table.html" with delivery_log_table=delivery_log_table %}
+{% endblock %}

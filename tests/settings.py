@@ -14,6 +14,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "codex_django",
     "codex_django.cabinet",
+    "codex_django.messaging",
     "codex_django.tracking",
 ]
 

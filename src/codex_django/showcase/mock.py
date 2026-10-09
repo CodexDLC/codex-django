@@ -37,6 +37,7 @@ from codex_django.cabinet import (
     TableColumn,
     TableFilter,
 )
+from codex_django.messaging import MessagingSettingsSection, MessagingSettingsState
 
 
 class ShowcaseMockData:
@@ -792,6 +793,10 @@ class ShowcaseMockData:
             "dashboard": "/showcase/dashboard/",
             "staff": "/showcase/staff/",
             "clients": "/showcase/clients/",
+            "messaging": "/showcase/messaging/",
+            "messaging_log": "/showcase/messaging/log/",
+            "messaging_templates": "/showcase/messaging/templates/",
+            "messaging_settings": "/showcase/messaging/settings/",
             "conversations": "/showcase/conversations/",
             "booking": "/showcase/booking/",
             "booking_appointments": "/showcase/booking/appointments/",
@@ -815,9 +820,9 @@ class ShowcaseMockData:
             {"group": "services", "label": "Catalog", "icon": "bi-tag", "url": cls._showcase_url("catalog")},
             {
                 "group": "services",
-                "label": "Notifications",
-                "icon": "bi-bell",
-                "url": cls._showcase_url("notifications_log"),
+                "label": "Messaging",
+                "icon": "bi-chat-dots",
+                "url": cls._showcase_url("messaging"),
             },
         ]
         return {
@@ -1140,6 +1145,16 @@ class ShowcaseMockData:
         topic_pk: str | None = None,
         q: str = "",
     ) -> dict[str, Any]:
+        return cls.get_messaging_context(folder=folder, topic_pk=topic_pk, q=q)
+
+    @classmethod
+    def get_messaging_context(
+        cls,
+        *,
+        folder: str = "inbox",
+        topic_pk: str | None = None,
+        q: str = "",
+    ) -> dict[str, Any]:
         active_folder = next((f for f in cls.FOLDERS if f["key"] == folder), cls.FOLDERS[0])
         convs = [c for c in cls.CONVERSATIONS if c["status"] in active_folder["statuses"]]
 
@@ -1168,13 +1183,13 @@ class ShowcaseMockData:
                 )
                 for conv in convs
             ],
-            detail_url=cls._showcase_url("conversations").rstrip("/"),
-            empty_message="Select a conversation",
+            detail_url=cls._showcase_url("messaging").rstrip("/"),
+            empty_message="Select a message thread",
         )
         sidebar = [
             cls._sidebar_item(
                 f["label"],
-                f"{cls._showcase_url('conversations')}?folder={f['key']}",
+                f"{cls._showcase_url('messaging')}?folder={f['key']}",
                 f["icon"],
                 active=folder == f["key"],
                 badge=f.get("count"),
@@ -1185,26 +1200,30 @@ class ShowcaseMockData:
             [
                 cls._sidebar_item(
                     "All Topics",
-                    f"{cls._showcase_url('conversations')}?folder={folder}",
+                    f"{cls._showcase_url('messaging')}?folder={folder}",
                     "bi-funnel",
                     active=not topic_pk,
                 ),
                 *[
                     cls._sidebar_item(
                         topic["label"],
-                        f"{cls._showcase_url('conversations')}?folder={folder}&topic={topic['pk']}",
+                        f"{cls._showcase_url('messaging')}?folder={folder}&topic={topic['pk']}",
                         "bi-tag",
                         active=topic_pk == str(topic["pk"]),
                     )
                     for topic in cls.TOPICS
                 ],
+                cls._sidebar_item("Delivery Log", cls._showcase_url("messaging_log"), "bi-bell"),
+                cls._sidebar_item("Templates", cls._showcase_url("messaging_templates"), "bi-file-earmark-text"),
+                cls._sidebar_item("Settings", cls._showcase_url("messaging_settings"), "bi-gear-wide"),
             ]
         )
-        context = cls._shell_context("conversations", label="Conversations", icon="bi-chat-dots")
+        context = cls._shell_context("messaging", label="Messaging", icon="bi-chat-dots")
         context.update(
             {
                 "cabinet_sidebar": sidebar,
                 "conversations": convs,
+                "threads": convs,
                 "folders": folders_with_counts,
                 "topics": cls.TOPICS,
                 "active_folder": folder,
@@ -1218,6 +1237,10 @@ class ShowcaseMockData:
 
     @classmethod
     def get_conversation_detail(cls, pk: int) -> dict[str, Any] | None:
+        return cls.get_message_detail(pk)
+
+    @classmethod
+    def get_message_detail(cls, pk: int) -> dict[str, Any] | None:
         return next((c for c in cls.CONVERSATIONS if c["pk"] == pk), None)
 
     @classmethod
@@ -1938,6 +1961,10 @@ class ShowcaseMockData:
 
     @classmethod
     def get_notifications_log_context(cls, *, channel: str = "all", status: str = "all") -> dict[str, Any]:
+        return cls.get_messaging_log_context(channel=channel, status=status)
+
+    @classmethod
+    def get_messaging_log_context(cls, *, channel: str = "all", status: str = "all") -> dict[str, Any]:
         entries = []
         for entry in cls._NOTIF_LOG_ENTRIES:
             if channel != "all" and entry["channel"] != channel:
@@ -1994,24 +2021,30 @@ class ShowcaseMockData:
                 )
                 for tab in status_tabs
             ],
-            empty_message="No notifications",
+            empty_message="No messages",
         )
-        context = cls._shell_context("notifications", label="Notifications", icon="bi-bell")
+        context = cls._shell_context("messaging", label="Messaging", icon="bi-chat-dots")
         context.update(
             {
                 "cabinet_sidebar": [
                     cls._sidebar_item(
-                        "Log",
-                        cls._showcase_url("notifications_log"),
+                        "Inbox",
+                        cls._showcase_url("messaging"),
+                        "bi-chat-dots",
+                    ),
+                    cls._sidebar_item(
+                        "Delivery Log",
+                        cls._showcase_url("messaging_log"),
                         "bi-bell",
                         active=True,
                         badge=cast("int | str | None", failed),
                     ),
                     cls._sidebar_item(
                         "Templates",
-                        cls._showcase_url("notifications_templates"),
+                        cls._showcase_url("messaging_templates"),
                         "bi-file-earmark-text",
                     ),
+                    cls._sidebar_item("Settings", cls._showcase_url("messaging_settings"), "bi-gear-wide"),
                 ],
                 "entries": entries,
                 "active_channel": channel,
@@ -2052,6 +2085,10 @@ class ShowcaseMockData:
 
     @classmethod
     def get_notification_templates_context(cls) -> dict[str, Any]:
+        return cls.get_messaging_templates_context()
+
+    @classmethod
+    def get_messaging_templates_context(cls) -> dict[str, Any]:
         templates = []
         for tmpl in cls._NOTIF_TEMPLATES:
             channel_details = [cls._NOTIF_CHANNELS[ch] for ch in tmpl["channels"]]
@@ -2066,20 +2103,64 @@ class ShowcaseMockData:
             rows=[{**template, "channels_label": ", ".join(template["channels"])} for template in templates],
             empty_message="No templates",
         )
-        context = cls._shell_context("notifications", label="Notifications", icon="bi-bell")
+        context = cls._shell_context("messaging", label="Messaging", icon="bi-chat-dots")
         context.update(
             {
                 "cabinet_sidebar": [
-                    cls._sidebar_item("Log", cls._showcase_url("notifications_log"), "bi-bell"),
+                    cls._sidebar_item("Inbox", cls._showcase_url("messaging"), "bi-chat-dots"),
                     cls._sidebar_item(
                         "Templates",
-                        cls._showcase_url("notifications_templates"),
+                        cls._showcase_url("messaging_templates"),
                         "bi-file-earmark-text",
                         active=True,
                     ),
+                    cls._sidebar_item("Delivery Log", cls._showcase_url("messaging_log"), "bi-bell"),
+                    cls._sidebar_item("Settings", cls._showcase_url("messaging_settings"), "bi-gear-wide"),
                 ],
                 "templates": templates,
                 "table": table,
+            }
+        )
+        return context
+
+    @classmethod
+    def get_messaging_settings_context(cls) -> dict[str, Any]:
+        state = MessagingSettingsState(
+            sections=[
+                MessagingSettingsSection(
+                    "identity",
+                    "Email Identity",
+                    fields=["email_from", "email_sender_name", "email_reply_to"],
+                ),
+                MessagingSettingsSection("branding", "Branding", fields=["site_base_url", "logo_url"]),
+                MessagingSettingsSection(
+                    "transactional_paths",
+                    "Transactional Paths",
+                    fields=["url_path_confirm", "url_path_cancel", "url_path_reschedule", "url_path_contact_form"],
+                ),
+            ],
+            values={
+                "email_from": "noreply@codex-studio.test",
+                "email_sender_name": "Codex Studio",
+                "email_reply_to": "support@codex-studio.test",
+                "site_base_url": "https://codex-studio.test",
+                "logo_url": "/static/branding/logo-email.png",
+                "url_path_confirm": "/booking/confirm/",
+                "url_path_cancel": "/booking/cancel/",
+                "url_path_reschedule": "/booking/reschedule/",
+                "url_path_contact_form": "/contact/thanks/",
+            },
+        )
+        context = cls._shell_context("messaging", label="Messaging", icon="bi-chat-dots")
+        context.update(
+            {
+                "cabinet_sidebar": [
+                    cls._sidebar_item("Inbox", cls._showcase_url("messaging"), "bi-chat-dots"),
+                    cls._sidebar_item("Delivery Log", cls._showcase_url("messaging_log"), "bi-bell"),
+                    cls._sidebar_item("Templates", cls._showcase_url("messaging_templates"), "bi-file-earmark-text"),
+                    cls._sidebar_item("Settings", cls._showcase_url("messaging_settings"), "bi-gear-wide", active=True),
+                ],
+                "settings_state": state,
             }
         )
         return context
