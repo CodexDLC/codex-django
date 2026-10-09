@@ -1,0 +1,14 @@
+# Keep generated artifacts and disposable environments out of the code graph.
+/tmp/
+/site/
+/site-*/
+/dist/
+/dist-local/
+/build/
+/.uv-cache/
+/.venv/
+/.venv-rebuild/
+/.mypy_cache/
+/.pytest_cache/
+/.ruff_cache/
+/sandbox/
